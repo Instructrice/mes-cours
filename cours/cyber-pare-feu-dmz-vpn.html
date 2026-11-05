@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Protéger un réseau : pare-feu, DMZ, VPN</title>
+<style>:root{--t1:#B91C1C;--t2:#F97316}
+:root{--bg:#F6F7FB;--card:#FFFFFF;--ink:#18202B;--muted:#5B6675;--rule:#E1E5EC;
+  --red:#C8102E;--blue:#0055A4;--yellow:#FFC20E;--green:#1E9E55;--orange:#F28C00;--purple:#7B3FC4;
+  --accent:var(--t1);--accent-soft:color-mix(in srgb,var(--t1) 12%,#fff);--good:#1E9E55;--bad:#C8102E;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;padding:0 0 24px;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+h1,h2,h3{line-height:1.2;margin:0}
+h2{font-size:1.4rem;margin:26px 0 6px}
+h3{font-size:1.05rem;margin-bottom:4px}
+p{margin:.4em 0}
+.muted{color:var(--muted)}
+.hero{background:linear-gradient(120deg,var(--t1) 0%,var(--t2) 100%);color:#fff;border-radius:0 0 22px 22px;padding:24px 0 22px;margin-bottom:14px}
+.hero .badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 12px;font-size:.82rem;font-weight:600;margin-bottom:8px}
+.hero h1{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:800;display:flex;gap:12px;align-items:center}
+.hero h1 .emo{font-size:1.3em}
+.hero p{opacity:.93;max-width:62ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+.tab{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:.95rem;cursor:pointer}
+.tab:hover{border-color:var(--accent)}
+.tab[aria-selected="true"]{background:var(--t1);border-color:var(--t1);color:#fff;font-weight:600}
+.panel[hidden]{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.grid.two{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:14px}
+.card .ico{font-size:1.9rem;line-height:1;margin-bottom:6px;display:block}
+.card.top{border-top:5px solid var(--c,var(--t1))}
+.note{border-left:4px solid var(--yellow);background:var(--card);padding:10px 14px;border-radius:8px;margin:12px 0}
+.note.red{border-color:var(--red)}.note.blue{border-color:var(--blue)}.note.green{border-color:var(--green)}
+.big{font-size:1.7rem;font-weight:800}
+ul.tight{margin:.3em 0;padding-left:1.2em} ul.tight li{margin:.2em 0}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+.steps li{counter-increment:s;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:10px 12px 10px 52px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--t1);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tbl{overflow-x:auto;margin-top:10px;border:1px solid var(--rule);border-radius:12px}
+table{border-collapse:collapse;width:100%;background:var(--card);font-size:.95rem}
+th,td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{background:var(--accent-soft);color:var(--accent)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.82rem;font-weight:700;color:#fff;background:var(--c,var(--t1))}
+.illu{width:100%;height:auto;display:block;border-radius:10px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;color:#fff;background:var(--t1)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--rule)}
+.chip{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 11px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--t1)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;cursor:pointer}
+.check:hover{background:var(--accent-soft)}
+.check input{width:20px;height:20px;accent-color:var(--good);margin-top:2px;flex:none}
+.flip{cursor:pointer}
+.flip .back{display:none;color:var(--muted);font-size:.92rem;margin-top:6px}
+.flip.open .back{display:block}
+.flip .hint{font-size:.78rem;color:var(--accent);margin-top:6px}
+.flip.open .hint{display:none}
+/* Quiz */
+.quiz{max-width:720px;margin:12px auto 0}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.progress{height:8px;background:var(--rule);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.progress i{display:block;height:100%;background:var(--t1);width:0;transition:width .3s}
+.qtext{font-size:1.15rem;font-weight:650;margin:4px 0 12px}
+.opts{display:grid;gap:8px}
+.opt{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit;cursor:pointer;text-align:left}
+.opt:hover{border-color:var(--accent)}
+.opt.ok{background:color-mix(in srgb,var(--good) 18%,var(--card));border-color:var(--good)}
+.opt.ko{background:color-mix(in srgb,var(--bad) 18%,var(--card));border-color:var(--bad)}
+.expl{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--accent-soft)}
+.result{text-align:center;padding:20px}
+.result .big{font-size:3rem}
+footer{margin-top:28px;font-size:.85rem;color:var(--muted)}
+
+code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:6px;font-size:.9em}
+.term{background:#0F1720;color:#D7E3EE;border-radius:12px;padding:12px 14px;font:14px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-x:auto;margin:10px 0;white-space:pre}
+.term .p{color:#7EE787}.term .k{color:#7D8B99}.term .o{color:#FFD479}
+.layer{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;color:#fff;background:var(--c);cursor:pointer;margin:6px 0;font-weight:600;border:0;width:100%;font:inherit;text-align:left;transition:transform .15s}
+.layer:hover{transform:translateX(4px)}
+.layer .n{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.layer .pdu{margin-left:auto;font-size:.82rem;background:rgba(0,0,0,.18);padding:2px 10px;border-radius:999px;font-weight:600}
+.layer[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:2px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:720px){.split{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px;font-size:.9rem;color:var(--muted)}
+.field input,.field select{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:10px;padding:8px 10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.out{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin-top:12px}
+.out b{color:var(--muted);font-weight:600}
+.out span{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:700}
+.bits{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.bits div{text-align:center;min-width:38px}
+.bits small{display:block;color:var(--muted);font-size:.72rem}
+.bits .b{display:block;border-radius:8px;padding:6px 0;font-weight:800;font-family:ui-monospace,monospace;background:var(--rule);color:var(--muted)}
+.bits .b.on{background:var(--t1);color:#fff}
+.enc{display:flex;align-items:stretch;justify-content:center;flex-wrap:wrap;gap:0;margin:14px 0;font-weight:700;font-size:.9rem}
+.enc div{padding:12px 10px;color:#fff;display:flex;align-items:center}
+.enc .hide{display:none}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.vs{grid-template-columns:1fr}}
+.perm{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;align-items:center;max-width:420px}
+.perm label{display:flex;justify-content:center}
+.perm input{width:22px;height:22px;accent-color:var(--t1)}
+.meter{height:12px;background:var(--rule);border-radius:99px;overflow:hidden;margin:8px 0}
+.meter i{display:block;height:100%;width:0;transition:width .3s,background .3s}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <span class="badge">BTS SIO SISR · Cybersécurité</span>
+  <h1><span class="emo">🧱</span>Protéger un réseau : pare-feu, DMZ, VPN</h1>
+  <p>Filtrer le trafic, isoler les serveurs exposés à Internet et connecter les salariés à distance en toute sécurité.</p>
+</div></header>
+<main class="wrap">
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-tab="fw" aria-selected="true">🧱 Pare-feu</button>
+    <button class="tab" role="tab" data-tab="dmz" aria-selected="false">🏰 DMZ</button>
+    <button class="tab" role="tab" data-tab="vpn" aria-selected="false">🚇 VPN</button>
+    <button class="tab" role="tab" data-tab="quiz" aria-selected="false">🧠 Quiz</button>
+  </nav>
+  <section class="panel" id="fw">
+<h2>Le pare-feu filtre le trafic</h2>
+<p>Il compare chaque paquet à une liste de <b>règles</b>, <b>de haut en bas</b>. La première règle qui correspond s'applique.</p>
+<div class="tbl"><table>
+<tr><th>#</th><th>Source</th><th>Destination</th><th>Port</th><th>Action</th></tr>
+<tr><td>1</td><td>LAN</td><td>Internet</td><td>80, 443 (web)</td><td><span class="pill" style="--c:#16A34A">Autoriser</span></td></tr>
+<tr><td>2</td><td>LAN</td><td>Serveur DNS</td><td>53</td><td><span class="pill" style="--c:#16A34A">Autoriser</span></td></tr>
+<tr><td>3</td><td>Internet</td><td>Serveur web DMZ</td><td>443</td><td><span class="pill" style="--c:#16A34A">Autoriser</span></td></tr>
+<tr><td>4</td><td>Admin</td><td>Serveurs</td><td>22 (SSH)</td><td><span class="pill" style="--c:#16A34A">Autoriser</span></td></tr>
+<tr><td><b>5</b></td><td><b>Tout</b></td><td><b>Tout</b></td><td><b>Tout</b></td><td><span class="pill" style="--c:#B91C1C">Refuser</span></td></tr>
+</table></div>
+<div class="note red"><b>Règle d'or :</b> tout ce qui n'est pas explicitement autorisé est <b>interdit</b> (la dernière règle « refuser tout »). On n'ouvre que le strict nécessaire.</div>
+<div class="grid">
+  <div class="card top"><span class="ico">📋</span><h3>Sans état</h3><p>Regarde chaque paquet seul (IP, port).</p></div>
+  <div class="card top" style="--c:var(--t2)"><span class="ico">🧠</span><h3>Avec état (stateful)</h3><p>Suit les connexions : autorise automatiquement les <b>réponses</b> à une connexion sortante.</p></div>
+  <div class="card top" style="--c:#7C3AED"><span class="ico">🔬</span><h3>Applicatif / UTM</h3><p>Analyse aussi le contenu (filtrage web, antivirus…).</p></div>
+</div>
+<p class="muted">Exemples de pare-feu : <b>pfSense</b>, <b>OPNsense</b>, Stormshield, Fortinet. Sous Linux : <code>iptables</code>/<code>nftables</code>, <code>ufw</code>.</p>
+  </section>
+  <section class="panel" id="dmz" hidden>
+<h2>La DMZ : une zone tampon</h2>
+<p>Les serveurs <b>accessibles depuis Internet</b> (site web, messagerie) sont placés dans une zone isolée : la <b>DMZ</b>. S'ils sont piratés, l'attaquant n'est <b>pas</b> dans le réseau interne.</p>
+<svg class="illu" viewBox="0 0 560 230" role="img" aria-label="Schéma réseau avec DMZ">
+  <g font-size="13" font-weight="700" text-anchor="middle">
+  <rect x="10" y="85" width="110" height="60" rx="14" fill="#64748B"/><text x="65" y="112" fill="#fff">🌍 Internet</text><text x="65" y="130" fill="#fff" font-size="11">non fiable</text>
+  <rect x="200" y="80" width="90" height="70" rx="12" fill="#B91C1C"/><text x="245" y="112" fill="#fff">🧱</text><text x="245" y="134" fill="#fff">Pare-feu</text>
+  <rect x="370" y="10" width="180" height="80" rx="14" fill="#F97316"/><text x="460" y="40" fill="#fff">DMZ</text><text x="460" y="64" fill="#fff" font-size="11">🌐 serveur web · ✉️ mail</text>
+  <rect x="370" y="140" width="180" height="80" rx="14" fill="#16A34A"/><text x="460" y="170" fill="#fff">LAN interne</text><text x="460" y="194" fill="#fff" font-size="11">💻 postes · 🗄️ AD · fichiers</text>
+  </g>
+  <g stroke="#94A3B8" stroke-width="3"><line x1="120" y1="115" x2="200" y2="115"/><line x1="290" y1="100" x2="370" y2="55"/><line x1="290" y1="130" x2="370" y2="180"/></g>
+</svg>
+<div class="tbl"><table>
+<tr><th>Flux</th><th>Autorisé ?</th></tr>
+<tr><td>Internet → DMZ (sur le port du service, ex 443)</td><td>✅ Oui</td></tr>
+<tr><td>Internet → LAN</td><td>❌ Jamais</td></tr>
+<tr><td>LAN → DMZ</td><td>✅ Oui (pour administrer, consulter)</td></tr>
+<tr><td>DMZ → LAN</td><td>❌ Non (ou très limité)</td></tr>
+<tr><td>LAN → Internet</td><td>✅ Oui (web), souvent via un proxy</td></tr>
+</table></div>
+<h2>Les autres briques de défense</h2>
+<div class="grid">
+  <div class="card"><span class="ico">🚪</span><h3>Proxy</h3><p>Intermédiaire pour la navigation web : filtre les sites, journalise.</p></div>
+  <div class="card"><span class="ico">🚨</span><h3>IDS / IPS</h3><p>Détecte (IDS) ou bloque (IPS) les comportements suspects. Ex : Suricata.</p></div>
+  <div class="card"><span class="ico">🦠</span><h3>Antivirus / EDR</h3><p>Protège chaque poste et serveur.</p></div>
+  <div class="card"><span class="ico">📶</span><h3>Wi-Fi sécurisé</h3><p><b>WPA3</b> (ou WPA2) ; réseau invités séparé. Jamais WEP.</p></div>
+</div>
+<div class="note blue">C'est la <b>défense en profondeur</b> : plusieurs couches de protection, pour qu'une seule faille ne suffise pas.</div>
+  </section>
+  <section class="panel" id="vpn" hidden>
+<h2>VPN : un tunnel chiffré à travers Internet</h2>
+<p>Un <b>VPN</b> (réseau privé virtuel) crée un <b>tunnel chiffré</b> : les données traversent Internet mais personne ne peut les lire.</p>
+<div class="vs">
+  <div class="card top"><h3>🧳 VPN nomade (accès distant)</h3><p>Un salarié en télétravail se connecte au réseau de l'entreprise depuis chez lui, comme s'il était au bureau.</p></div>
+  <div class="card top" style="--c:var(--t2)"><h3>🏢↔🏢 VPN site à site</h3><p>Relie <b>deux sites</b> de l'entreprise (siège et agence) de façon permanente, entre deux routeurs / pare-feu.</p></div>
+</div>
+<h2>Les protocoles</h2>
+<div class="tbl"><table>
+<tr><th>Protocole</th><th>À retenir</th></tr>
+<tr><td><b>IPsec</b></td><td>Standard, très utilisé en site à site</td></tr>
+<tr><td><b>OpenVPN</b></td><td>Libre, basé sur TLS, très répandu (pfSense)</td></tr>
+<tr><td><b>WireGuard</b></td><td>Moderne, simple et très rapide</td></tr>
+<tr><td>PPTP</td><td>❌ Obsolète, n'est plus sûr</td></tr>
+</table></div>
+<div class="note">Le VPN protège les données <b>pendant le trajet</b>. Il ne protège pas un poste déjà infecté : il faut aussi un antivirus, des mises à jour et une authentification forte (MFA).</div>
+  </section>
+  <section class="panel" id="quiz" hidden>
+<h2>Teste-toi</h2><p class="muted">9 questions. L'explication s'affiche après chaque réponse.</p><div class="quiz" id="quizBox"></div>
+  </section>
+  <footer>Cours de révision BTS SIO option SISR · bloc 3 cybersécurité. Références : ANSSI, CNIL, cybermalveillance.gouv.fr.</footer>
+</main>
+<script>
+(function(){
+var QUIZ=[{"q": "Un pare-feu lit ses règles :", "o": ["De bas en haut", "De haut en bas, la 1re qui correspond s'applique", "Au hasard"], "a": 1, "e": "L'ordre des règles est donc très important."}, {"q": "La bonne politique par défaut d'un pare-feu est :", "o": ["Tout autoriser", "Tout refuser sauf ce qui est nécessaire", "Refuser seulement les virus"], "a": 1, "e": "Principe du moindre privilège appliqué au réseau."}, {"q": "Où place-t-on le serveur web public de l'entreprise ?", "o": ["Dans le LAN", "Dans la DMZ", "Sur le poste du directeur"], "a": 1, "e": "La DMZ isole les serveurs exposés du réseau interne."}, {"q": "Quel flux doit être interdit ?", "o": ["LAN → Internet (web)", "Internet → LAN", "Internet → DMZ port 443"], "a": 1, "e": "Internet ne doit jamais atteindre directement le réseau interne."}, {"q": "Un pare-feu « stateful » :", "o": ["Suit l'état des connexions", "Ne filtre rien", "Remplace l'antivirus"], "a": 0, "e": "Il autorise automatiquement les réponses aux connexions légitimes."}, {"q": "Pour relier le siège et une agence de façon permanente :", "o": ["Un VPN site à site", "Un VLAN invité", "Un proxy"], "a": 0, "e": "Un tunnel permanent entre les deux pare-feu / routeurs."}, {"q": "Quel protocole VPN est obsolète ?", "o": ["WireGuard", "IPsec", "PPTP"], "a": 2, "e": "PPTP n'est plus considéré comme sûr."}, {"q": "Un IPS :", "o": ["Détecte et bloque les attaques", "Distribue des IP", "Sauvegarde les données"], "a": 0, "e": "IDS = détection, IPS = détection + prévention (blocage)."}, {"q": "Quel chiffrement Wi-Fi choisir ?", "o": ["WEP", "WPA3", "Aucun, avec un nom caché"], "a": 1, "e": "WPA3, ou WPA2 si le matériel est ancien. WEP est cassé."}];
+
+var tabs=document.getElementById('tabs');
+tabs.addEventListener('click',function(e){var t=e.target.closest('.tab');if(!t)return;
+  [].forEach.call(tabs.children,function(x){x.setAttribute('aria-selected',x===t);});
+  [].forEach.call(document.querySelectorAll('.panel'),function(p){p.hidden=p.id!==t.dataset.tab;});});
+document.addEventListener('click',function(e){var f=e.target.closest('.flip');if(f)f.classList.toggle('open');});
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var QZ=document.getElementById('quizBox'), order, qi, score, done;
+function startQuiz(){order=shuffle(QUIZ.map(function(_,i){return i;}));qi=0;score=0;renderQ();}
+function renderQ(){
+  if(qi>=order.length){var pct=Math.round(score/order.length*100);
+    QZ.innerHTML='<div class="card result"><div class="big">'+(pct>=80?'🏆':pct>=50?'👍':'📚')+'</div><h2>'+score+' / '+order.length+'</h2><p>'+(pct>=80?'Excellent, cette notion est maîtrisée !':pct>=50?'Pas mal ! Relis les points ratés et recommence.':'Relis la leçon puis retente le quiz.')+'</p><div class="btns" style="justify-content:center"><button class="btn" id="qRestart">↻ Recommencer</button></div></div>';
+    document.getElementById('qRestart').onclick=startQuiz;return;}
+  var q=QUIZ[order[qi]];done=false;
+  var opts=shuffle(q.o.map(function(t,i){return {t:t,i:i};}));
+  QZ.innerHTML='<div class="card"><div class="qhead"><b>Question '+(qi+1)+' / '+order.length+'</b><span class="muted">Score : '+score+'</span></div><div class="progress"><i style="width:'+(qi/order.length*100)+'%"></i></div><div class="qtext">'+q.q+'</div><div class="opts">'+
+    opts.map(function(o){return '<button class="opt" data-i="'+o.i+'">'+o.t+'</button>';}).join('')+'</div><div id="qAfter"></div></div>';
+  QZ.querySelector('.opts').onclick=function(e){var b=e.target.closest('.opt');if(!b||done)return;done=true;
+    var ok=+b.dataset.i===q.a;if(ok)score++;
+    [].forEach.call(this.children,function(c){if(+c.dataset.i===q.a)c.classList.add('ok');else if(c===b)c.classList.add('ko');});
+    document.getElementById('qAfter').innerHTML='<div class="expl">'+(ok?'✅ <b>Bonne réponse !</b> ':'❌ <b>Raté.</b> ')+q.e+'</div><div class="btns"><button class="btn" id="qNext">'+(qi+1<order.length?'Question suivante →':'Voir mon score')+'</button></div>';
+    document.getElementById('qNext').onclick=function(){qi++;renderQ();};};
+}
+startQuiz();
+
+
+})();
+</script>
+</body>
+</html>

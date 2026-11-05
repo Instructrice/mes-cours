@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Les attaques courantes</title>
+<style>:root{--t1:#B91C1C;--t2:#F97316}
+:root{--bg:#F6F7FB;--card:#FFFFFF;--ink:#18202B;--muted:#5B6675;--rule:#E1E5EC;
+  --red:#C8102E;--blue:#0055A4;--yellow:#FFC20E;--green:#1E9E55;--orange:#F28C00;--purple:#7B3FC4;
+  --accent:var(--t1);--accent-soft:color-mix(in srgb,var(--t1) 12%,#fff);--good:#1E9E55;--bad:#C8102E;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;padding:0 0 24px;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+h1,h2,h3{line-height:1.2;margin:0}
+h2{font-size:1.4rem;margin:26px 0 6px}
+h3{font-size:1.05rem;margin-bottom:4px}
+p{margin:.4em 0}
+.muted{color:var(--muted)}
+.hero{background:linear-gradient(120deg,var(--t1) 0%,var(--t2) 100%);color:#fff;border-radius:0 0 22px 22px;padding:24px 0 22px;margin-bottom:14px}
+.hero .badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 12px;font-size:.82rem;font-weight:600;margin-bottom:8px}
+.hero h1{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:800;display:flex;gap:12px;align-items:center}
+.hero h1 .emo{font-size:1.3em}
+.hero p{opacity:.93;max-width:62ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+.tab{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:.95rem;cursor:pointer}
+.tab:hover{border-color:var(--accent)}
+.tab[aria-selected="true"]{background:var(--t1);border-color:var(--t1);color:#fff;font-weight:600}
+.panel[hidden]{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.grid.two{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:14px}
+.card .ico{font-size:1.9rem;line-height:1;margin-bottom:6px;display:block}
+.card.top{border-top:5px solid var(--c,var(--t1))}
+.note{border-left:4px solid var(--yellow);background:var(--card);padding:10px 14px;border-radius:8px;margin:12px 0}
+.note.red{border-color:var(--red)}.note.blue{border-color:var(--blue)}.note.green{border-color:var(--green)}
+.big{font-size:1.7rem;font-weight:800}
+ul.tight{margin:.3em 0;padding-left:1.2em} ul.tight li{margin:.2em 0}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+.steps li{counter-increment:s;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:10px 12px 10px 52px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--t1);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tbl{overflow-x:auto;margin-top:10px;border:1px solid var(--rule);border-radius:12px}
+table{border-collapse:collapse;width:100%;background:var(--card);font-size:.95rem}
+th,td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{background:var(--accent-soft);color:var(--accent)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.82rem;font-weight:700;color:#fff;background:var(--c,var(--t1))}
+.illu{width:100%;height:auto;display:block;border-radius:10px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;color:#fff;background:var(--t1)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--rule)}
+.chip{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 11px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--t1)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;cursor:pointer}
+.check:hover{background:var(--accent-soft)}
+.check input{width:20px;height:20px;accent-color:var(--good);margin-top:2px;flex:none}
+.flip{cursor:pointer}
+.flip .back{display:none;color:var(--muted);font-size:.92rem;margin-top:6px}
+.flip.open .back{display:block}
+.flip .hint{font-size:.78rem;color:var(--accent);margin-top:6px}
+.flip.open .hint{display:none}
+/* Quiz */
+.quiz{max-width:720px;margin:12px auto 0}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.progress{height:8px;background:var(--rule);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.progress i{display:block;height:100%;background:var(--t1);width:0;transition:width .3s}
+.qtext{font-size:1.15rem;font-weight:650;margin:4px 0 12px}
+.opts{display:grid;gap:8px}
+.opt{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit;cursor:pointer;text-align:left}
+.opt:hover{border-color:var(--accent)}
+.opt.ok{background:color-mix(in srgb,var(--good) 18%,var(--card));border-color:var(--good)}
+.opt.ko{background:color-mix(in srgb,var(--bad) 18%,var(--card));border-color:var(--bad)}
+.expl{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--accent-soft)}
+.result{text-align:center;padding:20px}
+.result .big{font-size:3rem}
+footer{margin-top:28px;font-size:.85rem;color:var(--muted)}
+
+code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:6px;font-size:.9em}
+.term{background:#0F1720;color:#D7E3EE;border-radius:12px;padding:12px 14px;font:14px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-x:auto;margin:10px 0;white-space:pre}
+.term .p{color:#7EE787}.term .k{color:#7D8B99}.term .o{color:#FFD479}
+.layer{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;color:#fff;background:var(--c);cursor:pointer;margin:6px 0;font-weight:600;border:0;width:100%;font:inherit;text-align:left;transition:transform .15s}
+.layer:hover{transform:translateX(4px)}
+.layer .n{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.layer .pdu{margin-left:auto;font-size:.82rem;background:rgba(0,0,0,.18);padding:2px 10px;border-radius:999px;font-weight:600}
+.layer[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:2px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:720px){.split{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px;font-size:.9rem;color:var(--muted)}
+.field input,.field select{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:10px;padding:8px 10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.out{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin-top:12px}
+.out b{color:var(--muted);font-weight:600}
+.out span{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:700}
+.bits{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.bits div{text-align:center;min-width:38px}
+.bits small{display:block;color:var(--muted);font-size:.72rem}
+.bits .b{display:block;border-radius:8px;padding:6px 0;font-weight:800;font-family:ui-monospace,monospace;background:var(--rule);color:var(--muted)}
+.bits .b.on{background:var(--t1);color:#fff}
+.enc{display:flex;align-items:stretch;justify-content:center;flex-wrap:wrap;gap:0;margin:14px 0;font-weight:700;font-size:.9rem}
+.enc div{padding:12px 10px;color:#fff;display:flex;align-items:center}
+.enc .hide{display:none}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.vs{grid-template-columns:1fr}}
+.perm{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;align-items:center;max-width:420px}
+.perm label{display:flex;justify-content:center}
+.perm input{width:22px;height:22px;accent-color:var(--t1)}
+.meter{height:12px;background:var(--rule);border-radius:99px;overflow:hidden;margin:8px 0}
+.meter i{display:block;height:100%;width:0;transition:width .3s,background .3s}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <span class="badge">BTS SIO SISR · Cybersécurité</span>
+  <h1><span class="emo">🎣</span>Les attaques courantes</h1>
+  <p>Reconnaître les attaques les plus fréquentes pour savoir s'en protéger. Objectif : défendre, pas attaquer !</p>
+</div></header>
+<main class="wrap">
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-tab="social" aria-selected="true">🎣 Ingénierie sociale</button>
+    <button class="tab" role="tab" data-tab="malware" aria-selected="false">🦠 Logiciels malveillants</button>
+    <button class="tab" role="tab" data-tab="reseau" aria-selected="false">🌐 Attaques réseau</button>
+    <button class="tab" role="tab" data-tab="quiz" aria-selected="false">🧠 Quiz</button>
+  </nav>
+  <section class="panel" id="social">
+<h2>Le maillon faible : l'humain</h2>
+<p>L'<b>ingénierie sociale</b> manipule une personne pour obtenir des informations ou une action. C'est le point de départ de la majorité des attaques.</p>
+<div class="grid">
+<div class="card top" style="--c:#B91C1C"><span class="ico">🎣</span><h3>Hameçonnage (phishing)</h3><p>Faux mail ou SMS qui imite une banque, la Poste, le service informatique… pour voler tes identifiants.</p><p class="muted">🛡️ Vérifier l'expéditeur et le lien, ne jamais donner son mot de passe.</p></div><div class="card top" style="--c:#DC2626"><span class="ico">🎯</span><h3>Spear phishing</h3><p>Phishing <b>ciblé</b> et personnalisé (ton nom, ton chef, un vrai projet).</p><p class="muted">🛡️ Méfiance même si le message semble légitime.</p></div><div class="card top" style="--c:#F97316"><span class="ico">👔</span><h3>Fraude au président</h3><p>Un faux dirigeant demande un virement urgent et confidentiel.</p><p class="muted">🛡️ Toujours vérifier par un autre moyen (appel).</p></div><div class="card top" style="--c:#EA580C"><span class="ico">📞</span><h3>Faux support technique</h3><p>Un « technicien » appelle ou affiche une fausse alerte pour prendre la main sur le PC.</p><p class="muted">🛡️ Le vrai support ne demande jamais ton mot de passe.</p></div>
+</div>
+<h2>Repérer un mail de phishing</h2>
+<div class="card">
+  <label class="check"><input type="checkbox"> <span>📧 L'adresse de l'expéditeur est bizarre (<code>support@micros0ft-securite.com</code>)</span></label>
+  <label class="check"><input type="checkbox"> <span>⏰ Il y a une <b>urgence</b> ou une menace (« compte bloqué dans 24 h »)</span></label>
+  <label class="check"><input type="checkbox"> <span>🔗 Le lien, survolé, mène vers un autre site que celui annoncé</span></label>
+  <label class="check"><input type="checkbox"> <span>🔑 On te demande ton mot de passe ou tes coordonnées bancaires</span></label>
+  <label class="check"><input type="checkbox"> <span>📎 Une pièce jointe inattendue (.zip, .exe, document avec macros)</span></label>
+  <label class="check"><input type="checkbox"> <span>✍️ Des fautes, un ton inhabituel, une formule générique (« Cher client »)</span></label>
+</div>
+<div class="note red"><b>Tu as un doute ?</b> Ne clique pas, ne réponds pas, et <b>signale</b> au service informatique. Signalement : <b>signal-spam.fr</b> (mails) ou <b>33700</b> (SMS).</div>
+  </section>
+  <section class="panel" id="malware" hidden>
+<h2>La famille des malwares</h2>
+<div class="grid">
+<div class="card top" style="--c:#16A34A"><span class="ico">🦠</span><h3>Virus</h3><p>Se cache dans un fichier et s'active quand on l'ouvre.</p><p class="muted">🛡️ Antivirus, ne pas ouvrir n'importe quoi.</p></div><div class="card top" style="--c:#0D9488"><span class="ico">🪱</span><h3>Ver</h3><p>Se propage <b>tout seul</b> d'une machine à l'autre par le réseau.</p><p class="muted">🛡️ Mises à jour, segmentation réseau.</p></div><div class="card top" style="--c:#7C3AED"><span class="ico">🐴</span><h3>Cheval de Troie</h3><p>Ressemble à un logiciel utile mais ouvre une porte dérobée (backdoor).</p><p class="muted">🛡️ Télécharger uniquement depuis les sites officiels.</p></div><div class="card top" style="--c:#B91C1C"><span class="ico">💰</span><h3>Rançongiciel (ransomware)</h3><p><b>Chiffre</b> les fichiers et demande une rançon. Menace n°1 pour les entreprises.</p><p class="muted">🛡️ Sauvegardes hors ligne, mises à jour, ne pas payer.</p></div><div class="card top" style="--c:#2563EB"><span class="ico">👁️</span><h3>Logiciel espion (spyware)</h3><p>Collecte en cachette tes données.</p><p class="muted">🛡️ Antivirus / EDR, vigilance.</p></div><div class="card top" style="--c:#64748B"><span class="ico">⌨️</span><h3>Keylogger</h3><p>Enregistre tout ce que tu tapes, mots de passe compris.</p><p class="muted">🛡️ Authentification multifacteur (MFA).</p></div>
+</div>
+<div class="note"><b>Victime d'un rançongiciel ?</b> 1. <b>Débrancher</b> le PC du réseau (sans l'éteindre) · 2. Prévenir le responsable · 3. Ne pas payer · 4. Porter plainte et restaurer depuis les sauvegardes.</div>
+  </section>
+  <section class="panel" id="reseau" hidden>
+<h2>Les attaques sur le réseau et les services</h2>
+<div class="grid two">
+<div class="card top" style="--c:#B91C1C"><span class="ico">🕵️</span><h3>Homme du milieu (MITM)</h3><p>L'attaquant se place entre deux machines pour lire ou modifier les échanges (ex : faux Wi-Fi public, usurpation ARP).</p><p class="muted">🛡️ Chiffrement (HTTPS, VPN), éviter les Wi-Fi publics.</p></div><div class="card top" style="--c:#F97316"><span class="ico">🌊</span><h3>Déni de service (DoS / DDoS)</h3><p>Inonder un serveur de requêtes pour le rendre <b>indisponible</b>. Distribué (DDoS) = depuis des milliers de machines (botnet).</p><p class="muted">🛡️ Pare-feu, protection anti-DDoS de l'hébergeur.</p></div><div class="card top" style="--c:#7C3AED"><span class="ico">🔨</span><h3>Force brute / dictionnaire</h3><p>Essayer des milliers de mots de passe jusqu'à trouver le bon.</p><p class="muted">🛡️ Mots de passe longs, blocage après X échecs, MFA, fail2ban.</p></div><div class="card top" style="--c:#2563EB"><span class="ico">💉</span><h3>Injection SQL</h3><p>Glisser du code SQL dans un formulaire pour lire ou modifier la base de données.</p><p class="muted">🛡️ Requêtes préparées, vérifier les saisies.</p></div><div class="card top" style="--c:#0D9488"><span class="ico">📝</span><h3>XSS (cross-site scripting)</h3><p>Injecter du JavaScript dans une page web, exécuté chez les autres visiteurs.</p><p class="muted">🛡️ Échapper les données affichées.</p></div><div class="card top" style="--c:#64748B"><span class="ico">🔍</span><h3>Scan de ports</h3><p>Repérer les ports ouverts et les services d'une machine (souvent la 1re étape d'une attaque).</p><p class="muted">🛡️ Fermer les ports inutiles, pare-feu, IDS.</p></div>
+</div>
+<div class="note blue"><b>Rappel légal :</b> accéder ou se maintenir sans autorisation dans un système est un <b>délit</b> (article 323-1 du Code pénal). On teste uniquement sur ses propres labos ou avec une autorisation écrite.</div>
+  </section>
+  <section class="panel" id="quiz" hidden>
+<h2>Teste-toi</h2><p class="muted">9 questions. L'explication s'affiche après chaque réponse.</p><div class="quiz" id="quizBox"></div>
+  </section>
+  <footer>Cours de révision BTS SIO option SISR · bloc 3 cybersécurité. Références : ANSSI, CNIL, cybermalveillance.gouv.fr.</footer>
+</main>
+<script>
+(function(){
+var QUIZ=[{"q": "Un mail imitant ta banque te demande ton mot de passe. C'est :", "o": ["Du phishing", "Un ver", "Un DDoS"], "a": 0, "e": "C'est de l'hameçonnage : la banque ne demande jamais ton mot de passe."}, {"q": "Quel malware chiffre les fichiers et réclame de l'argent ?", "o": ["Le spyware", "Le rançongiciel", "Le keylogger"], "a": 1, "e": "Le rançongiciel (ransomware)."}, {"q": "Quel malware se propage seul par le réseau ?", "o": ["Le ver", "Le cheval de Troie", "Le virus"], "a": 0, "e": "Le ver n'a pas besoin qu'on ouvre un fichier pour se propager."}, {"q": "Première action face à un PC infecté par un ransomware :", "o": ["L'éteindre et le jeter", "Le déconnecter du réseau", "Payer la rançon"], "a": 1, "e": "Isoler la machine pour éviter la propagation, et garder les traces."}, {"q": "Un DDoS cherche à :", "o": ["Voler des mots de passe", "Rendre un service indisponible", "Modifier une base de données"], "a": 1, "e": "Il sature le service avec un énorme volume de requêtes."}, {"q": "Quelle protection limite le mieux la force brute ?", "o": ["Un fond d'écran", "Le blocage après plusieurs échecs + MFA", "Le RAID"], "a": 1, "e": "On limite les essais et on ajoute un second facteur."}, {"q": "L'injection SQL vise :", "o": ["La base de données d'un site", "Le câble réseau", "Le Wi-Fi"], "a": 0, "e": "Du code SQL est injecté via un formulaire mal protégé."}, {"q": "Le faux directeur qui demande un virement urgent, c'est :", "o": ["La fraude au président", "Un scan de ports", "Un XSS"], "a": 0, "e": "Toujours vérifier par un autre canal."}, {"q": "Une attaque MITM est rendue inefficace par :", "o": ["Le chiffrement des échanges", "Un écran plus grand", "Le DHCP"], "a": 0, "e": "Avec HTTPS ou un VPN, l'attaquant ne peut pas lire les données."}];
+
+var tabs=document.getElementById('tabs');
+tabs.addEventListener('click',function(e){var t=e.target.closest('.tab');if(!t)return;
+  [].forEach.call(tabs.children,function(x){x.setAttribute('aria-selected',x===t);});
+  [].forEach.call(document.querySelectorAll('.panel'),function(p){p.hidden=p.id!==t.dataset.tab;});});
+document.addEventListener('click',function(e){var f=e.target.closest('.flip');if(f)f.classList.toggle('open');});
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var QZ=document.getElementById('quizBox'), order, qi, score, done;
+function startQuiz(){order=shuffle(QUIZ.map(function(_,i){return i;}));qi=0;score=0;renderQ();}
+function renderQ(){
+  if(qi>=order.length){var pct=Math.round(score/order.length*100);
+    QZ.innerHTML='<div class="card result"><div class="big">'+(pct>=80?'🏆':pct>=50?'👍':'📚')+'</div><h2>'+score+' / '+order.length+'</h2><p>'+(pct>=80?'Excellent, cette notion est maîtrisée !':pct>=50?'Pas mal ! Relis les points ratés et recommence.':'Relis la leçon puis retente le quiz.')+'</p><div class="btns" style="justify-content:center"><button class="btn" id="qRestart">↻ Recommencer</button></div></div>';
+    document.getElementById('qRestart').onclick=startQuiz;return;}
+  var q=QUIZ[order[qi]];done=false;
+  var opts=shuffle(q.o.map(function(t,i){return {t:t,i:i};}));
+  QZ.innerHTML='<div class="card"><div class="qhead"><b>Question '+(qi+1)+' / '+order.length+'</b><span class="muted">Score : '+score+'</span></div><div class="progress"><i style="width:'+(qi/order.length*100)+'%"></i></div><div class="qtext">'+q.q+'</div><div class="opts">'+
+    opts.map(function(o){return '<button class="opt" data-i="'+o.i+'">'+o.t+'</button>';}).join('')+'</div><div id="qAfter"></div></div>';
+  QZ.querySelector('.opts').onclick=function(e){var b=e.target.closest('.opt');if(!b||done)return;done=true;
+    var ok=+b.dataset.i===q.a;if(ok)score++;
+    [].forEach.call(this.children,function(c){if(+c.dataset.i===q.a)c.classList.add('ok');else if(c===b)c.classList.add('ko');});
+    document.getElementById('qAfter').innerHTML='<div class="expl">'+(ok?'✅ <b>Bonne réponse !</b> ':'❌ <b>Raté.</b> ')+q.e+'</div><div class="btns"><button class="btn" id="qNext">'+(qi+1<order.length?'Question suivante →':'Voir mon score')+'</button></div>';
+    document.getElementById('qNext').onclick=function(){qi++;renderQ();};};
+}
+startQuiz();
+
+
+})();
+</script>
+</body>
+</html>

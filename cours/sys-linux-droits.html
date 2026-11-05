@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Linux : utilisateurs et droits</title>
+<style>:root{--t1:#6D28D9;--t2:#DB2777}
+:root{--bg:#F6F7FB;--card:#FFFFFF;--ink:#18202B;--muted:#5B6675;--rule:#E1E5EC;
+  --red:#C8102E;--blue:#0055A4;--yellow:#FFC20E;--green:#1E9E55;--orange:#F28C00;--purple:#7B3FC4;
+  --accent:var(--t1);--accent-soft:color-mix(in srgb,var(--t1) 12%,#fff);--good:#1E9E55;--bad:#C8102E;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;padding:0 0 24px;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+h1,h2,h3{line-height:1.2;margin:0}
+h2{font-size:1.4rem;margin:26px 0 6px}
+h3{font-size:1.05rem;margin-bottom:4px}
+p{margin:.4em 0}
+.muted{color:var(--muted)}
+.hero{background:linear-gradient(120deg,var(--t1) 0%,var(--t2) 100%);color:#fff;border-radius:0 0 22px 22px;padding:24px 0 22px;margin-bottom:14px}
+.hero .badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 12px;font-size:.82rem;font-weight:600;margin-bottom:8px}
+.hero h1{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:800;display:flex;gap:12px;align-items:center}
+.hero h1 .emo{font-size:1.3em}
+.hero p{opacity:.93;max-width:62ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+.tab{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:.95rem;cursor:pointer}
+.tab:hover{border-color:var(--accent)}
+.tab[aria-selected="true"]{background:var(--t1);border-color:var(--t1);color:#fff;font-weight:600}
+.panel[hidden]{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.grid.two{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:14px}
+.card .ico{font-size:1.9rem;line-height:1;margin-bottom:6px;display:block}
+.card.top{border-top:5px solid var(--c,var(--t1))}
+.note{border-left:4px solid var(--yellow);background:var(--card);padding:10px 14px;border-radius:8px;margin:12px 0}
+.note.red{border-color:var(--red)}.note.blue{border-color:var(--blue)}.note.green{border-color:var(--green)}
+.big{font-size:1.7rem;font-weight:800}
+ul.tight{margin:.3em 0;padding-left:1.2em} ul.tight li{margin:.2em 0}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+.steps li{counter-increment:s;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:10px 12px 10px 52px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--t1);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tbl{overflow-x:auto;margin-top:10px;border:1px solid var(--rule);border-radius:12px}
+table{border-collapse:collapse;width:100%;background:var(--card);font-size:.95rem}
+th,td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{background:var(--accent-soft);color:var(--accent)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.82rem;font-weight:700;color:#fff;background:var(--c,var(--t1))}
+.illu{width:100%;height:auto;display:block;border-radius:10px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;color:#fff;background:var(--t1)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--rule)}
+.chip{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 11px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--t1)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;cursor:pointer}
+.check:hover{background:var(--accent-soft)}
+.check input{width:20px;height:20px;accent-color:var(--good);margin-top:2px;flex:none}
+.flip{cursor:pointer}
+.flip .back{display:none;color:var(--muted);font-size:.92rem;margin-top:6px}
+.flip.open .back{display:block}
+.flip .hint{font-size:.78rem;color:var(--accent);margin-top:6px}
+.flip.open .hint{display:none}
+/* Quiz */
+.quiz{max-width:720px;margin:12px auto 0}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.progress{height:8px;background:var(--rule);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.progress i{display:block;height:100%;background:var(--t1);width:0;transition:width .3s}
+.qtext{font-size:1.15rem;font-weight:650;margin:4px 0 12px}
+.opts{display:grid;gap:8px}
+.opt{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit;cursor:pointer;text-align:left}
+.opt:hover{border-color:var(--accent)}
+.opt.ok{background:color-mix(in srgb,var(--good) 18%,var(--card));border-color:var(--good)}
+.opt.ko{background:color-mix(in srgb,var(--bad) 18%,var(--card));border-color:var(--bad)}
+.expl{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--accent-soft)}
+.result{text-align:center;padding:20px}
+.result .big{font-size:3rem}
+footer{margin-top:28px;font-size:.85rem;color:var(--muted)}
+
+code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:6px;font-size:.9em}
+.term{background:#0F1720;color:#D7E3EE;border-radius:12px;padding:12px 14px;font:14px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-x:auto;margin:10px 0;white-space:pre}
+.term .p{color:#7EE787}.term .k{color:#7D8B99}.term .o{color:#FFD479}
+.layer{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;color:#fff;background:var(--c);cursor:pointer;margin:6px 0;font-weight:600;border:0;width:100%;font:inherit;text-align:left;transition:transform .15s}
+.layer:hover{transform:translateX(4px)}
+.layer .n{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.layer .pdu{margin-left:auto;font-size:.82rem;background:rgba(0,0,0,.18);padding:2px 10px;border-radius:999px;font-weight:600}
+.layer[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:2px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:720px){.split{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px;font-size:.9rem;color:var(--muted)}
+.field input,.field select{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:10px;padding:8px 10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.out{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin-top:12px}
+.out b{color:var(--muted);font-weight:600}
+.out span{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:700}
+.bits{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.bits div{text-align:center;min-width:38px}
+.bits small{display:block;color:var(--muted);font-size:.72rem}
+.bits .b{display:block;border-radius:8px;padding:6px 0;font-weight:800;font-family:ui-monospace,monospace;background:var(--rule);color:var(--muted)}
+.bits .b.on{background:var(--t1);color:#fff}
+.enc{display:flex;align-items:stretch;justify-content:center;flex-wrap:wrap;gap:0;margin:14px 0;font-weight:700;font-size:.9rem}
+.enc div{padding:12px 10px;color:#fff;display:flex;align-items:center}
+.enc .hide{display:none}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.vs{grid-template-columns:1fr}}
+.perm{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;align-items:center;max-width:420px}
+.perm label{display:flex;justify-content:center}
+.perm input{width:22px;height:22px;accent-color:var(--t1)}
+.meter{height:12px;background:var(--rule);border-radius:99px;overflow:hidden;margin:8px 0}
+.meter i{display:block;height:100%;width:0;transition:width .3s,background .3s}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <span class="badge">BTS SIO SISR · Systèmes</span>
+  <h1><span class="emo">🔐</span>Linux : utilisateurs et droits</h1>
+  <p>Créer des comptes et des groupes, lire et modifier les droits rwx, et comprendre chmod 755.</p>
+</div></header>
+<main class="wrap">
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-tab="users" aria-selected="true">👥 Utilisateurs</button>
+    <button class="tab" role="tab" data-tab="rwx" aria-selected="false">📜 Lire les droits</button>
+    <button class="tab" role="tab" data-tab="chmod" aria-selected="false">🎛️ chmod et chown</button>
+    <button class="tab" role="tab" data-tab="quiz" aria-selected="false">🧠 Quiz</button>
+  </nav>
+  <section class="panel" id="users">
+<h2>Utilisateurs et groupes</h2>
+<div class="grid">
+  <div class="card top"><span class="ico">👑</span><h3>root</h3><p>Le super-administrateur (UID 0). Il a <b>tous</b> les droits. On évite de travailler en root : on utilise <code>sudo</code>.</p></div>
+  <div class="card top" style="--c:var(--t2)"><span class="ico">🙋</span><h3>Utilisateurs</h3><p>Chaque personne a son compte, son UID et son dossier dans <code>/home</code>.</p></div>
+  <div class="card top" style="--c:#0EA5E9"><span class="ico">👥</span><h3>Groupes</h3><p>On donne des droits à un groupe (ex : <code>compta</code>) plutôt qu'à chaque utilisateur.</p></div>
+</div>
+<h2>Les fichiers qui stockent les comptes</h2>
+<div class="tbl"><table>
+<tr><th>Fichier</th><th>Contenu</th></tr>
+<tr><td><code>/etc/passwd</code></td><td>La liste des comptes (nom, UID, dossier, shell)</td></tr>
+<tr><td><code>/etc/shadow</code></td><td>Les mots de passe <b>hachés</b> (lisible par root uniquement)</td></tr>
+<tr><td><code>/etc/group</code></td><td>Les groupes et leurs membres</td></tr>
+</table></div>
+<h2>Les commandes</h2>
+<div class="term"><span class="p">#</span> adduser alice                <span class="k"># créer un utilisateur (interactif)</span>
+<span class="p">#</span> passwd alice                 <span class="k"># changer son mot de passe</span>
+<span class="p">#</span> groupadd compta              <span class="k"># créer un groupe</span>
+<span class="p">#</span> usermod -aG compta alice     <span class="k"># ajouter alice au groupe (-a = sans retirer les autres !)</span>
+<span class="p">#</span> usermod -aG sudo alice       <span class="k"># donner les droits sudo</span>
+<span class="p">#</span> deluser alice                <span class="k"># supprimer</span>
+<span class="p">$</span> id alice ; groups alice      <span class="k"># vérifier</span></div>
+  </section>
+  <section class="panel" id="rwx" hidden>
+<h2>Lire un ls -l</h2>
+<div class="term"><span class="p">$</span> ls -l
+-rwxr-x---  1 alice compta  4096 nov. 5 rapport.sh</div>
+<div class="enc" style="font-family:ui-monospace,monospace;font-size:1.1rem">
+  <div style="background:#64748B;border-radius:10px 0 0 10px">-</div>
+  <div style="background:#6D28D9">rwx</div>
+  <div style="background:#DB2777">r-x</div>
+  <div style="background:#0EA5E9;border-radius:0 10px 10px 0">---</div>
+</div>
+<div class="grid">
+  <div class="card top" style="--c:#64748B"><h3>Type</h3><p><code>-</code> fichier · <code>d</code> dossier · <code>l</code> lien</p></div>
+  <div class="card top" style="--c:#6D28D9"><h3>u · propriétaire</h3><p>Ici <b>alice</b> : lire, écrire, exécuter.</p></div>
+  <div class="card top" style="--c:#DB2777"><h3>g · groupe</h3><p>Ici <b>compta</b> : lire et exécuter.</p></div>
+  <div class="card top" style="--c:#0EA5E9"><h3>o · les autres</h3><p>Tous les autres : <b>aucun</b> droit.</p></div>
+</div>
+<h2>Que veut dire r, w, x ?</h2>
+<div class="tbl"><table>
+<tr><th>Droit</th><th>Valeur</th><th>Sur un fichier</th><th>Sur un dossier</th></tr>
+<tr><td><b>r</b> read</td><td><b>4</b></td><td>Lire le contenu</td><td>Lister le contenu (ls)</td></tr>
+<tr><td><b>w</b> write</td><td><b>2</b></td><td>Modifier</td><td>Créer / supprimer des fichiers dedans</td></tr>
+<tr><td><b>x</b> execute</td><td><b>1</b></td><td>Exécuter (script, programme)</td><td>Entrer dedans (cd)</td></tr>
+</table></div>
+  </section>
+  <section class="panel" id="chmod" hidden>
+<h2>Calculateur de droits</h2>
+<p class="muted">Coche les cases : on additionne r=4, w=2, x=1 pour chaque catégorie.</p>
+<div class="card">
+  <div class="perm" id="perm">
+    <span></span><b style="text-align:center">r (4)</b><b style="text-align:center">w (2)</b><b style="text-align:center">x (1)</b>
+  </div>
+  <div class="out"><b>Octal</b><span id="octal" style="font-size:1.6rem"></span><b>Symbolique</b><span id="sym"></span><b>Commande</b><span id="cmd"></span></div>
+</div>
+<h2>Les valeurs classiques</h2>
+<div class="grid">
+  <div class="card"><span class="big">755</span><p>rwxr-xr-x · scripts, dossiers web</p></div>
+  <div class="card"><span class="big">644</span><p>rw-r--r-- · fichiers classiques</p></div>
+  <div class="card"><span class="big">700</span><p>rwx------ · dossier privé</p></div>
+  <div class="card"><span class="big">600</span><p>rw------- · clé SSH privée</p></div>
+</div>
+<div class="term"><span class="p">$</span> chmod 750 rapport.sh          <span class="k"># en octal</span>
+<span class="p">$</span> chmod u+x script.sh           <span class="k"># ajouter x au propriétaire</span>
+<span class="p">$</span> chmod o-r secret.txt          <span class="k"># retirer r aux autres</span>
+<span class="p">#</span> chown alice:compta rapport.sh  <span class="k"># changer propriétaire et groupe</span>
+<span class="p">#</span> chown -R www-data /var/www     <span class="k"># -R = récursif</span></div>
+<div class="note red"><b>Jamais de chmod 777</b> « pour que ça marche » : tout le monde pourrait modifier le fichier. Applique le <b>principe du moindre privilège</b>.</div>
+  </section>
+  <section class="panel" id="quiz" hidden>
+<h2>Teste-toi</h2><p class="muted">8 questions. L'explication s'affiche après chaque réponse.</p><div class="quiz" id="quizBox"></div>
+  </section>
+  <footer>Cours de révision BTS SIO option SISR · administration des systèmes.</footer>
+</main>
+<script>
+(function(){
+var QUIZ=[{"q": "Les mots de passe hachés sont stockés dans :", "o": ["/etc/passwd", "/etc/shadow", "/home/root"], "a": 1, "e": "/etc/shadow, lisible uniquement par root."}, {"q": "Que vaut chmod 755 ?", "o": ["rwxr-xr-x", "rw-r--r--", "rwxrwxrwx"], "a": 0, "e": "7 = 4+2+1 (rwx), 5 = 4+1 (r-x)."}, {"q": "Quelle valeur correspond à rw-r----- ?", "o": ["640", "644", "750"], "a": 0, "e": "rw- = 6, r-- = 4, --- = 0."}, {"q": "Pour ajouter alice au groupe compta sans la retirer des autres groupes :", "o": ["usermod -G compta alice", "usermod -aG compta alice", "groupadd alice compta"], "a": 1, "e": "Sans -a, l'utilisateur est retiré de ses autres groupes secondaires !"}, {"q": "Sur un dossier, le droit x permet de :", "o": ["L'exécuter", "Y entrer (cd)", "Le supprimer"], "a": 1, "e": "Pour un dossier, x = traverser / entrer dedans."}, {"q": "Quelle commande change le propriétaire d'un fichier ?", "o": ["chmod", "chown", "passwd"], "a": 1, "e": "chown utilisateur:groupe fichier."}, {"q": "L'UID de root est :", "o": ["0", "1", "1000"], "a": 0, "e": "root a toujours l'UID 0. Les utilisateurs commencent souvent à 1000."}, {"q": "Pourquoi éviter chmod 777 ?", "o": ["C'est trop lent", "Tout le monde peut lire, modifier et exécuter le fichier", "Ça supprime le fichier"], "a": 1, "e": "777 donne tous les droits à tous : grosse faille de sécurité."}];
+
+var tabs=document.getElementById('tabs');
+tabs.addEventListener('click',function(e){var t=e.target.closest('.tab');if(!t)return;
+  [].forEach.call(tabs.children,function(x){x.setAttribute('aria-selected',x===t);});
+  [].forEach.call(document.querySelectorAll('.panel'),function(p){p.hidden=p.id!==t.dataset.tab;});});
+document.addEventListener('click',function(e){var f=e.target.closest('.flip');if(f)f.classList.toggle('open');});
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var QZ=document.getElementById('quizBox'), order, qi, score, done;
+function startQuiz(){order=shuffle(QUIZ.map(function(_,i){return i;}));qi=0;score=0;renderQ();}
+function renderQ(){
+  if(qi>=order.length){var pct=Math.round(score/order.length*100);
+    QZ.innerHTML='<div class="card result"><div class="big">'+(pct>=80?'🏆':pct>=50?'👍':'📚')+'</div><h2>'+score+' / '+order.length+'</h2><p>'+(pct>=80?'Excellent, cette notion est maîtrisée !':pct>=50?'Pas mal ! Relis les points ratés et recommence.':'Relis la leçon puis retente le quiz.')+'</p><div class="btns" style="justify-content:center"><button class="btn" id="qRestart">↻ Recommencer</button></div></div>';
+    document.getElementById('qRestart').onclick=startQuiz;return;}
+  var q=QUIZ[order[qi]];done=false;
+  var opts=shuffle(q.o.map(function(t,i){return {t:t,i:i};}));
+  QZ.innerHTML='<div class="card"><div class="qhead"><b>Question '+(qi+1)+' / '+order.length+'</b><span class="muted">Score : '+score+'</span></div><div class="progress"><i style="width:'+(qi/order.length*100)+'%"></i></div><div class="qtext">'+q.q+'</div><div class="opts">'+
+    opts.map(function(o){return '<button class="opt" data-i="'+o.i+'">'+o.t+'</button>';}).join('')+'</div><div id="qAfter"></div></div>';
+  QZ.querySelector('.opts').onclick=function(e){var b=e.target.closest('.opt');if(!b||done)return;done=true;
+    var ok=+b.dataset.i===q.a;if(ok)score++;
+    [].forEach.call(this.children,function(c){if(+c.dataset.i===q.a)c.classList.add('ok');else if(c===b)c.classList.add('ko');});
+    document.getElementById('qAfter').innerHTML='<div class="expl">'+(ok?'✅ <b>Bonne réponse !</b> ':'❌ <b>Raté.</b> ')+q.e+'</div><div class="btns"><button class="btn" id="qNext">'+(qi+1<order.length?'Question suivante →':'Voir mon score')+'</button></div>';
+    document.getElementById('qNext').onclick=function(){qi++;renderQ();};};
+}
+startQuiz();
+
+
+var P=document.getElementById('perm'),who=[['u','Propriétaire'],['g','Groupe'],['o','Autres']],w=[4,2,1],L='rwx',init=[7,5,0];
+who.forEach(function(x,i){var s=document.createElement('b');s.textContent=x[1];P.appendChild(s);
+  w.forEach(function(v,j){var l=document.createElement('label'),c=document.createElement('input');c.type='checkbox';c.dataset.i=i;c.dataset.v=v;c.dataset.j=j;c.checked=!!(init[i]&v);c.setAttribute('aria-label',x[1]+' '+L[j]);l.appendChild(c);P.appendChild(l);});});
+function upd(){var o=[0,0,0],s=['-','-','-','-','-','-','-','-','-'];
+  [].forEach.call(P.querySelectorAll('input'),function(c){if(c.checked){o[c.dataset.i]+=+c.dataset.v;s[c.dataset.i*3+(+c.dataset.j)]=L[c.dataset.j];}});
+  var oc=o.join('');document.getElementById('octal').textContent=oc;document.getElementById('sym').textContent=s.join('');document.getElementById('cmd').textContent='chmod '+oc+' fichier';}
+P.addEventListener('change',upd);upd();
+
+})();
+</script>
+</body>
+</html>
