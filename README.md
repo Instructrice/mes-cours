@@ -1,88 +1,74 @@
 # 📚 Mes cours
 
-Plateforme personnelle d'apprentissage : **ajoutez vos cours depuis un espace admin**, puis **suivez-les leçon par leçon** avec vidéos YouTube intégrées, notes en Markdown et suivi de progression.
+Plateforme personnelle d'apprentissage **hébergée gratuitement sur GitHub Pages** :
+ajoutez vos cours depuis un **espace admin**, puis suivez-les leçon par leçon avec **vidéos YouTube**, notes en **Markdown** et **suivi de progression**.
+
+- Site : `https://<votre-compte>.github.io/<nom-du-depot>/`
+- Admin : `https://<votre-compte>.github.io/<nom-du-depot>/admin.html`
 
 ## ✨ Fonctionnalités
 
-**Côté apprenant**
+**Pour apprendre**
 - Catalogue des cours avec recherche et filtre par catégorie
-- Page de cours avec programme et barre de progression
-- Lecteur **YouTube intégré** (mode confidentialité renforcée `youtube-nocookie.com`, temps de départ `?t=` respecté)
-- Contenu de leçon en **Markdown** (titres, listes, code, tableaux, images, liens…)
+- Lecteur **YouTube intégré** (`youtube-nocookie.com`, temps de départ `?t=` respecté)
+- Contenu en **Markdown** : titres, listes, code, tableaux, images, liens…
 - « Marquer comme terminée », bouton **Reprendre le cours**, navigation ← / → au clavier
-- Progression enregistrée dans le navigateur, thème clair / sombre, responsive mobile
+- Progression enregistrée dans le navigateur, thème clair / sombre, adapté au mobile
 
-**Côté admin** (`/admin`, protégé par mot de passe)
+**Admin**
 - Créer / modifier / supprimer des cours (titre, catégorie, description, couverture, publié ou brouillon)
-- Ajouter des leçons avec lien YouTube (**aperçu vidéo en direct**) et contenu Markdown (**aperçu en direct**)
-- Réordonner les leçons (↑ ↓), « Enregistrer et ajouter une autre » pour enchaîner
-- Couverture automatique : miniature de la première vidéo si aucune image n'est fournie
-- Aperçu des cours en brouillon avant publication
+- Leçons avec lien YouTube (**aperçu vidéo en direct**) et Markdown (**aperçu en direct**)
+- Réordonner les leçons (↑ ↓), « Enregistrer et ajouter une autre »
+- Bouton **Publier sur GitHub** : enregistre tout dans `data/courses.json` du dépôt
+- Brouillon conservé automatiquement dans le navigateur tant que vous n'avez pas publié
 
-## 🚀 Démarrage
+## 🚀 Mise en ligne (une seule fois)
 
-Prérequis : **Node.js 22.13 ou plus** (la base SQLite est intégrée à Node, aucune installation de base de données).
+1. **Activer GitHub Pages** : dans le dépôt, *Settings → Pages → Build and deployment*,
+   Source « Deploy from a branch », branche `main`, dossier `/ (root)`, puis *Save*.
+   Après 1 à 2 minutes le site est visible à l'adresse indiquée.
+2. **Créer un jeton pour l'admin** : ouvrez <https://github.com/settings/personal-access-tokens/new>
+   - *Repository access* : « Only select repositories » → ce dépôt
+   - *Permissions → Repository permissions → Contents* : **Read and write**
+   - Générez et copiez le jeton (`github_pat_…`)
+3. Ouvrez `…/admin.html`, allez dans **Réglages**, collez le jeton puis « Enregistrer et tester ».
 
-```bash
-git clone https://github.com/<votre-compte>/mes-cours.git
-cd mes-cours
-npm install
-cp .env.example .env      # puis choisissez votre ADMIN_PASSWORD
-npm run seed              # (optionnel) ajoute un cours d'exemple
-npm start
-```
+C'est tout : créez vos cours, cliquez sur **Publier sur GitHub**, le site se met à jour en 1 à 2 minutes.
 
-Ouvrez http://localhost:3000 — l'admin est sur http://localhost:3000/admin.
+## 🔒 Sécurité, à savoir
 
-En développement, `npm run dev` relance le serveur à chaque modification.
-
-## ⚙️ Configuration (`.env`)
-
-| Variable | Rôle |
-|---|---|
-| `ADMIN_PASSWORD` | Mot de passe de l'espace admin (**obligatoire**) |
-| `SESSION_SECRET` | Clé de signature des sessions — à définir pour rester connecté après un redémarrage |
-| `PORT` | Port HTTP (défaut `3000`) |
-| `SITE_NAME` | Nom affiché dans l'en-tête |
-| `DB_PATH` | Emplacement de la base SQLite (défaut `data/cours.db`) |
-| `TRUST_PROXY` / `NODE_ENV=production` | Derrière un proxy HTTPS : cookies sécurisés |
+- Le jeton est stocké **uniquement dans votre navigateur**. Sans lui, la page admin ne peut rien modifier :
+  n'importe qui peut l'ouvrir mais personne ne peut publier.
+- Utilisez l'admin seulement sur vos appareils personnels et donnez au jeton l'accès à **ce seul dépôt**.
+- Un dépôt public (nécessaire pour GitHub Pages gratuit) rend `data/courses.json` lisible par tous,
+  **y compris les cours en brouillon**. Ne mettez rien de confidentiel.
 
 ## 🎬 Liens YouTube acceptés
 
-`youtube.com/watch?v=…`, `youtu.be/…`, `youtube.com/shorts/…`, `youtube.com/live/…`, `youtube.com/embed/…`, ou l'identifiant seul. Ajoutez `?t=90` ou `&t=1m30s` pour démarrer à un moment précis.
+`youtube.com/watch?v=…`, `youtu.be/…`, `youtube.com/shorts/…`, `youtube.com/live/…`, `youtube.com/embed/…`
+ou l'identifiant seul. Ajoutez `?t=90` ou `&t=1m30s` pour démarrer à un moment précis.
 
-## 🐳 Docker
+## 💻 En local
 
 ```bash
-docker build -t mes-cours .
-docker run -p 3000:3000 -e ADMIN_PASSWORD=monmotdepasse -e SESSION_SECRET=unelonguechaine -v mes-cours-data:/data mes-cours
+npm start      # sert le site sur http://localhost:3000
+npm test       # vérifie les liens YouTube et data/courses.json
 ```
 
-## ☁️ Mise en ligne
-
-L'application a besoin d'un serveur Node (pas GitHub Pages) et d'un **disque persistant** pour `data/cours.db` : Render (avec disque), Railway, Fly.io, un VPS… Pensez à définir `ADMIN_PASSWORD`, `SESSION_SECRET`, `TRUST_PROXY=1` et `NODE_ENV=production`.
-
-**Sauvegarde** : il suffit de copier le fichier `data/cours.db`.
+Vous pouvez aussi modifier `data/courses.json` à la main et le pousser : c'est le même fichier que l'admin.
 
 ## 🗂️ Structure
 
 ```
-server.js              Point d'entrée
-src/app.js             Configuration Express
-src/db.js              Base SQLite (cours, leçons)
-src/youtube.js         Analyse des liens YouTube
-src/routes/public.js   Pages apprenant
-src/routes/admin.js    Espace admin
-views/                 Templates EJS
-public/                CSS et JavaScript du navigateur
-scripts/seed.js        Cours d'exemple
-test/                  Tests (npm test)
-```
-
-## 🧪 Tests
-
-```bash
-npm test
+index.html           Site d'apprentissage
+admin.html           Espace admin
+assets/app.js        Pages : accueil, cours, leçon
+assets/admin.js      Admin + enregistrement via l'API GitHub
+assets/common.js     Fonctions partagées (Markdown, progression, thème…)
+assets/youtube.js    Analyse des liens YouTube
+assets/style.css     Design
+assets/vendor/       marked (Markdown) et DOMPurify (sécurité)
+data/courses.json    Vos cours
 ```
 
 ## Licence

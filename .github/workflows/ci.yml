@@ -1,4 +1,4 @@
-name: CI
+name: Vérifications
 on: [push, pull_request]
 jobs:
   test:
@@ -8,6 +8,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
       - run: npm test
