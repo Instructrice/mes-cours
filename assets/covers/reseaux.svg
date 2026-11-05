@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0B6E99"/><stop offset="1" stop-color="#14B8A6"/></linearGradient></defs>
+<rect width="640" height="360" fill="url(#g)"/>
+<g fill="#fff" opacity=".08"><circle cx="560" cy="60" r="120"/><circle cx="80" cy="330" r="90"/></g>
+<text x="320" y="170" text-anchor="middle" font-size="110">🌐</text>
+<text x="320" y="245" text-anchor="middle" font-family="system-ui,Segoe UI,Roboto,sans-serif" font-size="40" font-weight="800" fill="#fff">Réseaux</text>
+<text x="320" y="285" text-anchor="middle" font-family="system-ui,Segoe UI,Roboto,sans-serif" font-size="20" fill="#fff" opacity=".85">OSI · IPv4 · VLAN · DHCP · DNS</text>
+</svg>

@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le modèle OSI et TCP/IP</title>
+<style>:root{--t1:#0B6E99;--t2:#14B8A6}
+:root{--bg:#F6F7FB;--card:#FFFFFF;--ink:#18202B;--muted:#5B6675;--rule:#E1E5EC;
+  --red:#C8102E;--blue:#0055A4;--yellow:#FFC20E;--green:#1E9E55;--orange:#F28C00;--purple:#7B3FC4;
+  --accent:var(--t1);--accent-soft:color-mix(in srgb,var(--t1) 12%,#fff);--good:#1E9E55;--bad:#C8102E;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;padding:0 0 24px;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+h1,h2,h3{line-height:1.2;margin:0}
+h2{font-size:1.4rem;margin:26px 0 6px}
+h3{font-size:1.05rem;margin-bottom:4px}
+p{margin:.4em 0}
+.muted{color:var(--muted)}
+.hero{background:linear-gradient(120deg,var(--t1) 0%,var(--t2) 100%);color:#fff;border-radius:0 0 22px 22px;padding:24px 0 22px;margin-bottom:14px}
+.hero .badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 12px;font-size:.82rem;font-weight:600;margin-bottom:8px}
+.hero h1{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:800;display:flex;gap:12px;align-items:center}
+.hero h1 .emo{font-size:1.3em}
+.hero p{opacity:.93;max-width:62ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+.tab{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:.95rem;cursor:pointer}
+.tab:hover{border-color:var(--accent)}
+.tab[aria-selected="true"]{background:var(--t1);border-color:var(--t1);color:#fff;font-weight:600}
+.panel[hidden]{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.grid.two{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:14px}
+.card .ico{font-size:1.9rem;line-height:1;margin-bottom:6px;display:block}
+.card.top{border-top:5px solid var(--c,var(--t1))}
+.note{border-left:4px solid var(--yellow);background:var(--card);padding:10px 14px;border-radius:8px;margin:12px 0}
+.note.red{border-color:var(--red)}.note.blue{border-color:var(--blue)}.note.green{border-color:var(--green)}
+.big{font-size:1.7rem;font-weight:800}
+ul.tight{margin:.3em 0;padding-left:1.2em} ul.tight li{margin:.2em 0}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+.steps li{counter-increment:s;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:10px 12px 10px 52px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--t1);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tbl{overflow-x:auto;margin-top:10px;border:1px solid var(--rule);border-radius:12px}
+table{border-collapse:collapse;width:100%;background:var(--card);font-size:.95rem}
+th,td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{background:var(--accent-soft);color:var(--accent)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.82rem;font-weight:700;color:#fff;background:var(--c,var(--t1))}
+.illu{width:100%;height:auto;display:block;border-radius:10px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;color:#fff;background:var(--t1)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--rule)}
+.chip{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 11px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--t1)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;cursor:pointer}
+.check:hover{background:var(--accent-soft)}
+.check input{width:20px;height:20px;accent-color:var(--good);margin-top:2px;flex:none}
+.flip{cursor:pointer}
+.flip .back{display:none;color:var(--muted);font-size:.92rem;margin-top:6px}
+.flip.open .back{display:block}
+.flip .hint{font-size:.78rem;color:var(--accent);margin-top:6px}
+.flip.open .hint{display:none}
+/* Quiz */
+.quiz{max-width:720px;margin:12px auto 0}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.progress{height:8px;background:var(--rule);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.progress i{display:block;height:100%;background:var(--t1);width:0;transition:width .3s}
+.qtext{font-size:1.15rem;font-weight:650;margin:4px 0 12px}
+.opts{display:grid;gap:8px}
+.opt{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit;cursor:pointer;text-align:left}
+.opt:hover{border-color:var(--accent)}
+.opt.ok{background:color-mix(in srgb,var(--good) 18%,var(--card));border-color:var(--good)}
+.opt.ko{background:color-mix(in srgb,var(--bad) 18%,var(--card));border-color:var(--bad)}
+.expl{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--accent-soft)}
+.result{text-align:center;padding:20px}
+.result .big{font-size:3rem}
+footer{margin-top:28px;font-size:.85rem;color:var(--muted)}
+
+code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:6px;font-size:.9em}
+.term{background:#0F1720;color:#D7E3EE;border-radius:12px;padding:12px 14px;font:14px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-x:auto;margin:10px 0;white-space:pre}
+.term .p{color:#7EE787}.term .k{color:#7D8B99}.term .o{color:#FFD479}
+.layer{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;color:#fff;background:var(--c);cursor:pointer;margin:6px 0;font-weight:600;border:0;width:100%;font:inherit;text-align:left;transition:transform .15s}
+.layer:hover{transform:translateX(4px)}
+.layer .n{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.layer .pdu{margin-left:auto;font-size:.82rem;background:rgba(0,0,0,.18);padding:2px 10px;border-radius:999px;font-weight:600}
+.layer[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:2px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:720px){.split{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px;font-size:.9rem;color:var(--muted)}
+.field input,.field select{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:10px;padding:8px 10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.out{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin-top:12px}
+.out b{color:var(--muted);font-weight:600}
+.out span{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:700}
+.bits{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.bits div{text-align:center;min-width:38px}
+.bits small{display:block;color:var(--muted);font-size:.72rem}
+.bits .b{display:block;border-radius:8px;padding:6px 0;font-weight:800;font-family:ui-monospace,monospace;background:var(--rule);color:var(--muted)}
+.bits .b.on{background:var(--t1);color:#fff}
+.enc{display:flex;align-items:stretch;justify-content:center;flex-wrap:wrap;gap:0;margin:14px 0;font-weight:700;font-size:.9rem}
+.enc div{padding:12px 10px;color:#fff;display:flex;align-items:center}
+.enc .hide{display:none}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.vs{grid-template-columns:1fr}}
+.perm{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;align-items:center;max-width:420px}
+.perm label{display:flex;justify-content:center}
+.perm input{width:22px;height:22px;accent-color:var(--t1)}
+.meter{height:12px;background:var(--rule);border-radius:99px;overflow:hidden;margin:8px 0}
+.meter i{display:block;height:100%;width:0;transition:width .3s,background .3s}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <span class="badge">BTS SIO SISR · Réseaux</span>
+  <h1><span class="emo">🧱</span>Le modèle OSI et TCP/IP</h1>
+  <p>7 couches pour comprendre comment une donnée part de ton PC et arrive sur un serveur à l'autre bout du monde.</p>
+</div></header>
+<main class="wrap">
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-tab="couches" aria-selected="true">🧱 Les 7 couches</button>
+    <button class="tab" role="tab" data-tab="encap" aria-selected="false">📦 Encapsulation</button>
+    <button class="tab" role="tab" data-tab="tcpip" aria-selected="false">🔀 OSI vs TCP/IP</button>
+    <button class="tab" role="tab" data-tab="quiz" aria-selected="false">🧠 Quiz</button>
+  </nav>
+  <section class="panel" id="couches">
+<h2>Clique sur une couche</h2>
+<p class="muted">Chaque couche a <b>un seul rôle</b> et rend service à la couche du dessus.</p>
+<div class="split">
+  <div><button class="layer" style="--c:#7C3AED" data-l="7" aria-pressed="false"><span class="n">7</span>Application<span class="pdu">Données</span></button>
+<button class="layer" style="--c:#9333EA" data-l="6" aria-pressed="false"><span class="n">6</span>Présentation<span class="pdu">Données</span></button>
+<button class="layer" style="--c:#C026D3" data-l="5" aria-pressed="false"><span class="n">5</span>Session<span class="pdu">Données</span></button>
+<button class="layer" style="--c:#DB2777" data-l="4" aria-pressed="false"><span class="n">4</span>Transport<span class="pdu">Segment</span></button>
+<button class="layer" style="--c:#EA580C" data-l="3" aria-pressed="true"><span class="n">3</span>Réseau<span class="pdu">Paquet</span></button>
+<button class="layer" style="--c:#16A34A" data-l="2" aria-pressed="false"><span class="n">2</span>Liaison de données<span class="pdu">Trame</span></button>
+<button class="layer" style="--c:#0284C7" data-l="1" aria-pressed="false"><span class="n">1</span>Physique<span class="pdu">Bit</span></button></div>
+  <div class="card top" id="osiDetail" style="position:sticky;top:10px"></div>
+</div>
+<div class="note"><b>Moyen mnémotechnique</b> (de la couche 1 à la 7) :<br>
+<b>P</b>our <b>L</b>e <b>R</b>éseau, <b>T</b>out <b>S</b>e <b>P</b>asse <b>A</b>utomatiquement<br>
+<span class="muted">Physique · Liaison · Réseau · Transport · Session · Présentation · Application</span></div>
+<div class="grid">
+  <div class="card top" style="--c:#7C3AED"><span class="ico">👤</span><h3>Couches hautes (5 à 7)</h3><p>Côté <b>logiciel</b> : ce que font les applications.</p></div>
+  <div class="card top" style="--c:#0284C7"><span class="ico">🔌</span><h3>Couches basses (1 à 4)</h3><p>Côté <b>transport</b> : comment les données voyagent.</p></div>
+</div>
+  </section>
+  <section class="panel" id="encap" hidden>
+<h2>L'encapsulation, c'est comme des enveloppes</h2>
+<p>À l'envoi, chaque couche <b>ajoute son en-tête</b> autour des données. À la réception, chaque couche <b>retire</b> le sien : c'est la <b>désencapsulation</b>.</p>
+<div class="card">
+  <div class="enc" id="enc">
+    <div id="e2h" class="hide" style="background:#16A34A;border-radius:10px 0 0 10px">En-tête MAC</div>
+    <div id="e3" class="hide" style="background:#EA580C">En-tête IP</div>
+    <div id="e4" class="hide" style="background:#DB2777">En-tête TCP</div>
+    <div style="background:#7C3AED">Données (ex : page web)</div>
+    <div id="e2t" class="hide" style="background:#16A34A;border-radius:0 10px 10px 0">FCS</div>
+  </div>
+  <p id="encTxt" style="text-align:center"><b>Couche 7 :</b> l'application produit des <b>données</b>.</p>
+  <div class="btns" style="justify-content:center"><button class="btn" id="encNext">Descendre d'une couche ↓</button><button class="btn ghost" id="encReset">↻ Recommencer</button></div>
+</div>
+<div class="tbl"><table>
+<tr><th>Couche</th><th>Ce qu'on ajoute</th><th>Nom du paquet (PDU)</th></tr>
+<tr><td>7 à 5</td><td>—</td><td>Données</td></tr>
+<tr><td>4 Transport</td><td>Ports source et destination</td><td><b>Segment</b></td></tr>
+<tr><td>3 Réseau</td><td>Adresses IP source et destination</td><td><b>Paquet</b></td></tr>
+<tr><td>2 Liaison</td><td>Adresses MAC + contrôle d'erreur (FCS)</td><td><b>Trame</b></td></tr>
+<tr><td>1 Physique</td><td>Conversion en signal</td><td><b>Bits</b></td></tr>
+</table></div>
+<div class="note blue">PDU = <i>Protocol Data Unit</i>. Retiens l'ordre : <b>Données → Segment → Paquet → Trame → Bits</b>.</div>
+  </section>
+  <section class="panel" id="tcpip" hidden>
+<h2>Le modèle TCP/IP : la version réelle</h2>
+<p>OSI est un modèle <b>théorique</b> pour expliquer. Internet utilise le modèle <b>TCP/IP</b>, en 4 couches.</p>
+<div class="tbl"><table>
+<tr><th>OSI (7 couches)</th><th>TCP/IP (4 couches)</th><th>Exemples</th></tr>
+<tr><td>7 Application<br>6 Présentation<br>5 Session</td><td><span class="pill" style="--c:#7C3AED">Application</span></td><td>HTTP, DNS, SSH, SMTP</td></tr>
+<tr><td>4 Transport</td><td><span class="pill" style="--c:#DB2777">Transport</span></td><td>TCP, UDP</td></tr>
+<tr><td>3 Réseau</td><td><span class="pill" style="--c:#EA580C">Internet</span></td><td>IP, ICMP</td></tr>
+<tr><td>2 Liaison<br>1 Physique</td><td><span class="pill" style="--c:#16A34A">Accès réseau</span></td><td>Ethernet, Wi-Fi</td></tr>
+</table></div>
+<h2>Qui travaille à quelle couche ?</h2>
+<div class="grid">
+  <div class="card top" style="--c:#0284C7"><span class="ico">〰️</span><h3>Hub · couche 1</h3><p>Répète le signal à tous les ports. Obsolète.</p></div>
+  <div class="card top" style="--c:#16A34A"><span class="ico">🔀</span><h3>Switch · couche 2</h3><p>Lit les adresses <b>MAC</b> et envoie au bon port.</p></div>
+  <div class="card top" style="--c:#EA580C"><span class="ico">🌐</span><h3>Routeur · couche 3</h3><p>Lit les adresses <b>IP</b> et relie des réseaux différents.</p></div>
+  <div class="card top" style="--c:#DB2777"><span class="ico">🧱</span><h3>Pare-feu · couches 3-4 (et +)</h3><p>Filtre selon IP et <b>ports</b>, parfois selon l'application.</p></div>
+</div>
+  </section>
+  <section class="panel" id="quiz" hidden>
+<h2>Teste-toi</h2><p class="muted">9 questions. L'explication s'affiche après chaque réponse.</p><div class="quiz" id="quizBox"></div>
+  </section>
+  <footer>Cours de révision BTS SIO option SISR · bloc 1 et bloc 2 (réseaux).</footer>
+</main>
+<script>
+(function(){
+var QUIZ=[{"q": "Combien de couches compte le modèle OSI ?", "o": ["4", "5", "7"], "a": 2, "e": "7 couches, de Physique (1) à Application (7)."}, {"q": "À quelle couche se trouvent les adresses IP ?", "o": ["Couche 2 Liaison", "Couche 3 Réseau", "Couche 4 Transport"], "a": 1, "e": "L'adressage logique IP et le routage, c'est la couche 3."}, {"q": "Un switch classique travaille principalement à la couche :", "o": ["1", "2", "3"], "a": 1, "e": "Il lit les adresses MAC : couche 2 Liaison de données."}, {"q": "Le PDU de la couche Transport s'appelle :", "o": ["Trame", "Paquet", "Segment"], "a": 2, "e": "Transport = segment (avec TCP), Réseau = paquet, Liaison = trame."}, {"q": "TCP et UDP sont des protocoles de la couche :", "o": ["Transport", "Réseau", "Application"], "a": 0, "e": "Ce sont les deux protocoles de transport, couche 4."}, {"q": "Quelle couche ajoute les adresses MAC ?", "o": ["Physique", "Liaison de données", "Réseau"], "a": 1, "e": "La couche 2 encapsule le paquet dans une trame avec les adresses MAC."}, {"q": "La couche « Internet » du modèle TCP/IP correspond à quelle couche OSI ?", "o": ["Couche 3", "Couches 5 à 7", "Couche 1"], "a": 0, "e": "Internet (TCP/IP) = Réseau (OSI), c'est la couche d'IP."}, {"q": "HTTP, DNS et SSH sont des protocoles de la couche :", "o": ["Transport", "Session", "Application"], "a": 2, "e": "Ce sont des services utilisés par les applications : couche 7."}, {"q": "Quand les données descendent les couches à l'envoi, on parle :", "o": ["D'encapsulation", "De désencapsulation", "De routage"], "a": 0, "e": "Chaque couche ajoute son en-tête : c'est l'encapsulation."}];
+
+var tabs=document.getElementById('tabs');
+tabs.addEventListener('click',function(e){var t=e.target.closest('.tab');if(!t)return;
+  [].forEach.call(tabs.children,function(x){x.setAttribute('aria-selected',x===t);});
+  [].forEach.call(document.querySelectorAll('.panel'),function(p){p.hidden=p.id!==t.dataset.tab;});});
+document.addEventListener('click',function(e){var f=e.target.closest('.flip');if(f)f.classList.toggle('open');});
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var QZ=document.getElementById('quizBox'), order, qi, score, done;
+function startQuiz(){order=shuffle(QUIZ.map(function(_,i){return i;}));qi=0;score=0;renderQ();}
+function renderQ(){
+  if(qi>=order.length){var pct=Math.round(score/order.length*100);
+    QZ.innerHTML='<div class="card result"><div class="big">'+(pct>=80?'🏆':pct>=50?'👍':'📚')+'</div><h2>'+score+' / '+order.length+'</h2><p>'+(pct>=80?'Excellent, cette notion est maîtrisée !':pct>=50?'Pas mal ! Relis les points ratés et recommence.':'Relis la leçon puis retente le quiz.')+'</p><div class="btns" style="justify-content:center"><button class="btn" id="qRestart">↻ Recommencer</button></div></div>';
+    document.getElementById('qRestart').onclick=startQuiz;return;}
+  var q=QUIZ[order[qi]];done=false;
+  var opts=shuffle(q.o.map(function(t,i){return {t:t,i:i};}));
+  QZ.innerHTML='<div class="card"><div class="qhead"><b>Question '+(qi+1)+' / '+order.length+'</b><span class="muted">Score : '+score+'</span></div><div class="progress"><i style="width:'+(qi/order.length*100)+'%"></i></div><div class="qtext">'+q.q+'</div><div class="opts">'+
+    opts.map(function(o){return '<button class="opt" data-i="'+o.i+'">'+o.t+'</button>';}).join('')+'</div><div id="qAfter"></div></div>';
+  QZ.querySelector('.opts').onclick=function(e){var b=e.target.closest('.opt');if(!b||done)return;done=true;
+    var ok=+b.dataset.i===q.a;if(ok)score++;
+    [].forEach.call(this.children,function(c){if(+c.dataset.i===q.a)c.classList.add('ok');else if(c===b)c.classList.add('ko');});
+    document.getElementById('qAfter').innerHTML='<div class="expl">'+(ok?'✅ <b>Bonne réponse !</b> ':'❌ <b>Raté.</b> ')+q.e+'</div><div class="btns"><button class="btn" id="qNext">'+(qi+1<order.length?'Question suivante →':'Voir mon score')+'</button></div>';
+    document.getElementById('qNext').onclick=function(){qi++;renderQ();};};
+}
+startQuiz();
+
+
+var OSI={"7": {"name": "Application", "c": "#7C3AED", "pdu": "Données", "role": "Le service que l'utilisateur voit : le web, les mails, la résolution de noms…", "proto": "HTTP, HTTPS, DNS, DHCP, FTP, SMTP, SSH", "eq": "Proxy, pare-feu applicatif"}, "6": {"name": "Présentation", "c": "#9333EA", "pdu": "Données", "role": "Met les données dans un format commun : encodage des caractères, compression, chiffrement.", "proto": "UTF-8, JPEG, MP4, chiffrement TLS", "eq": "—"}, "5": {"name": "Session", "c": "#C026D3", "pdu": "Données", "role": "Ouvre, maintient et ferme le dialogue entre deux applications.", "proto": "NetBIOS, RPC", "eq": "—"}, "4": {"name": "Transport", "c": "#DB2777", "pdu": "Segment", "role": "Communication de bout en bout entre deux programmes, grâce aux <b>ports</b>. Gère (ou non) la fiabilité.", "proto": "TCP (fiable), UDP (rapide)", "eq": "Pare-feu (filtrage par port)"}, "3": {"name": "Réseau", "c": "#EA580C", "pdu": "Paquet", "role": "Adressage <b>logique</b> (adresses IP) et <b>routage</b> : trouver le chemin entre deux réseaux.", "proto": "IPv4, IPv6, ICMP (ping)", "eq": "Routeur, switch de niveau 3"}, "2": {"name": "Liaison de données", "c": "#16A34A", "pdu": "Trame", "role": "Communication dans le réseau local grâce aux adresses <b>MAC</b>. Détecte les erreurs de transmission.", "proto": "Ethernet, Wi-Fi (802.11), VLAN (802.1Q), ARP", "eq": "Switch, point d'accès Wi-Fi"}, "1": {"name": "Physique", "c": "#0284C7", "pdu": "Bit", "role": "Transporte les <b>bits</b> (0 et 1) sous forme de signal : électrique, lumineux ou radio.", "proto": "Câble RJ45, fibre optique, ondes radio", "eq": "Câble, hub, répéteur"}};
+var det=document.getElementById('osiDetail');
+function showL(n){var l=OSI[n];det.style.setProperty('--c',l.c);
+  det.innerHTML='<span class="pill" style="--c:'+l.c+'">Couche '+n+'</span><h2 style="margin:8px 0">'+l.name+'</h2><p>'+l.role+'</p>'+
+  '<p><b>PDU :</b> '+l.pdu+'</p><p><b>Protocoles :</b> '+l.proto+'</p><p><b>Équipements :</b> '+l.eq+'</p>';
+  [].forEach.call(document.querySelectorAll('.layer'),function(b){b.setAttribute('aria-pressed',b.dataset.l==n);});}
+document.addEventListener('click',function(e){var b=e.target.closest('.layer');if(b)showL(b.dataset.l);});
+showL(3);
+var steps=[['e4'],['e3'],['e2h','e2t'],[]],txt=['<b>Couche 4 :</b> TCP ajoute les <b>ports</b> → on obtient un <b>segment</b>.','<b>Couche 3 :</b> IP ajoute les <b>adresses IP</b> → on obtient un <b>paquet</b>.','<b>Couche 2 :</b> Ethernet ajoute les <b>adresses MAC</b> et le FCS → on obtient une <b>trame</b>.','<b>Couche 1 :</b> la trame est envoyée sous forme de <b>bits</b> sur le câble : 0101100111…'],si=0;
+document.getElementById('encNext').onclick=function(){if(si>=steps.length)return;steps[si].forEach(function(id){document.getElementById(id).classList.remove('hide');});document.getElementById('encTxt').innerHTML=txt[si];si++;if(si===steps.length)this.disabled=true;};
+document.getElementById('encReset').onclick=function(){si=0;['e4','e3','e2h','e2t'].forEach(function(id){document.getElementById(id).classList.add('hide');});document.getElementById('encTxt').innerHTML="<b>Couche 7 :</b> l'application produit des <b>données</b>.";document.getElementById('encNext').disabled=false;};
+
+})();
+</script>
+</body>
+</html>

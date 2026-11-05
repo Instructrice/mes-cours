@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Adressage IPv4 et sous-réseaux</title>
+<style>:root{--t1:#0B6E99;--t2:#14B8A6}
+:root{--bg:#F6F7FB;--card:#FFFFFF;--ink:#18202B;--muted:#5B6675;--rule:#E1E5EC;
+  --red:#C8102E;--blue:#0055A4;--yellow:#FFC20E;--green:#1E9E55;--orange:#F28C00;--purple:#7B3FC4;
+  --accent:var(--t1);--accent-soft:color-mix(in srgb,var(--t1) 12%,#fff);--good:#1E9E55;--bad:#C8102E;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;padding:0 0 24px;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+h1,h2,h3{line-height:1.2;margin:0}
+h2{font-size:1.4rem;margin:26px 0 6px}
+h3{font-size:1.05rem;margin-bottom:4px}
+p{margin:.4em 0}
+.muted{color:var(--muted)}
+.hero{background:linear-gradient(120deg,var(--t1) 0%,var(--t2) 100%);color:#fff;border-radius:0 0 22px 22px;padding:24px 0 22px;margin-bottom:14px}
+.hero .badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 12px;font-size:.82rem;font-weight:600;margin-bottom:8px}
+.hero h1{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:800;display:flex;gap:12px;align-items:center}
+.hero h1 .emo{font-size:1.3em}
+.hero p{opacity:.93;max-width:62ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+.tab{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:.95rem;cursor:pointer}
+.tab:hover{border-color:var(--accent)}
+.tab[aria-selected="true"]{background:var(--t1);border-color:var(--t1);color:#fff;font-weight:600}
+.panel[hidden]{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.grid.two{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:14px}
+.card .ico{font-size:1.9rem;line-height:1;margin-bottom:6px;display:block}
+.card.top{border-top:5px solid var(--c,var(--t1))}
+.note{border-left:4px solid var(--yellow);background:var(--card);padding:10px 14px;border-radius:8px;margin:12px 0}
+.note.red{border-color:var(--red)}.note.blue{border-color:var(--blue)}.note.green{border-color:var(--green)}
+.big{font-size:1.7rem;font-weight:800}
+ul.tight{margin:.3em 0;padding-left:1.2em} ul.tight li{margin:.2em 0}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+.steps li{counter-increment:s;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:10px 12px 10px 52px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--t1);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tbl{overflow-x:auto;margin-top:10px;border:1px solid var(--rule);border-radius:12px}
+table{border-collapse:collapse;width:100%;background:var(--card);font-size:.95rem}
+th,td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{background:var(--accent-soft);color:var(--accent)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.82rem;font-weight:700;color:#fff;background:var(--c,var(--t1))}
+.illu{width:100%;height:auto;display:block;border-radius:10px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;color:#fff;background:var(--t1)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--rule)}
+.chip{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 11px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--t1)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;cursor:pointer}
+.check:hover{background:var(--accent-soft)}
+.check input{width:20px;height:20px;accent-color:var(--good);margin-top:2px;flex:none}
+.flip{cursor:pointer}
+.flip .back{display:none;color:var(--muted);font-size:.92rem;margin-top:6px}
+.flip.open .back{display:block}
+.flip .hint{font-size:.78rem;color:var(--accent);margin-top:6px}
+.flip.open .hint{display:none}
+/* Quiz */
+.quiz{max-width:720px;margin:12px auto 0}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.progress{height:8px;background:var(--rule);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.progress i{display:block;height:100%;background:var(--t1);width:0;transition:width .3s}
+.qtext{font-size:1.15rem;font-weight:650;margin:4px 0 12px}
+.opts{display:grid;gap:8px}
+.opt{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit;cursor:pointer;text-align:left}
+.opt:hover{border-color:var(--accent)}
+.opt.ok{background:color-mix(in srgb,var(--good) 18%,var(--card));border-color:var(--good)}
+.opt.ko{background:color-mix(in srgb,var(--bad) 18%,var(--card));border-color:var(--bad)}
+.expl{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--accent-soft)}
+.result{text-align:center;padding:20px}
+.result .big{font-size:3rem}
+footer{margin-top:28px;font-size:.85rem;color:var(--muted)}
+
+code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:6px;font-size:.9em}
+.term{background:#0F1720;color:#D7E3EE;border-radius:12px;padding:12px 14px;font:14px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-x:auto;margin:10px 0;white-space:pre}
+.term .p{color:#7EE787}.term .k{color:#7D8B99}.term .o{color:#FFD479}
+.layer{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;color:#fff;background:var(--c);cursor:pointer;margin:6px 0;font-weight:600;border:0;width:100%;font:inherit;text-align:left;transition:transform .15s}
+.layer:hover{transform:translateX(4px)}
+.layer .n{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.layer .pdu{margin-left:auto;font-size:.82rem;background:rgba(0,0,0,.18);padding:2px 10px;border-radius:999px;font-weight:600}
+.layer[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:2px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:720px){.split{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px;font-size:.9rem;color:var(--muted)}
+.field input,.field select{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:10px;padding:8px 10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.out{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin-top:12px}
+.out b{color:var(--muted);font-weight:600}
+.out span{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:700}
+.bits{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.bits div{text-align:center;min-width:38px}
+.bits small{display:block;color:var(--muted);font-size:.72rem}
+.bits .b{display:block;border-radius:8px;padding:6px 0;font-weight:800;font-family:ui-monospace,monospace;background:var(--rule);color:var(--muted)}
+.bits .b.on{background:var(--t1);color:#fff}
+.enc{display:flex;align-items:stretch;justify-content:center;flex-wrap:wrap;gap:0;margin:14px 0;font-weight:700;font-size:.9rem}
+.enc div{padding:12px 10px;color:#fff;display:flex;align-items:center}
+.enc .hide{display:none}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.vs{grid-template-columns:1fr}}
+.perm{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;align-items:center;max-width:420px}
+.perm label{display:flex;justify-content:center}
+.perm input{width:22px;height:22px;accent-color:var(--t1)}
+.meter{height:12px;background:var(--rule);border-radius:99px;overflow:hidden;margin:8px 0}
+.meter i{display:block;height:100%;width:0;transition:width .3s,background .3s}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <span class="badge">BTS SIO SISR · Réseaux</span>
+  <h1><span class="emo">🔢</span>Adressage IPv4 et sous-réseaux</h1>
+  <p>Lire une adresse IP, comprendre le masque, trouver le réseau, le broadcast et le nombre d'hôtes.</p>
+</div></header>
+<main class="wrap">
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-tab="base" aria-selected="true">🔢 IP et masque</button>
+    <button class="tab" role="tab" data-tab="speciales" aria-selected="false">🏷️ Adresses spéciales</button>
+    <button class="tab" role="tab" data-tab="calcul" aria-selected="false">🧮 Calculer un sous-réseau</button>
+    <button class="tab" role="tab" data-tab="quiz" aria-selected="false">🧠 Quiz</button>
+  </nav>
+  <section class="panel" id="base">
+<h2>Une adresse IPv4 = 32 bits</h2>
+<p>Elle s'écrit en <b>4 octets</b> (4 nombres de 0 à 255) séparés par des points : <code>192.168.1.10</code></p>
+<div class="grid two">
+  <div class="card top" style="--c:#0B6E99"><span class="ico">🏠</span><h3>Partie réseau</h3><p>Identifie le <b>réseau</b> (comme le nom de la rue). Tous les PC d'un même réseau ont la même.</p></div>
+  <div class="card top" style="--c:#14B8A6"><span class="ico">🚪</span><h3>Partie hôte</h3><p>Identifie la <b>machine</b> dans ce réseau (comme le numéro de la maison).</p></div>
+</div>
+<p>C'est le <b>masque</b> qui dit où s'arrête la partie réseau. Les bits à <b>1</b> = réseau, les bits à <b>0</b> = hôte.</p>
+<div class="tbl"><table>
+<tr><th>CIDR</th><th>Masque</th><th>Adresses utilisables</th></tr>
+<tr><td>/8</td><td>255.0.0.0</td><td>16 777 214</td></tr>
+<tr><td>/16</td><td>255.255.0.0</td><td>65 534</td></tr>
+<tr><td><b>/24</b></td><td><b>255.255.255.0</b></td><td><b>254</b></td></tr>
+<tr><td>/25</td><td>255.255.255.128</td><td>126</td></tr>
+<tr><td>/26</td><td>255.255.255.192</td><td>62</td></tr>
+<tr><td>/27</td><td>255.255.255.224</td><td>30</td></tr>
+<tr><td>/28</td><td>255.255.255.240</td><td>14</td></tr>
+<tr><td>/30</td><td>255.255.255.252</td><td>2 (liaison entre 2 routeurs)</td></tr>
+</table></div>
+<h2>Convertisseur décimal → binaire</h2>
+<div class="card">
+  <div class="row"><label class="field">Nombre (0 à 255)<input id="dec" type="number" min="0" max="255" value="192"></label></div>
+  <div class="bits" id="bits"></div>
+  <p class="muted" id="bitsSum"></p>
+</div>
+<div class="note">Astuce : les poids des bits d'un octet sont <b>128 · 64 · 32 · 16 · 8 · 4 · 2 · 1</b>. Apprends-les par cœur !</div>
+  </section>
+  <section class="panel" id="speciales" hidden>
+<h2>Adresses privées (RFC 1918)</h2>
+<p>Utilisées dans les réseaux locaux, <b>jamais routées sur Internet</b>. Pour sortir, il faut le <b>NAT</b>.</p>
+<div class="grid">
+  <div class="card top" style="--c:#0B6E99"><span class="pill" style="--c:#0B6E99">Classe A</span><h3 class="mono" style="margin-top:8px">10.0.0.0/8</h3><p>10.0.0.0 → 10.255.255.255</p></div>
+  <div class="card top" style="--c:#0E9F6E"><span class="pill" style="--c:#0E9F6E">Classe B</span><h3 class="mono" style="margin-top:8px">172.16.0.0/12</h3><p>172.16.0.0 → 172.31.255.255</p></div>
+  <div class="card top" style="--c:#14B8A6"><span class="pill" style="--c:#14B8A6">Classe C</span><h3 class="mono" style="margin-top:8px">192.168.0.0/16</h3><p>192.168.0.0 → 192.168.255.255</p></div>
+</div>
+<h2>À connaître aussi</h2>
+<div class="tbl"><table>
+<tr><th>Adresse</th><th>Rôle</th></tr>
+<tr><td class="mono">127.0.0.1</td><td><b>Loopback</b> : la machine elle-même (localhost). Sert à tester.</td></tr>
+<tr><td class="mono">169.254.x.x</td><td><b>APIPA</b> : le PC n'a pas trouvé de serveur DHCP 😕</td></tr>
+<tr><td class="mono">0.0.0.0/0</td><td><b>Route par défaut</b> : « toutes les destinations ».</td></tr>
+<tr><td class="mono">255.255.255.255</td><td><b>Broadcast</b> général sur le réseau local.</td></tr>
+<tr><td>1re adresse du réseau</td><td><b>Adresse réseau</b> : identifie le réseau, pas attribuable.</td></tr>
+<tr><td>Dernière adresse</td><td><b>Broadcast</b> du réseau : envoie à tous, pas attribuable.</td></tr>
+</table></div>
+<div class="note blue"><b>Les classes A, B, C</b> sont historiques (avant 1993). Aujourd'hui on utilise la notation <b>CIDR</b> (<code>/24</code>…), mais le vocabulaire reste utilisé.</div>
+  </section>
+  <section class="panel" id="calcul" hidden>
+<h2>La méthode en 4 étapes</h2>
+<ol class="steps">
+  <li><b>Nombre d'hôtes</b> = 2<sup>(32 − CIDR)</sup> − 2 (on enlève adresse réseau et broadcast).</li>
+  <li><b>Taille du bloc</b> = 256 − valeur du masque dans l'octet « intéressant ». Ex : /26 → 256 − 192 = <b>64</b>.</li>
+  <li><b>Adresse réseau</b> = le multiple du bloc juste en dessous de l'IP. Ex : 77 → 64.</li>
+  <li><b>Broadcast</b> = adresse réseau suivante − 1. Ex : 128 − 1 = 127.</li>
+</ol>
+<div class="note green"><b>Exemple :</b> <code>192.168.10.77/26</code> → réseau <b>192.168.10.64</b>, hôtes de <b>.65 à .126</b>, broadcast <b>192.168.10.127</b>, 62 hôtes.</div>
+<h2>Calculatrice : vérifie tes exercices</h2>
+<div class="card">
+  <div class="row">
+    <label class="field">Adresse IP<input id="ip" value="192.168.10.77" inputmode="decimal"></label>
+    <label class="field">CIDR<select id="cidr"></select></label>
+  </div>
+  <div class="out" id="calcOut"></div>
+</div>
+<h2>Découper un réseau</h2>
+<p>Tu as <code>192.168.1.0/24</code> et tu veux <b>4 sous-réseaux</b> : il faut 2 bits de plus (2² = 4) → <b>/26</b>.</p>
+<div class="tbl"><table>
+<tr><th>Sous-réseau</th><th>Adresse réseau</th><th>Hôtes</th><th>Broadcast</th></tr>
+<tr><td>1</td><td class="mono">192.168.1.0/26</td><td>.1 → .62</td><td>.63</td></tr>
+<tr><td>2</td><td class="mono">192.168.1.64/26</td><td>.65 → .126</td><td>.127</td></tr>
+<tr><td>3</td><td class="mono">192.168.1.128/26</td><td>.129 → .190</td><td>.191</td></tr>
+<tr><td>4</td><td class="mono">192.168.1.192/26</td><td>.193 → .254</td><td>.255</td></tr>
+</table></div>
+  </section>
+  <section class="panel" id="quiz" hidden>
+<h2>Teste-toi</h2><p class="muted">9 questions. L'explication s'affiche après chaque réponse.</p><div class="quiz" id="quizBox"></div>
+  </section>
+  <footer>Cours de révision BTS SIO option SISR · bloc 1 et bloc 2 (réseaux).</footer>
+</main>
+<script>
+(function(){
+var QUIZ=[{"q": "Combien de bits contient une adresse IPv4 ?", "o": ["32", "64", "128"], "a": 0, "e": "4 octets de 8 bits = 32 bits. (IPv6 en a 128.)"}, {"q": "Le masque /24 s'écrit :", "o": ["255.255.0.0", "255.255.255.0", "255.255.255.255"], "a": 1, "e": "24 bits à 1 = trois octets à 255."}, {"q": "Combien d'hôtes utilisables dans un /26 ?", "o": ["64", "62", "30"], "a": 1, "e": "2⁶ − 2 = 62 (on retire réseau et broadcast)."}, {"q": "Laquelle est une adresse privée ?", "o": ["172.20.5.1", "8.8.8.8", "172.40.1.1"], "a": 0, "e": "172.16.0.0 à 172.31.255.255 est privé : 172.20 en fait partie, pas 172.40."}, {"q": "Un PC obtient l'adresse 169.254.12.3. Que se passe-t-il ?", "o": ["Il est bien configuré", "Il n'a pas reçu de réponse du serveur DHCP", "Il est sur Internet"], "a": 1, "e": "169.254.x.x = APIPA : adresse auto-attribuée faute de DHCP."}, {"q": "Quelle est l'adresse réseau de 192.168.5.200/25 ?", "o": ["192.168.5.0", "192.168.5.128", "192.168.5.192"], "a": 1, "e": "/25 → blocs de 128. 200 est dans le bloc 128-255."}, {"q": "Quel est le broadcast de 10.0.0.0/30 ?", "o": ["10.0.0.3", "10.0.0.4", "10.0.0.255"], "a": 0, "e": "/30 → blocs de 4 : 10.0.0.0 à 10.0.0.3. Hôtes .1 et .2."}, {"q": "127.0.0.1 désigne :", "o": ["La passerelle", "La machine elle-même", "Le serveur DNS"], "a": 1, "e": "C'est la boucle locale (localhost)."}, {"q": "192 en binaire s'écrit :", "o": ["11000000", "10100000", "11100000"], "a": 0, "e": "128 + 64 = 192 → 11000000."}];
+
+var tabs=document.getElementById('tabs');
+tabs.addEventListener('click',function(e){var t=e.target.closest('.tab');if(!t)return;
+  [].forEach.call(tabs.children,function(x){x.setAttribute('aria-selected',x===t);});
+  [].forEach.call(document.querySelectorAll('.panel'),function(p){p.hidden=p.id!==t.dataset.tab;});});
+document.addEventListener('click',function(e){var f=e.target.closest('.flip');if(f)f.classList.toggle('open');});
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var QZ=document.getElementById('quizBox'), order, qi, score, done;
+function startQuiz(){order=shuffle(QUIZ.map(function(_,i){return i;}));qi=0;score=0;renderQ();}
+function renderQ(){
+  if(qi>=order.length){var pct=Math.round(score/order.length*100);
+    QZ.innerHTML='<div class="card result"><div class="big">'+(pct>=80?'🏆':pct>=50?'👍':'📚')+'</div><h2>'+score+' / '+order.length+'</h2><p>'+(pct>=80?'Excellent, cette notion est maîtrisée !':pct>=50?'Pas mal ! Relis les points ratés et recommence.':'Relis la leçon puis retente le quiz.')+'</p><div class="btns" style="justify-content:center"><button class="btn" id="qRestart">↻ Recommencer</button></div></div>';
+    document.getElementById('qRestart').onclick=startQuiz;return;}
+  var q=QUIZ[order[qi]];done=false;
+  var opts=shuffle(q.o.map(function(t,i){return {t:t,i:i};}));
+  QZ.innerHTML='<div class="card"><div class="qhead"><b>Question '+(qi+1)+' / '+order.length+'</b><span class="muted">Score : '+score+'</span></div><div class="progress"><i style="width:'+(qi/order.length*100)+'%"></i></div><div class="qtext">'+q.q+'</div><div class="opts">'+
+    opts.map(function(o){return '<button class="opt" data-i="'+o.i+'">'+o.t+'</button>';}).join('')+'</div><div id="qAfter"></div></div>';
+  QZ.querySelector('.opts').onclick=function(e){var b=e.target.closest('.opt');if(!b||done)return;done=true;
+    var ok=+b.dataset.i===q.a;if(ok)score++;
+    [].forEach.call(this.children,function(c){if(+c.dataset.i===q.a)c.classList.add('ok');else if(c===b)c.classList.add('ko');});
+    document.getElementById('qAfter').innerHTML='<div class="expl">'+(ok?'✅ <b>Bonne réponse !</b> ':'❌ <b>Raté.</b> ')+q.e+'</div><div class="btns"><button class="btn" id="qNext">'+(qi+1<order.length?'Question suivante →':'Voir mon score')+'</button></div>';
+    document.getElementById('qNext').onclick=function(){qi++;renderQ();};};
+}
+startQuiz();
+
+
+var W=[128,64,32,16,8,4,2,1],dec=document.getElementById('dec');
+function bits(){var v=Math.max(0,Math.min(255,parseInt(dec.value)||0)),parts=[];
+  document.getElementById('bits').innerHTML=W.map(function(w){var on=(v&w)?1:0;if(on)parts.push(w);return '<div><small>'+w+'</small><span class="b'+(on?' on':'')+'">'+on+'</span></div>';}).join('');
+  document.getElementById('bitsSum').textContent=v+' = '+(parts.length?parts.join(' + '):'0');}
+dec.oninput=bits;bits();
+var sel=document.getElementById('cidr');
+for(var c=8;c<=30;c++){var o=document.createElement('option');o.value=c;o.textContent='/'+c;if(c===26)o.selected=true;sel.appendChild(o);}
+function toInt(s){var p=s.trim().split('.');if(p.length!==4)return null;var n=0;for(var i=0;i<4;i++){if(!/^\d{1,3}$/.test(p[i])||+p[i]>255)return null;n=n*256+(+p[i]);}return n;}
+function toIp(n){return [n>>>24,(n>>>16)&255,(n>>>8)&255,n&255].join('.');}
+function calc(){var ip=toInt(document.getElementById('ip').value),c=+sel.value,out=document.getElementById('calcOut');
+  if(ip===null){out.innerHTML='<b>⚠️</b><span>Adresse IP invalide</span>';return;}
+  var size=Math.pow(2,32-c),mask=(0xFFFFFFFF-(size-1))>>>0,net=Math.floor(ip/size)*size,bc=net+size-1;
+  out.innerHTML='<b>Masque</b><span>'+toIp(mask)+'</span><b>Adresse réseau</b><span>'+toIp(net)+'/'+c+'</span><b>1re adresse</b><span>'+toIp(net+1)+'</span><b>Dernière adresse</b><span>'+toIp(bc-1)+'</span><b>Broadcast</b><span>'+toIp(bc)+'</span><b>Hôtes utilisables</b><span>'+(size-2).toLocaleString('fr-FR')+'</span>';}
+document.getElementById('ip').oninput=calc;sel.onchange=calc;calc();
+
+})();
+</script>
+</body>
+</html>
