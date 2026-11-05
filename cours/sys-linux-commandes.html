@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Linux : les commandes essentielles</title>
+<style>:root{--t1:#6D28D9;--t2:#DB2777}
+:root{--bg:#F6F7FB;--card:#FFFFFF;--ink:#18202B;--muted:#5B6675;--rule:#E1E5EC;
+  --red:#C8102E;--blue:#0055A4;--yellow:#FFC20E;--green:#1E9E55;--orange:#F28C00;--purple:#7B3FC4;
+  --accent:var(--t1);--accent-soft:color-mix(in srgb,var(--t1) 12%,#fff);--good:#1E9E55;--bad:#C8102E;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;padding:0 0 24px;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+h1,h2,h3{line-height:1.2;margin:0}
+h2{font-size:1.4rem;margin:26px 0 6px}
+h3{font-size:1.05rem;margin-bottom:4px}
+p{margin:.4em 0}
+.muted{color:var(--muted)}
+.hero{background:linear-gradient(120deg,var(--t1) 0%,var(--t2) 100%);color:#fff;border-radius:0 0 22px 22px;padding:24px 0 22px;margin-bottom:14px}
+.hero .badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 12px;font-size:.82rem;font-weight:600;margin-bottom:8px}
+.hero h1{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:800;display:flex;gap:12px;align-items:center}
+.hero h1 .emo{font-size:1.3em}
+.hero p{opacity:.93;max-width:62ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+.tab{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:.95rem;cursor:pointer}
+.tab:hover{border-color:var(--accent)}
+.tab[aria-selected="true"]{background:var(--t1);border-color:var(--t1);color:#fff;font-weight:600}
+.panel[hidden]{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.grid.two{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:14px}
+.card .ico{font-size:1.9rem;line-height:1;margin-bottom:6px;display:block}
+.card.top{border-top:5px solid var(--c,var(--t1))}
+.note{border-left:4px solid var(--yellow);background:var(--card);padding:10px 14px;border-radius:8px;margin:12px 0}
+.note.red{border-color:var(--red)}.note.blue{border-color:var(--blue)}.note.green{border-color:var(--green)}
+.big{font-size:1.7rem;font-weight:800}
+ul.tight{margin:.3em 0;padding-left:1.2em} ul.tight li{margin:.2em 0}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+.steps li{counter-increment:s;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:10px 12px 10px 52px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--t1);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tbl{overflow-x:auto;margin-top:10px;border:1px solid var(--rule);border-radius:12px}
+table{border-collapse:collapse;width:100%;background:var(--card);font-size:.95rem}
+th,td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{background:var(--accent-soft);color:var(--accent)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.82rem;font-weight:700;color:#fff;background:var(--c,var(--t1))}
+.illu{width:100%;height:auto;display:block;border-radius:10px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;color:#fff;background:var(--t1)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--rule)}
+.chip{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 11px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--t1)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;cursor:pointer}
+.check:hover{background:var(--accent-soft)}
+.check input{width:20px;height:20px;accent-color:var(--good);margin-top:2px;flex:none}
+.flip{cursor:pointer}
+.flip .back{display:none;color:var(--muted);font-size:.92rem;margin-top:6px}
+.flip.open .back{display:block}
+.flip .hint{font-size:.78rem;color:var(--accent);margin-top:6px}
+.flip.open .hint{display:none}
+/* Quiz */
+.quiz{max-width:720px;margin:12px auto 0}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.progress{height:8px;background:var(--rule);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.progress i{display:block;height:100%;background:var(--t1);width:0;transition:width .3s}
+.qtext{font-size:1.15rem;font-weight:650;margin:4px 0 12px}
+.opts{display:grid;gap:8px}
+.opt{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit;cursor:pointer;text-align:left}
+.opt:hover{border-color:var(--accent)}
+.opt.ok{background:color-mix(in srgb,var(--good) 18%,var(--card));border-color:var(--good)}
+.opt.ko{background:color-mix(in srgb,var(--bad) 18%,var(--card));border-color:var(--bad)}
+.expl{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--accent-soft)}
+.result{text-align:center;padding:20px}
+.result .big{font-size:3rem}
+footer{margin-top:28px;font-size:.85rem;color:var(--muted)}
+
+code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:6px;font-size:.9em}
+.term{background:#0F1720;color:#D7E3EE;border-radius:12px;padding:12px 14px;font:14px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-x:auto;margin:10px 0;white-space:pre}
+.term .p{color:#7EE787}.term .k{color:#7D8B99}.term .o{color:#FFD479}
+.layer{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;color:#fff;background:var(--c);cursor:pointer;margin:6px 0;font-weight:600;border:0;width:100%;font:inherit;text-align:left;transition:transform .15s}
+.layer:hover{transform:translateX(4px)}
+.layer .n{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.layer .pdu{margin-left:auto;font-size:.82rem;background:rgba(0,0,0,.18);padding:2px 10px;border-radius:999px;font-weight:600}
+.layer[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:2px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:720px){.split{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px;font-size:.9rem;color:var(--muted)}
+.field input,.field select{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:10px;padding:8px 10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.out{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin-top:12px}
+.out b{color:var(--muted);font-weight:600}
+.out span{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:700}
+.bits{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.bits div{text-align:center;min-width:38px}
+.bits small{display:block;color:var(--muted);font-size:.72rem}
+.bits .b{display:block;border-radius:8px;padding:6px 0;font-weight:800;font-family:ui-monospace,monospace;background:var(--rule);color:var(--muted)}
+.bits .b.on{background:var(--t1);color:#fff}
+.enc{display:flex;align-items:stretch;justify-content:center;flex-wrap:wrap;gap:0;margin:14px 0;font-weight:700;font-size:.9rem}
+.enc div{padding:12px 10px;color:#fff;display:flex;align-items:center}
+.enc .hide{display:none}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.vs{grid-template-columns:1fr}}
+.perm{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;align-items:center;max-width:420px}
+.perm label{display:flex;justify-content:center}
+.perm input{width:22px;height:22px;accent-color:var(--t1)}
+.meter{height:12px;background:var(--rule);border-radius:99px;overflow:hidden;margin:8px 0}
+.meter i{display:block;height:100%;width:0;transition:width .3s,background .3s}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <span class="badge">BTS SIO SISR · Systèmes</span>
+  <h1><span class="emo">🐧</span>Linux : les commandes essentielles</h1>
+  <p>L'arborescence Linux et les commandes que tu utiliseras tous les jours sur un serveur Debian ou Ubuntu.</p>
+</div></header>
+<main class="wrap">
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-tab="arbo" aria-selected="true">🌳 Arborescence</button>
+    <button class="tab" role="tab" data-tab="cmd" aria-selected="false">⌨️ Commandes</button>
+    <button class="tab" role="tab" data-tab="pratique" aria-selected="false">🧪 En pratique</button>
+    <button class="tab" role="tab" data-tab="quiz" aria-selected="false">🧠 Quiz</button>
+  </nav>
+  <section class="panel" id="arbo">
+<h2>Tout est fichier, tout part de /</h2>
+<p>Pas de <code>C:</code> sous Linux : une seule arborescence qui commence à la <b>racine</b> <code>/</code>.</p>
+<div class="grid">
+  <div class="card"><h3 class="mono">/</h3><p>La racine : tout part d'ici</p></div>
+  <div class="card"><h3 class="mono">/home</h3><p>Dossiers des utilisateurs (/home/alice)</p></div>
+  <div class="card"><h3 class="mono">/root</h3><p>Dossier de l'administrateur root</p></div>
+  <div class="card"><h3 class="mono">/etc</h3><p>Fichiers de <b>configuration</b></p></div>
+  <div class="card"><h3 class="mono">/var/log</h3><p>Les <b>journaux</b> (logs)</p></div>
+  <div class="card"><h3 class="mono">/bin, /usr/bin</h3><p>Les programmes (commandes)</p></div>
+  <div class="card"><h3 class="mono">/tmp</h3><p>Fichiers temporaires, vidé au redémarrage</p></div>
+  <div class="card"><h3 class="mono">/dev</h3><p>Les périphériques (disques : /dev/sda)</p></div>
+</div>
+<h2>Chemins absolus et relatifs</h2>
+<div class="vs">
+  <div class="card top"><h3>Absolu</h3><p>Part de la racine : <code>/home/alice/cours</code></p></div>
+  <div class="card top" style="--c:var(--t2)"><h3>Relatif</h3><p>Part de là où je suis : <code>cours/</code>, <code>../bob</code></p></div>
+</div>
+<div class="note"><code>.</code> = dossier actuel · <code>..</code> = dossier parent · <code>~</code> = mon dossier personnel. Les fichiers qui commencent par <code>.</code> sont <b>cachés</b>.</div>
+<div class="note blue">Linux est <b>sensible à la casse</b> : <code>Fichier.txt</code> et <code>fichier.txt</code> sont deux fichiers différents.</div>
+  </section>
+  <section class="panel" id="cmd" hidden>
+<h2>📂 Se déplacer</h2><div class="tbl" style="border-top:4px solid #6D28D9"><table><tr><td><code>pwd</code></td><td>Où suis-je ?</td></tr><tr><td><code>ls -l</code></td><td>Lister en détail (ls -la : + fichiers cachés)</td></tr><tr><td><code>cd /etc</code></td><td>Aller dans /etc (cd .. : remonter, cd ~ : chez moi)</td></tr></table></div>
+<h2>📄 Fichiers</h2><div class="tbl" style="border-top:4px solid #DB2777"><table><tr><td><code>mkdir projet</code></td><td>Créer un dossier</td></tr><tr><td><code>touch notes.txt</code></td><td>Créer un fichier vide</td></tr><tr><td><code>cp a.txt b.txt</code></td><td>Copier</td></tr><tr><td><code>mv a.txt doc/</code></td><td>Déplacer ou renommer</td></tr><tr><td><code>rm fichier</code></td><td>Supprimer (rm -r : un dossier) ⚠️ pas de corbeille</td></tr></table></div>
+<h2>👀 Lire et chercher</h2><div class="tbl" style="border-top:4px solid #0EA5E9"><table><tr><td><code>cat fichier</code></td><td>Afficher le contenu</td></tr><tr><td><code>nano fichier</code></td><td>Modifier avec un éditeur simple</td></tr><tr><td><code>tail -f /var/log/syslog</code></td><td>Suivre un log en direct</td></tr><tr><td><code>grep "erreur" app.log</code></td><td>Chercher un mot dans un fichier</td></tr><tr><td><code>find / -name "*.conf"</code></td><td>Trouver des fichiers</td></tr></table></div>
+<h2>⚙️ Système</h2><div class="tbl" style="border-top:4px solid #16A34A"><table><tr><td><code>sudo commande</code></td><td>Exécuter en administrateur</td></tr><tr><td><code>apt update && apt upgrade</code></td><td>Mettre à jour (Debian/Ubuntu)</td></tr><tr><td><code>apt install apache2</code></td><td>Installer un paquet</td></tr><tr><td><code>systemctl status ssh</code></td><td>État d'un service (start, stop, restart, enable)</td></tr><tr><td><code>ps aux / top</code></td><td>Voir les processus</td></tr><tr><td><code>df -h</code></td><td>Espace disque</td></tr><tr><td><code>ip a</code></td><td>Adresses IP</td></tr></table></div>
+
+<div class="note green"><b>Astuces :</b> <kbd>Tab</kbd> complète automatiquement · <kbd>↑</kbd> rappelle la commande précédente · <code>man ls</code> affiche l'aide · <kbd>Ctrl</kbd>+<kbd>C</kbd> arrête une commande.</div>
+  </section>
+  <section class="panel" id="pratique" hidden>
+<h2>Installer un serveur web en 4 commandes</h2>
+<div class="term"><span class="p">alice@srv:~$</span> sudo apt update
+<span class="p">alice@srv:~$</span> sudo apt install apache2
+<span class="p">alice@srv:~$</span> sudo systemctl enable --now apache2
+<span class="p">alice@srv:~$</span> systemctl status apache2
+<span class="o">● apache2.service - The Apache HTTP Server
+     Active: active (running)</span></div>
+<h2>Les redirections et le pipe</h2>
+<div class="tbl"><table>
+<tr><th>Symbole</th><th>Effet</th><th>Exemple</th></tr>
+<tr><td><code>&gt;</code></td><td>Écrit la sortie dans un fichier (écrase)</td><td><code>ls &gt; liste.txt</code></td></tr>
+<tr><td><code>&gt;&gt;</code></td><td>Ajoute à la fin du fichier</td><td><code>echo "ok" &gt;&gt; log.txt</code></td></tr>
+<tr><td><code>|</code></td><td>Envoie la sortie à la commande suivante</td><td><code>ps aux | grep ssh</code></td></tr>
+</table></div>
+<h2>Se connecter à un serveur à distance</h2>
+<div class="term"><span class="p">$</span> ssh alice@192.168.1.20
+<span class="p">$</span> scp rapport.pdf alice@192.168.1.20:/home/alice/   <span class="k"># copier un fichier</span></div>
+<div class="note">Le prompt te renseigne : <code>alice@srv:~$</code> = utilisateur normal · <code>root@srv:~#</code> = <b>root</b>, attention à ce que tu tapes !</div>
+  </section>
+  <section class="panel" id="quiz" hidden>
+<h2>Teste-toi</h2><p class="muted">9 questions. L'explication s'affiche après chaque réponse.</p><div class="quiz" id="quizBox"></div>
+  </section>
+  <footer>Cours de révision BTS SIO option SISR · administration des systèmes.</footer>
+</main>
+<script>
+(function(){
+var QUIZ=[{"q": "Quelle commande affiche le dossier courant ?", "o": ["ls", "pwd", "cd"], "a": 1, "e": "pwd = print working directory."}, {"q": "Les fichiers de configuration se trouvent dans :", "o": ["/home", "/etc", "/tmp"], "a": 1, "e": "/etc contient la configuration du système et des services."}, {"q": "Pour lister aussi les fichiers cachés :", "o": ["ls -l", "ls -a", "ls -h"], "a": 1, "e": "-a (all) affiche les fichiers qui commencent par un point."}, {"q": "Quelle commande installe un paquet sous Debian ?", "o": ["apt install", "yum get", "install.exe"], "a": 0, "e": "apt install nom_du_paquet (avec sudo)."}, {"q": "Pour redémarrer le service SSH :", "o": ["systemctl restart ssh", "service-restart ssh", "reboot ssh"], "a": 0, "e": "systemctl gère les services : start, stop, restart, status, enable."}, {"q": "Que fait grep ?", "o": ["Il supprime un fichier", "Il cherche un texte dans un fichier", "Il copie un dossier"], "a": 1, "e": "grep \"mot\" fichier affiche les lignes qui contiennent le mot."}, {"q": "Les journaux système sont dans :", "o": ["/var/log", "/bin", "/dev"], "a": 0, "e": "/var/log : syslog, auth.log, les logs d'Apache…"}, {"q": "Le prompt se termine par # . Cela signifie :", "o": ["Je suis root", "Je suis un utilisateur normal", "La commande a échoué"], "a": 0, "e": "# = root, $ = utilisateur normal."}, {"q": "Que fait ps aux | grep apache ?", "o": ["Supprime Apache", "Liste les processus et ne garde que ceux contenant « apache »", "Installe Apache"], "a": 1, "e": "Le pipe | envoie la liste des processus à grep qui filtre."}];
+
+var tabs=document.getElementById('tabs');
+tabs.addEventListener('click',function(e){var t=e.target.closest('.tab');if(!t)return;
+  [].forEach.call(tabs.children,function(x){x.setAttribute('aria-selected',x===t);});
+  [].forEach.call(document.querySelectorAll('.panel'),function(p){p.hidden=p.id!==t.dataset.tab;});});
+document.addEventListener('click',function(e){var f=e.target.closest('.flip');if(f)f.classList.toggle('open');});
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var QZ=document.getElementById('quizBox'), order, qi, score, done;
+function startQuiz(){order=shuffle(QUIZ.map(function(_,i){return i;}));qi=0;score=0;renderQ();}
+function renderQ(){
+  if(qi>=order.length){var pct=Math.round(score/order.length*100);
+    QZ.innerHTML='<div class="card result"><div class="big">'+(pct>=80?'🏆':pct>=50?'👍':'📚')+'</div><h2>'+score+' / '+order.length+'</h2><p>'+(pct>=80?'Excellent, cette notion est maîtrisée !':pct>=50?'Pas mal ! Relis les points ratés et recommence.':'Relis la leçon puis retente le quiz.')+'</p><div class="btns" style="justify-content:center"><button class="btn" id="qRestart">↻ Recommencer</button></div></div>';
+    document.getElementById('qRestart').onclick=startQuiz;return;}
+  var q=QUIZ[order[qi]];done=false;
+  var opts=shuffle(q.o.map(function(t,i){return {t:t,i:i};}));
+  QZ.innerHTML='<div class="card"><div class="qhead"><b>Question '+(qi+1)+' / '+order.length+'</b><span class="muted">Score : '+score+'</span></div><div class="progress"><i style="width:'+(qi/order.length*100)+'%"></i></div><div class="qtext">'+q.q+'</div><div class="opts">'+
+    opts.map(function(o){return '<button class="opt" data-i="'+o.i+'">'+o.t+'</button>';}).join('')+'</div><div id="qAfter"></div></div>';
+  QZ.querySelector('.opts').onclick=function(e){var b=e.target.closest('.opt');if(!b||done)return;done=true;
+    var ok=+b.dataset.i===q.a;if(ok)score++;
+    [].forEach.call(this.children,function(c){if(+c.dataset.i===q.a)c.classList.add('ok');else if(c===b)c.classList.add('ko');});
+    document.getElementById('qAfter').innerHTML='<div class="expl">'+(ok?'✅ <b>Bonne réponse !</b> ':'❌ <b>Raté.</b> ')+q.e+'</div><div class="btns"><button class="btn" id="qNext">'+(qi+1<order.length?'Question suivante →':'Voir mon score')+'</button></div>';
+    document.getElementById('qNext').onclick=function(){qi++;renderQ();};};
+}
+startQuiz();
+
+
+})();
+</script>
+</body>
+</html>

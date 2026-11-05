@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ports, protocoles et diagnostic</title>
+<style>:root{--t1:#0B6E99;--t2:#14B8A6}
+:root{--bg:#F6F7FB;--card:#FFFFFF;--ink:#18202B;--muted:#5B6675;--rule:#E1E5EC;
+  --red:#C8102E;--blue:#0055A4;--yellow:#FFC20E;--green:#1E9E55;--orange:#F28C00;--purple:#7B3FC4;
+  --accent:var(--t1);--accent-soft:color-mix(in srgb,var(--t1) 12%,#fff);--good:#1E9E55;--bad:#C8102E;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;padding:0 0 24px;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+h1,h2,h3{line-height:1.2;margin:0}
+h2{font-size:1.4rem;margin:26px 0 6px}
+h3{font-size:1.05rem;margin-bottom:4px}
+p{margin:.4em 0}
+.muted{color:var(--muted)}
+.hero{background:linear-gradient(120deg,var(--t1) 0%,var(--t2) 100%);color:#fff;border-radius:0 0 22px 22px;padding:24px 0 22px;margin-bottom:14px}
+.hero .badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 12px;font-size:.82rem;font-weight:600;margin-bottom:8px}
+.hero h1{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:800;display:flex;gap:12px;align-items:center}
+.hero h1 .emo{font-size:1.3em}
+.hero p{opacity:.93;max-width:62ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+.tab{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:.95rem;cursor:pointer}
+.tab:hover{border-color:var(--accent)}
+.tab[aria-selected="true"]{background:var(--t1);border-color:var(--t1);color:#fff;font-weight:600}
+.panel[hidden]{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.grid.two{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:14px}
+.card .ico{font-size:1.9rem;line-height:1;margin-bottom:6px;display:block}
+.card.top{border-top:5px solid var(--c,var(--t1))}
+.note{border-left:4px solid var(--yellow);background:var(--card);padding:10px 14px;border-radius:8px;margin:12px 0}
+.note.red{border-color:var(--red)}.note.blue{border-color:var(--blue)}.note.green{border-color:var(--green)}
+.big{font-size:1.7rem;font-weight:800}
+ul.tight{margin:.3em 0;padding-left:1.2em} ul.tight li{margin:.2em 0}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+.steps li{counter-increment:s;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:10px 12px 10px 52px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--t1);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tbl{overflow-x:auto;margin-top:10px;border:1px solid var(--rule);border-radius:12px}
+table{border-collapse:collapse;width:100%;background:var(--card);font-size:.95rem}
+th,td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{background:var(--accent-soft);color:var(--accent)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.82rem;font-weight:700;color:#fff;background:var(--c,var(--t1))}
+.illu{width:100%;height:auto;display:block;border-radius:10px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;color:#fff;background:var(--t1)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--rule)}
+.chip{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 11px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--t1)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;cursor:pointer}
+.check:hover{background:var(--accent-soft)}
+.check input{width:20px;height:20px;accent-color:var(--good);margin-top:2px;flex:none}
+.flip{cursor:pointer}
+.flip .back{display:none;color:var(--muted);font-size:.92rem;margin-top:6px}
+.flip.open .back{display:block}
+.flip .hint{font-size:.78rem;color:var(--accent);margin-top:6px}
+.flip.open .hint{display:none}
+/* Quiz */
+.quiz{max-width:720px;margin:12px auto 0}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.progress{height:8px;background:var(--rule);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.progress i{display:block;height:100%;background:var(--t1);width:0;transition:width .3s}
+.qtext{font-size:1.15rem;font-weight:650;margin:4px 0 12px}
+.opts{display:grid;gap:8px}
+.opt{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit;cursor:pointer;text-align:left}
+.opt:hover{border-color:var(--accent)}
+.opt.ok{background:color-mix(in srgb,var(--good) 18%,var(--card));border-color:var(--good)}
+.opt.ko{background:color-mix(in srgb,var(--bad) 18%,var(--card));border-color:var(--bad)}
+.expl{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--accent-soft)}
+.result{text-align:center;padding:20px}
+.result .big{font-size:3rem}
+footer{margin-top:28px;font-size:.85rem;color:var(--muted)}
+
+code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:6px;font-size:.9em}
+.term{background:#0F1720;color:#D7E3EE;border-radius:12px;padding:12px 14px;font:14px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-x:auto;margin:10px 0;white-space:pre}
+.term .p{color:#7EE787}.term .k{color:#7D8B99}.term .o{color:#FFD479}
+.layer{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;color:#fff;background:var(--c);cursor:pointer;margin:6px 0;font-weight:600;border:0;width:100%;font:inherit;text-align:left;transition:transform .15s}
+.layer:hover{transform:translateX(4px)}
+.layer .n{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.layer .pdu{margin-left:auto;font-size:.82rem;background:rgba(0,0,0,.18);padding:2px 10px;border-radius:999px;font-weight:600}
+.layer[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:2px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:720px){.split{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px;font-size:.9rem;color:var(--muted)}
+.field input,.field select{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:10px;padding:8px 10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.out{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin-top:12px}
+.out b{color:var(--muted);font-weight:600}
+.out span{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:700}
+.bits{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.bits div{text-align:center;min-width:38px}
+.bits small{display:block;color:var(--muted);font-size:.72rem}
+.bits .b{display:block;border-radius:8px;padding:6px 0;font-weight:800;font-family:ui-monospace,monospace;background:var(--rule);color:var(--muted)}
+.bits .b.on{background:var(--t1);color:#fff}
+.enc{display:flex;align-items:stretch;justify-content:center;flex-wrap:wrap;gap:0;margin:14px 0;font-weight:700;font-size:.9rem}
+.enc div{padding:12px 10px;color:#fff;display:flex;align-items:center}
+.enc .hide{display:none}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.vs{grid-template-columns:1fr}}
+.perm{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;align-items:center;max-width:420px}
+.perm label{display:flex;justify-content:center}
+.perm input{width:22px;height:22px;accent-color:var(--t1)}
+.meter{height:12px;background:var(--rule);border-radius:99px;overflow:hidden;margin:8px 0}
+.meter i{display:block;height:100%;width:0;transition:width .3s,background .3s}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <span class="badge">BTS SIO SISR · Réseaux</span>
+  <h1><span class="emo">🔌</span>Ports, protocoles et diagnostic</h1>
+  <p>TCP ou UDP, les ports à connaître par cœur, et les commandes pour dépanner un réseau.</p>
+</div></header>
+<main class="wrap">
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-tab="tcpudp" aria-selected="true">🤝 TCP vs UDP</button>
+    <button class="tab" role="tab" data-tab="ports" aria-selected="false">🃏 Ports à connaître</button>
+    <button class="tab" role="tab" data-tab="diag" aria-selected="false">🩺 Dépanner</button>
+    <button class="tab" role="tab" data-tab="quiz" aria-selected="false">🧠 Quiz</button>
+  </nav>
+  <section class="panel" id="tcpudp">
+<h2>Deux façons de transporter les données</h2>
+<div class="vs">
+  <div class="card top" style="--c:#0B6E99"><h3>📦 TCP · le recommandé</h3><ul class="tight"><li><b>Connexion</b> établie avant l'envoi</li><li>Accusés de réception, renvoi si perte</li><li>Données remises <b>dans l'ordre</b></li><li>👉 Web, mails, SSH, transferts de fichiers</li></ul></div>
+  <div class="card top" style="--c:#F59E0B"><h3>⚡ UDP · le rapide</h3><ul class="tight"><li><b>Sans connexion</b>, on envoie direct</li><li>Pas de vérification : des pertes possibles</li><li>Très léger et rapide</li><li>👉 DNS, DHCP, vidéo en direct, jeux, VoIP</li></ul></div>
+</div>
+<h2>La poignée de main TCP (3 temps)</h2>
+<ol class="steps">
+  <li><b>SYN</b> : le client demande « On se connecte ? »</li>
+  <li><b>SYN-ACK</b> : le serveur répond « OK, et toi ? »</li>
+  <li><b>ACK</b> : le client confirme « C'est parti ! »</li>
+</ol>
+<h2>Les ports</h2>
+<p>L'IP désigne la <b>machine</b>, le port désigne le <b>service</b> sur cette machine. Un « socket » = IP + port, ex : <code>192.168.1.20:443</code>.</p>
+<div class="grid">
+  <div class="card"><span class="big">0 – 1023</span><p>Ports <b>connus</b> (services standards)</p></div>
+  <div class="card"><span class="big">1024 – 49151</span><p>Ports <b>enregistrés</b> (logiciels)</p></div>
+  <div class="card"><span class="big">49152 – 65535</span><p>Ports <b>dynamiques</b> (côté client)</p></div>
+</div>
+  </section>
+  <section class="panel" id="ports" hidden>
+<h2>Les ports incontournables</h2>
+<p class="muted">Devine le service, puis touche la carte pour vérifier.</p>
+<div class="grid">
+  <div class="card flip"><span class="pill">20/21</span><h3 style="margin-top:8px">Port 20/21</h3><div class="hint">👆 Touche pour voir</div><div class="back"><b>FTP</b> · Transfert de fichiers (non chiffré)</div></div>
+  <div class="card flip"><span class="pill">22</span><h3 style="margin-top:8px">Port 22</h3><div class="hint">👆 Touche pour voir</div><div class="back"><b>SSH</b> · Administration à distance chiffrée (+ SFTP)</div></div>
+  <div class="card flip"><span class="pill">23</span><h3 style="margin-top:8px">Port 23</h3><div class="hint">👆 Touche pour voir</div><div class="back"><b>Telnet</b> · Administration à distance NON chiffrée ⚠️</div></div>
+  <div class="card flip"><span class="pill">25</span><h3 style="margin-top:8px">Port 25</h3><div class="hint">👆 Touche pour voir</div><div class="back"><b>SMTP</b> · Envoi de mails</div></div>
+  <div class="card flip"><span class="pill">53</span><h3 style="margin-top:8px">Port 53</h3><div class="hint">👆 Touche pour voir</div><div class="back"><b>DNS</b> · Résolution de noms</div></div>
+  <div class="card flip"><span class="pill">67/68</span><h3 style="margin-top:8px">Port 67/68</h3><div class="hint">👆 Touche pour voir</div><div class="back"><b>DHCP</b> · Attribution d'adresses IP</div></div>
+  <div class="card flip"><span class="pill">80</span><h3 style="margin-top:8px">Port 80</h3><div class="hint">👆 Touche pour voir</div><div class="back"><b>HTTP</b> · Web non chiffré</div></div>
+  <div class="card flip"><span class="pill">110</span><h3 style="margin-top:8px">Port 110</h3><div class="hint">👆 Touche pour voir</div><div class="back"><b>POP3</b> · Récupérer ses mails (téléchargement)</div></div>
+  <div class="card flip"><span class="pill">123</span><h3 style="margin-top:8px">Port 123</h3><div class="hint">👆 Touche pour voir</div><div class="back"><b>NTP</b> · Synchronisation de l'heure</div></div>
+  <div class="card flip"><span class="pill">143</span><h3 style="margin-top:8px">Port 143</h3><div class="hint">👆 Touche pour voir</div><div class="back"><b>IMAP</b> · Consulter ses mails sur le serveur</div></div>
+  <div class="card flip"><span class="pill">161</span><h3 style="margin-top:8px">Port 161</h3><div class="hint">👆 Touche pour voir</div><div class="back"><b>SNMP</b> · Supervision des équipements</div></div>
+  <div class="card flip"><span class="pill">389</span><h3 style="margin-top:8px">Port 389</h3><div class="hint">👆 Touche pour voir</div><div class="back"><b>LDAP</b> · Annuaire (Active Directory)</div></div>
+  <div class="card flip"><span class="pill">443</span><h3 style="margin-top:8px">Port 443</h3><div class="hint">👆 Touche pour voir</div><div class="back"><b>HTTPS</b> · Web chiffré (TLS)</div></div>
+  <div class="card flip"><span class="pill">445</span><h3 style="margin-top:8px">Port 445</h3><div class="hint">👆 Touche pour voir</div><div class="back"><b>SMB</b> · Partage de fichiers Windows</div></div>
+  <div class="card flip"><span class="pill">514</span><h3 style="margin-top:8px">Port 514</h3><div class="hint">👆 Touche pour voir</div><div class="back"><b>Syslog</b> · Envoi des journaux (logs)</div></div>
+  <div class="card flip"><span class="pill">3389</span><h3 style="margin-top:8px">Port 3389</h3><div class="hint">👆 Touche pour voir</div><div class="back"><b>RDP</b> · Bureau à distance Windows</div></div>
+</div>
+<div class="note green"><b>Sécurité :</b> préfère toujours la version chiffrée → SSH plutôt que Telnet, HTTPS plutôt que HTTP, SFTP plutôt que FTP.</div>
+  </section>
+  <section class="panel" id="diag" hidden>
+<h2>La boîte à outils du technicien</h2>
+<div class="tbl"><table>
+<tr><th>Besoin</th><th>Windows</th><th>Linux</th></tr>
+<tr><td>Voir sa config IP</td><td><code>ipconfig /all</code></td><td><code>ip a</code></td></tr>
+<tr><td>Tester si une machine répond</td><td><code>ping 192.168.1.1</code></td><td><code>ping -c 4 192.168.1.1</code></td></tr>
+<tr><td>Voir le chemin parcouru</td><td><code>tracert 8.8.8.8</code></td><td><code>traceroute 8.8.8.8</code></td></tr>
+<tr><td>Tester le DNS</td><td><code>nslookup site.fr</code></td><td><code>dig site.fr</code></td></tr>
+<tr><td>Voir les connexions / ports ouverts</td><td><code>netstat -an</code></td><td><code>ss -tuln</code></td></tr>
+<tr><td>Voir la table ARP</td><td><code>arp -a</code></td><td><code>ip neigh</code></td></tr>
+</table></div>
+<h2>La méthode : du plus proche au plus loin</h2>
+<ol class="steps">
+  <li><code>ping 127.0.0.1</code> → la pile TCP/IP de mon PC fonctionne ?</li>
+  <li><code>ipconfig</code> → j'ai une bonne IP ? (pas de 169.254 !)</li>
+  <li><code>ping</code> de ma <b>passerelle</b> → mon réseau local fonctionne ?</li>
+  <li><code>ping 8.8.8.8</code> → je sors sur Internet ?</li>
+  <li><code>nslookup google.fr</code> → le DNS répond ?</li>
+</ol>
+<div class="note"><b>Ping</b> utilise le protocole <b>ICMP</b> (couche 3), pas de port. Un pare-feu peut le bloquer : un ping qui échoue ne prouve pas toujours que la machine est éteinte.</div>
+  </section>
+  <section class="panel" id="quiz" hidden>
+<h2>Teste-toi</h2><p class="muted">9 questions. L'explication s'affiche après chaque réponse.</p><div class="quiz" id="quizBox"></div>
+  </section>
+  <footer>Cours de révision BTS SIO option SISR · bloc 1 et bloc 2 (réseaux).</footer>
+</main>
+<script>
+(function(){
+var QUIZ=[{"q": "Quel protocole est orienté connexion et fiable ?", "o": ["UDP", "TCP", "ICMP"], "a": 1, "e": "TCP établit une connexion et vérifie la bonne réception."}, {"q": "Le DNS utilise surtout :", "o": ["UDP", "TCP uniquement", "ICMP"], "a": 0, "e": "Les requêtes DNS sont courtes : UDP est idéal (port 53)."}, {"q": "Les 3 étapes de la connexion TCP sont :", "o": ["SYN, SYN-ACK, ACK", "ACK, SYN, FIN", "DISCOVER, OFFER, ACK"], "a": 0, "e": "La poignée de main en 3 temps (three-way handshake)."}, {"q": "Le port 22 correspond à :", "o": ["Telnet", "SSH", "FTP"], "a": 1, "e": "SSH, administration à distance chiffrée."}, {"q": "Le port 443 correspond à :", "o": ["HTTP", "HTTPS", "SMTP"], "a": 1, "e": "HTTPS = HTTP chiffré avec TLS."}, {"q": "Le bureau à distance Windows (RDP) utilise le port :", "o": ["3389", "389", "445"], "a": 0, "e": "3389. (389 = LDAP, 445 = SMB.)"}, {"q": "Pourquoi éviter Telnet ?", "o": ["Il est trop lent", "Il transmet tout en clair, mots de passe compris", "Il ne marche que sous Linux"], "a": 1, "e": "Rien n'est chiffré : on utilise SSH à la place."}, {"q": "Quelle commande montre le chemin vers une destination sous Windows ?", "o": ["tracert", "ping", "arp -a"], "a": 0, "e": "tracert liste les routeurs traversés."}, {"q": "ping utilise le protocole :", "o": ["TCP", "UDP", "ICMP"], "a": 2, "e": "ICMP, au niveau 3 : il n'utilise pas de port."}];
+
+var tabs=document.getElementById('tabs');
+tabs.addEventListener('click',function(e){var t=e.target.closest('.tab');if(!t)return;
+  [].forEach.call(tabs.children,function(x){x.setAttribute('aria-selected',x===t);});
+  [].forEach.call(document.querySelectorAll('.panel'),function(p){p.hidden=p.id!==t.dataset.tab;});});
+document.addEventListener('click',function(e){var f=e.target.closest('.flip');if(f)f.classList.toggle('open');});
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var QZ=document.getElementById('quizBox'), order, qi, score, done;
+function startQuiz(){order=shuffle(QUIZ.map(function(_,i){return i;}));qi=0;score=0;renderQ();}
+function renderQ(){
+  if(qi>=order.length){var pct=Math.round(score/order.length*100);
+    QZ.innerHTML='<div class="card result"><div class="big">'+(pct>=80?'🏆':pct>=50?'👍':'📚')+'</div><h2>'+score+' / '+order.length+'</h2><p>'+(pct>=80?'Excellent, cette notion est maîtrisée !':pct>=50?'Pas mal ! Relis les points ratés et recommence.':'Relis la leçon puis retente le quiz.')+'</p><div class="btns" style="justify-content:center"><button class="btn" id="qRestart">↻ Recommencer</button></div></div>';
+    document.getElementById('qRestart').onclick=startQuiz;return;}
+  var q=QUIZ[order[qi]];done=false;
+  var opts=shuffle(q.o.map(function(t,i){return {t:t,i:i};}));
+  QZ.innerHTML='<div class="card"><div class="qhead"><b>Question '+(qi+1)+' / '+order.length+'</b><span class="muted">Score : '+score+'</span></div><div class="progress"><i style="width:'+(qi/order.length*100)+'%"></i></div><div class="qtext">'+q.q+'</div><div class="opts">'+
+    opts.map(function(o){return '<button class="opt" data-i="'+o.i+'">'+o.t+'</button>';}).join('')+'</div><div id="qAfter"></div></div>';
+  QZ.querySelector('.opts').onclick=function(e){var b=e.target.closest('.opt');if(!b||done)return;done=true;
+    var ok=+b.dataset.i===q.a;if(ok)score++;
+    [].forEach.call(this.children,function(c){if(+c.dataset.i===q.a)c.classList.add('ok');else if(c===b)c.classList.add('ko');});
+    document.getElementById('qAfter').innerHTML='<div class="expl">'+(ok?'✅ <b>Bonne réponse !</b> ':'❌ <b>Raté.</b> ')+q.e+'</div><div class="btns"><button class="btn" id="qNext">'+(qi+1<order.length?'Question suivante →':'Voir mon score')+'</button></div>';
+    document.getElementById('qNext').onclick=function(){qi++;renderQ();};};
+}
+startQuiz();
+
+
+})();
+</script>
+</body>
+</html>
