@@ -1,4 +1,4 @@
-import { esc, md, coverHtml, loadData, normalize, initTheme, youtubeId, thumbnailUrl, embedUrl, DATA_PATH } from './common.js';
+import { esc, md, loadData, normalize, initTheme, youtubeId, thumbnailUrl, embedUrl, htmlLessonFrame, DATA_PATH } from './common.js';
 
 initTheme();
 const app = document.getElementById('app');
@@ -37,7 +37,14 @@ const GitHub = {
     if (res.status === 404) return { data: { courses: [] }, sha: null };
     if (!res.ok) throw new Error(await this.error(res));
     const json = await res.json();
-    return { data: normalize(JSON.parse(fromB64(json.content))), sha: json.sha };
+    let b64 = json.content;
+    if (!b64 || json.encoding === 'none') { // fichier > 1 Mo : passer par l'API "blobs"
+      const blob = await fetch(`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/git/blobs/${json.sha}`,
+        { headers: this.headers(cfg), cache: 'no-store' });
+      if (!blob.ok) throw new Error(await this.error(blob));
+      b64 = (await blob.json()).content;
+    }
+    return { data: normalize(JSON.parse(fromB64(b64))), sha: json.sha };
   },
   async write(data, sha, message) {
     const cfg = Config.get();
@@ -225,9 +232,19 @@ function lessonForm(c, l) {
       <input name="youtube_url" value="${esc(l.youtube_url)}" data-yt-input
         placeholder="https://www.youtube.com/watch?v=… ou https://youtu.be/…"></label>
     <div class="video preview" data-yt-preview hidden></div>
-    <label>Contenu de la leçon <small class="muted">(Markdown : # titres, **gras**, listes, \`code\`, liens…)</small>
-      <textarea name="content" rows="16" class="mono" data-md-input>${esc(l.content)}</textarea></label>
-    <details><summary>Aperçu du contenu</summary><div class="prose preview-box" data-md-preview></div></details>
+    <fieldset class="format-choice">
+      <legend>Format du contenu</legend>
+      <label class="checkbox"><input type="radio" name="format" value="markdown" ${l.format !== 'html' ? 'checked' : ''}> Markdown <small class="muted">— simple et rapide</small></label>
+      <label class="checkbox"><input type="radio" name="format" value="html" ${l.format === 'html' ? 'checked' : ''}> HTML <small class="muted">— page libre avec CSS et JavaScript</small></label>
+    </fieldset>
+    <label><span data-content-label></span>
+      <textarea name="content" rows="18" class="mono" data-content-input spellcheck="false">${esc(l.content)}</textarea></label>
+    <div class="row import-row" data-html-only>
+      <label class="btn ghost file-btn">📂 Importer un fichier .html
+        <input type="file" accept=".html,.htm,text/html" data-import-html hidden></label>
+      <small class="muted">Le contenu du fichier remplace celui de la zone de texte.</small>
+    </div>
+    <details open><summary>Aperçu du contenu</summary><div class="preview-box" data-content-preview></div></details>
     <div class="row">
       <button class="btn">Enregistrer</button>
       ${isNew ? '<button class="btn ghost" name="again" value="1">Enregistrer et ajouter une autre</button>' : ''}
@@ -299,10 +316,36 @@ function initPreviews() {
     };
     ytInput.addEventListener('input', update); update();
   }
-  const mdInput = app.querySelector('[data-md-input]'), mdPreview = app.querySelector('[data-md-preview]');
-  if (mdInput) {
-    const r = () => { mdPreview.innerHTML = md(mdInput.value || '*Rien à afficher.*'); };
-    mdInput.addEventListener('input', r); r();
+  const input = app.querySelector('[data-content-input]');
+  if (input) {
+    const form = input.form, preview = app.querySelector('[data-content-preview]');
+    const label = app.querySelector('[data-content-label]');
+    let timer;
+    const format = () => form.querySelector('input[name=format]:checked')?.value || 'markdown';
+    const renderPreview = () => {
+      const html = format() === 'html';
+      label.innerHTML = html
+        ? 'Code HTML de la leçon <small class="muted">(un fragment ou une page complète avec &lt;style&gt; et &lt;script&gt;)</small>'
+        : 'Contenu de la leçon <small class="muted">(Markdown : # titres, **gras**, listes, `code`, liens… le HTML simple est aussi accepté)</small>';
+      form.querySelectorAll('[data-html-only]').forEach(el => { el.hidden = !html; });
+      preview.classList.toggle('prose', !html);
+      preview.innerHTML = !input.value.trim() ? '<p class="muted"><em>Rien à afficher.</em></p>'
+        : html ? htmlLessonFrame(input.value, 'Aperçu') : md(input.value);
+    };
+    input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(renderPreview, 400); });
+    form.querySelectorAll('input[name=format]').forEach(r => r.addEventListener('change', renderPreview));
+    form.querySelector('[data-import-html]').addEventListener('change', async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const text = await file.text();
+      input.value = text;
+      const title = form.querySelector('input[name=title]');
+      const t = text.match(/<title[^>]*>([^<]*)<\/title>/i);
+      if (!title.value.trim()) title.value = (t && t[1].trim()) || file.name.replace(/\.html?$/i, '');
+      e.target.value = '';
+      renderPreview();
+    });
+    renderPreview();
   }
 }
 
@@ -330,7 +373,7 @@ app.addEventListener('submit', async e => {
   }
   if (kind === 'lesson') {
     const c = findCourse(form.dataset.course);
-    const input = { title: v.title.trim(), youtube_url: v.youtube_url.trim(), content: v.content };
+    const input = { title: v.title.trim(), youtube_url: v.youtube_url.trim(), content: v.content, format: v.format === 'html' ? 'html' : 'markdown' };
     if (form.dataset.id) Object.assign(c.lessons.find(l => l.id === form.dataset.id), input);
     else c.lessons.push({ id: uid(), ...input });
     c.updated_at = new Date().toISOString();

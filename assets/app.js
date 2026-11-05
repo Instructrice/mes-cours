@@ -1,4 +1,4 @@
-import { esc, md, plain, coverHtml, loadData, Progress, initTheme, videoHtml, youtubeId } from './common.js';
+import { esc, md, plain, coverHtml, loadData, Progress, initTheme, videoHtml, youtubeId, lessonBodyHtml } from './common.js';
 
 initTheme();
 const app = document.getElementById('app');
@@ -61,6 +61,7 @@ function lessonListHtml(course, currentId, compact = false) {
         <span class="num">${i + 1}</span>
         <span class="lesson-title">${esc(l.title)}</span>
         ${!compact && youtubeId(l.youtube_url) ? '<span class="badge">▶ vidéo</span>' : ''}
+        ${!compact && l.format === 'html' ? '<span class="badge">HTML</span>' : ''}
         <span class="check" aria-hidden="true">✓</span>
       </a></li>`).join('')}</ol>`;
 }
@@ -114,7 +115,7 @@ function lessonPage(course, lessonId) {
       <p class="muted">Leçon ${index + 1} / ${course.lessons.length}</p>
       <h1>${esc(lesson.title)}</h1>
       ${videoHtml(lesson.youtube_url, lesson.title)}
-      <div class="prose">${md(lesson.content)}</div>
+      ${lessonBodyHtml(lesson)}
       <div class="lesson-actions">
         <button class="btn ghost ${isDone ? 'success' : ''}" type="button" data-toggle-done>
           ${isDone ? '✓ Terminée' : 'Marquer comme terminée'}</button>
