@@ -1,0 +1,44 @@
+<%- include('partials/head') %>
+<section class="hero">
+  <h1>Apprendre, à votre rythme</h1>
+  <p class="muted">Retrouvez tous vos cours, leurs vidéos et votre progression.</p>
+  <form class="search" method="get" action="/">
+    <input type="search" name="q" value="<%= q %>" placeholder="Rechercher un cours…">
+    <% if (categories.length) { %>
+      <select name="categorie" onchange="this.form.submit()">
+        <option value="">Toutes les catégories</option>
+        <% categories.forEach(c => { %><option <%= c === category ? 'selected' : '' %>><%= c %></option><% }) %>
+      </select>
+    <% } %>
+    <button class="btn">Rechercher</button>
+  </form>
+</section>
+
+<% if (!courses.length) { %>
+  <div class="empty">
+    <% if (q || category) { %>
+      <p>Aucun cours ne correspond à votre recherche. <a href="/">Tout afficher</a></p>
+    <% } else { %>
+      <p>Aucun cours publié pour l'instant.</p>
+      <p><a class="btn" href="/admin/cours/nouveau">Créer mon premier cours</a></p>
+    <% } %>
+  </div>
+<% } %>
+
+<div class="grid">
+  <% courses.forEach(course => { %>
+    <a class="card" href="/cours/<%= course.slug %>" data-course-card="<%= course.id %>" data-total="<%= course.lesson_count %>">
+      <%- include('partials/cover', { course }) %>
+      <div class="card-body">
+        <% if (course.category) { %><span class="tag"><%= course.category %></span><% } %>
+        <h2><%= course.title %></h2>
+        <p class="muted clamp"><%= course.description.replace(/[#*_`>\[\]]/g, '') %></p>
+        <div class="card-foot">
+          <span class="muted"><%= course.lesson_count %> leçon<%= course.lesson_count > 1 ? 's' : '' %></span>
+          <div class="progress small"><div class="bar"></div></div>
+        </div>
+      </div>
+    </a>
+  <% }) %>
+</div>
+<%- include('partials/foot') %>

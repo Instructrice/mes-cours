@@ -1,0 +1,23 @@
+{
+  "name": "mes-cours",
+  "version": "1.0.0",
+  "description": "Plateforme personnelle de cours : ajoutez vos cours côté admin, apprenez avec vidéos YouTube et suivi de progression.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning --env-file-if-exists=.env server.js",
+    "dev": "node --disable-warning=ExperimentalWarning --watch --env-file-if-exists=.env server.js",
+    "seed": "node --disable-warning=ExperimentalWarning --env-file-if-exists=.env scripts/seed.js",
+    "test": "node --disable-warning=ExperimentalWarning --test"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "ejs": "^7.0.2",
+    "express": "^5.3.0",
+    "express-session": "^1.19.0",
+    "marked": "^18.1.3"
+  }
+}
