@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { youtubeId, youtubeStart, embedUrl } from '../src/youtube.js';
+import { youtubeId, youtubeStart, embedUrl } from '../assets/youtube.js';
 
 test('extrait l\'ID des différents formats', () => {
   const id = 'dQw4w9WgXcQ';
