@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Permis, papiers et assurance</title>
+<style>:root{--t1:#C8102E;--t2:#F28C00}
+:root{--bg:#F6F7FB;--card:#FFFFFF;--ink:#18202B;--muted:#5B6675;--rule:#E1E5EC;
+  --red:#C8102E;--blue:#0055A4;--yellow:#FFC20E;--green:#1E9E55;--orange:#F28C00;--purple:#7B3FC4;
+  --accent:var(--t1);--accent-soft:color-mix(in srgb,var(--t1) 12%,#fff);--good:#1E9E55;--bad:#C8102E;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;padding:0 0 24px;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+h1,h2,h3{line-height:1.2;margin:0}
+h2{font-size:1.4rem;margin:26px 0 6px}
+h3{font-size:1.05rem;margin-bottom:4px}
+p{margin:.4em 0}
+.muted{color:var(--muted)}
+.hero{background:linear-gradient(120deg,var(--t1) 0%,var(--t2) 100%);color:#fff;border-radius:0 0 22px 22px;padding:24px 0 22px;margin-bottom:14px}
+.hero .badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 12px;font-size:.82rem;font-weight:600;margin-bottom:8px}
+.hero h1{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:800;display:flex;gap:12px;align-items:center}
+.hero h1 .emo{font-size:1.3em}
+.hero p{opacity:.93;max-width:62ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+.tab{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:.95rem;cursor:pointer}
+.tab:hover{border-color:var(--accent)}
+.tab[aria-selected="true"]{background:var(--t1);border-color:var(--t1);color:#fff;font-weight:600}
+.panel[hidden]{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.grid.two{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:14px}
+.card .ico{font-size:1.9rem;line-height:1;margin-bottom:6px;display:block}
+.card.top{border-top:5px solid var(--c,var(--t1))}
+.note{border-left:4px solid var(--yellow);background:var(--card);padding:10px 14px;border-radius:8px;margin:12px 0}
+.note.red{border-color:var(--red)}.note.blue{border-color:var(--blue)}.note.green{border-color:var(--green)}
+.big{font-size:1.7rem;font-weight:800}
+ul.tight{margin:.3em 0;padding-left:1.2em} ul.tight li{margin:.2em 0}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+.steps li{counter-increment:s;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:10px 12px 10px 52px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--t1);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tbl{overflow-x:auto;margin-top:10px;border:1px solid var(--rule);border-radius:12px}
+table{border-collapse:collapse;width:100%;background:var(--card);font-size:.95rem}
+th,td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{background:var(--accent-soft);color:var(--accent)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.82rem;font-weight:700;color:#fff;background:var(--c,var(--t1))}
+.illu{width:100%;height:auto;display:block;border-radius:10px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;color:#fff;background:var(--t1)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--rule)}
+.chip{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 11px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--t1)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;cursor:pointer}
+.check:hover{background:var(--accent-soft)}
+.check input{width:20px;height:20px;accent-color:var(--good);margin-top:2px;flex:none}
+.flip{cursor:pointer}
+.flip .back{display:none;color:var(--muted);font-size:.92rem;margin-top:6px}
+.flip.open .back{display:block}
+.flip .hint{font-size:.78rem;color:var(--accent);margin-top:6px}
+.flip.open .hint{display:none}
+/* Quiz */
+.quiz{max-width:720px;margin:12px auto 0}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.progress{height:8px;background:var(--rule);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.progress i{display:block;height:100%;background:var(--t1);width:0;transition:width .3s}
+.qtext{font-size:1.15rem;font-weight:650;margin:4px 0 12px}
+.opts{display:grid;gap:8px}
+.opt{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit;cursor:pointer;text-align:left}
+.opt:hover{border-color:var(--accent)}
+.opt.ok{background:color-mix(in srgb,var(--good) 18%,var(--card));border-color:var(--good)}
+.opt.ko{background:color-mix(in srgb,var(--bad) 18%,var(--card));border-color:var(--bad)}
+.expl{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--accent-soft)}
+.result{text-align:center;padding:20px}
+.result .big{font-size:3rem}
+footer{margin-top:28px;font-size:.85rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <span class="badge">Code de la route · Thème D</span>
+  <h1><span class="emo">🪪</span>Permis, papiers et assurance</h1>
+  <p>Les catégories de permis, les papiers à avoir, le contrôle technique, l'assurance, le constat amiable et les points.</p>
+</div></header>
+<main class="wrap">
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-tab="permis" aria-selected="true">🪪 Catégories</button>
+    <button class="tab" role="tab" data-tab="papiers" aria-selected="false">📄 Papiers & contrôles</button>
+    <button class="tab" role="tab" data-tab="constat" aria-selected="false">📝 Constat amiable</button>
+    <button class="tab" role="tab" data-tab="points" aria-selected="false">⭐ Récupérer ses points</button>
+    <button class="tab" role="tab" data-tab="quiz" aria-selected="false">🧠 Quiz</button>
+  </nav>
+  <section class="panel" id="permis">
+
+<h2>Les catégories de permis</h2>
+<div class="tbl"><table>
+  <thead><tr><th>Permis</th><th>Âge minimum</th><th>Ce qu'il permet de conduire</th></tr></thead>
+  <tbody>
+    <tr><td><span class="pill" style="--c:#7B3FC4">AM</span></td><td>14 ans</td><td>Cyclomoteur (scooter 50 cm³, 45 km/h max), voiturette</td></tr>
+    <tr><td><span class="pill" style="--c:#F28C00">A1</span></td><td>16 ans</td><td>Moto légère jusqu'à 125 cm³ et 11 kW</td></tr>
+    <tr><td><span class="pill" style="--c:#F28C00">A2</span></td><td>18 ans</td><td>Moto jusqu'à 35 kW</td></tr>
+    <tr><td><span class="pill" style="--c:#F28C00">A</span></td><td>20 ans (après 2 ans de A2)</td><td>Toutes les motos</td></tr>
+    <tr><td><span class="pill" style="--c:#0055A4">B</span></td><td><b>17 ans</b></td><td>Voiture jusqu'à 3,5 t et 9 places, avec une remorque de 750 kg maximum (ou plus si l'ensemble ne dépasse pas 3,5 t)</td></tr>
+    <tr><td><span class="pill" style="--c:#0055A4">B96</span></td><td>17 ans</td><td>Formation de 7 h : ensemble voiture + remorque jusqu'à 4,25 t</td></tr>
+    <tr><td><span class="pill" style="--c:#0055A4">BE</span></td><td>18 ans</td><td>Voiture + remorque lourde (au-delà)</td></tr>
+  </tbody>
+</table></div>
+<div class="grid">
+  <div class="card top"><span class="ico">👨‍👧</span><h3>Conduite accompagnée (AAC)</h3><p>Dès <b>15 ans</b>, après la formation initiale. Au moins <b>1 an</b> et <b>3 000 km</b>, avec un accompagnateur qui a le permis B depuis 5 ans. Avantage : probatoire raccourci à 2 ans.</p></div>
+  <div class="card top"><span class="ico">🔰</span><h3>Le disque « A »</h3><p>Obligatoire à l'arrière pendant toute la période probatoire.</p></div>
+  <div class="card top"><span class="ico">📝</span><h3>L'examen du code</h3><p>40 questions, il faut <b>35 bonnes réponses</b>. Valable 5 ans pour passer la conduite.</p></div>
+</div>
+
+  </section>
+  <section class="panel" id="papiers" hidden>
+
+<h2>Les papiers du véhicule</h2>
+<div class="grid">
+  <div class="card top"><span class="ico">🪪</span><h3>Permis de conduire</h3><p>Le permis au format carte bancaire a une validité de 15 ans (le titre, pas les droits). Il peut aussi être présenté sur l'application France Identité.</p></div>
+  <div class="card top"><span class="ico">📗</span><h3>Certificat d'immatriculation</h3><p>La « carte grise ». En cas de déménagement, changement d'adresse dans le <b>mois</b>. Vente : déclaration de cession dans les <b>15 jours</b>.</p></div>
+  <div class="card top" style="--c:var(--green)"><span class="ico">🛡️</span><h3>Assurance</h3><p>Obligatoire, au minimum la <b>responsabilité civile</b> (« au tiers »). Plus de vignette verte sur le pare-brise depuis avril 2024.</p></div>
+  <div class="card top" style="--c:var(--orange)"><span class="ico">🌿</span><h3>Vignette Crit'Air</h3><p>Exigée dans les zones à faibles émissions (ZFE) là où elles s'appliquent, et lors des pics de pollution.</p></div>
+</div>
+<h2>Le contrôle technique</h2>
+<ol class="steps">
+  <li>Le premier dans les <b>6 mois avant les 4 ans</b> de la voiture.</li>
+  <li>Ensuite <b>tous les 2 ans</b>.</li>
+  <li>En cas de défaillance majeure : <b>contre-visite dans les 2 mois</b>. Défaillance critique : le véhicule ne peut rouler que le jour du contrôle.</li>
+  <li>Avant de vendre une voiture de plus de 4 ans : contrôle de <b>moins de 6 mois</b>.</li>
+</ol>
+
+  </section>
+  <section class="panel" id="constat" hidden>
+
+<h2>Remplir un constat amiable</h2>
+<ol class="steps">
+  <li><b>Sécurise</b> les lieux et vérifie qu'il n'y a pas de blessé (sinon appelle le 112).</li>
+  <li>Remplissez <b>un seul constat ensemble</b> : chaque conducteur sa colonne (A ou B).</li>
+  <li>Coche les <b>cases des circonstances</b> et indique leur nombre en bas.</li>
+  <li>Fais un <b>croquis</b> clair : voies, sens, position des véhicules, panneaux.</li>
+  <li><b>Signez tous les deux.</b> Ne modifie plus rien ensuite. Si tu n'es pas d'accord, ne signe pas.</li>
+  <li>Envoie-le à ton assureur dans les <b>5 jours ouvrés</b>.</li>
+</ol>
+<div class="note">Il existe aussi un <b>e-constat</b> sur l'application officielle.</div>
+<div class="note red"><b>Délit de fuite :</b> partir sans s'arrêter après un accident coûte 6 points, jusqu'à 75 000 € d'amende et 3 ans de prison.</div>
+
+  </section>
+  <section class="panel" id="points" hidden>
+
+<h2>Comment récupérer ses points ?</h2>
+<div class="grid">
+  <div class="card top" style="--c:var(--green)"><span class="ico">⏳</span><h3>Avec le temps</h3><p>Une infraction à <b>1 point</b> : le point revient après <b>6 mois</b> sans nouvelle infraction.<br>Sinon, tous les points reviennent après <b>2 ans</b> (ou 3 ans pour les infractions graves et délits) sans nouvelle infraction.</p></div>
+  <div class="card top" style="--c:var(--blue)"><span class="ico">🎓</span><h3>Stage de sensibilisation</h3><p>2 jours, jusqu'à <b>4 points</b>, une fois par an au maximum. Obligatoire en probatoire après une infraction à 3 points ou plus.</p></div>
+  <div class="card top" style="--c:var(--red)"><span class="ico">0️⃣</span><h3>Plus de points</h3><p>Le permis est <b>invalidé</b> : il faut attendre 6 mois puis repasser le code (et la conduite si tu l'avais depuis moins de 3 ans).</p></div>
+</div>
+<p class="muted">Ton solde de points se consulte sur le site officiel <b>Mes points permis</b>.</p>
+
+  </section>
+  <section class="panel" id="quiz" hidden>
+<h2>Teste-toi</h2><p class="muted">10 questions dans le style de l'examen. L'explication s'affiche après chaque réponse.</p><div class="quiz" id="quizBox"></div>
+  </section>
+  <footer>Règles en vigueur en France en 2026, résumées pour réviser. En cas de doute, la référence officielle est securite-routiere.gouv.fr.</footer>
+</main>
+<script>
+(function(){
+var QUIZ=[{"q":"Depuis 2024, on peut passer le permis B dès :","o":["16 ans","17 ans","18 ans"],"a":1,"e":"Le permis B est accessible dès 17 ans."},{"q":"Le premier contrôle technique d'une voiture neuve a lieu :","o":["Après 2 ans","Dans les 6 mois avant ses 4 ans","Après 5 ans"],"a":1,"e":"Puis tous les 2 ans."},{"q":"Après une contre-visite exigée, j'ai :","o":["15 jours","2 mois","6 mois"],"a":1,"e":"La contre-visite doit être faite dans les 2 mois."},{"q":"L'assurance minimale obligatoire est :","o":["Tous risques","La responsabilité civile","Le vol et incendie"],"a":1,"e":"La responsabilité civile (« au tiers ») couvre les dommages causés aux autres."},{"q":"Le constat amiable doit être envoyé à l'assureur sous :","o":["24 heures","5 jours ouvrés","1 mois"],"a":1,"e":"Dans les 5 jours ouvrés."},{"q":"Après avoir signé le constat, je peux :","o":["Ajouter des remarques","Ne rien modifier","Changer le croquis"],"a":1,"e":"Une fois signé par les deux conducteurs, le constat ne se modifie plus."},{"q":"Un stage de sensibilisation permet de récupérer :","o":["2 points","4 points","12 points"],"a":1,"e":"Jusqu'à 4 points, dans la limite d'un stage par an."},{"q":"La conduite accompagnée dure au minimum :","o":["6 mois et 1 000 km","1 an et 3 000 km","2 ans et 5 000 km"],"a":1,"e":"1 an et 3 000 km minimum."},{"q":"Pour réussir l'examen du code, il faut au moins :","o":["30 bonnes réponses sur 40","35 bonnes réponses sur 40","38 bonnes réponses sur 40"],"a":1,"e":"35/40, soit 5 fautes maximum."},{"q":"Après un déménagement, je dois changer l'adresse de ma carte grise dans :","o":["Le mois","L'année","Ce n'est pas obligatoire"],"a":0,"e":"Dans le mois qui suit le déménagement."}];
+
+var tabs=document.getElementById('tabs');
+tabs.addEventListener('click',function(e){var t=e.target.closest('.tab');if(!t)return;
+  [].forEach.call(tabs.children,function(x){x.setAttribute('aria-selected',x===t);});
+  [].forEach.call(document.querySelectorAll('.panel'),function(p){p.hidden=p.id!==t.dataset.tab;});});
+document.addEventListener('click',function(e){var f=e.target.closest('.flip');if(f)f.classList.toggle('open');});
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var QZ=document.getElementById('quizBox'), order, qi, score, done;
+function startQuiz(){order=shuffle(QUIZ.map(function(_,i){return i;}));qi=0;score=0;renderQ();}
+function renderQ(){
+  if(qi>=order.length){var pct=Math.round(score/order.length*100);
+    QZ.innerHTML='<div class="card result"><div class="big">'+(pct>=80?'🏆':pct>=50?'👍':'📚')+'</div><h2>'+score+' / '+order.length+'</h2><p>'+(pct>=80?'Excellent, ce thème est maîtrisé !':pct>=50?'Pas mal ! Relis les points ratés et recommence.':'Relis la leçon puis retente le quiz.')+'</p><div class="btns" style="justify-content:center"><button class="btn" id="qRestart">↻ Recommencer</button></div></div>';
+    document.getElementById('qRestart').onclick=startQuiz;return;}
+  var q=QUIZ[order[qi]];done=false;
+  var opts=shuffle(q.o.map(function(t,i){return {t:t,i:i};}));
+  QZ.innerHTML='<div class="card"><div class="qhead"><b>Question '+(qi+1)+' / '+order.length+'</b><span class="muted">Score : '+score+'</span></div><div class="progress"><i style="width:'+(qi/order.length*100)+'%"></i></div><div class="qtext">'+q.q+'</div><div class="opts">'+
+    opts.map(function(o){return '<button class="opt" data-i="'+o.i+'">'+o.t+'</button>';}).join('')+'</div><div id="qAfter"></div></div>';
+  QZ.querySelector('.opts').onclick=function(e){var b=e.target.closest('.opt');if(!b||done)return;done=true;
+    var ok=+b.dataset.i===q.a;if(ok)score++;
+    [].forEach.call(this.children,function(c){if(+c.dataset.i===q.a)c.classList.add('ok');else if(c===b)c.classList.add('ko');});
+    document.getElementById('qAfter').innerHTML='<div class="expl">'+(ok?'✅ <b>Bonne réponse !</b> ':'❌ <b>Raté.</b> ')+q.e+'</div><div class="btns"><button class="btn" id="qNext">'+(qi+1<order.length?'Question suivante →':'Voir mon score')+'</button></div>';
+    document.getElementById('qNext').onclick=function(){qi++;renderQ();};};
+}
+startQuiz();
+
+
+})();
+</script>
+</body>
+</html>
