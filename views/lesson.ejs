@@ -1,0 +1,51 @@
+<%- include('partials/head') %>
+<div class="lesson-layout">
+  <aside class="sidebar">
+    <a href="/cours/<%= course.slug %>" class="back">← <%= course.title %></a>
+    <div class="progress small" data-course-progress="<%= course.id %>" data-total="<%= lessons.length %>"><div class="bar"></div></div>
+    <ol class="lesson-list compact">
+      <% lessons.forEach((l, i) => { %>
+        <li data-lesson="<%= l.id %>" data-course="<%= course.id %>" class="<%= l.id === lesson.id ? 'current' : '' %>">
+          <a href="/cours/<%= course.slug %>/lecon/<%= l.id %>">
+            <span class="num"><%= i + 1 %></span>
+            <span class="lesson-title"><%= l.title %></span>
+            <span class="check" aria-hidden="true">✓</span>
+          </a>
+        </li>
+      <% }) %>
+    </ol>
+  </aside>
+
+  <article class="lesson" data-current-lesson="<%= lesson.id %>" data-course="<%= course.id %>" data-slug="<%= course.slug %>">
+    <p class="muted">Leçon <%= index + 1 %> / <%= lessons.length %></p>
+    <h1><%= lesson.title %></h1>
+
+    <% const embed = embedUrl(lesson.youtube_url); %>
+    <% if (embed) { %>
+      <div class="video">
+        <iframe src="<%= embed %>" title="<%= lesson.title %>" loading="lazy"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      </div>
+    <% } %>
+
+    <div class="prose"><%- md(lesson.content) %></div>
+
+    <div class="lesson-actions">
+      <button class="btn ghost" type="button" data-toggle-done="<%= lesson.id %>" data-course="<%= course.id %>">
+        Marquer comme terminée
+      </button>
+      <% if (isAdmin) { %><a class="btn ghost" href="/admin/lecons/<%= lesson.id %>">Modifier</a><% } %>
+    </div>
+
+    <nav class="pager">
+      <% if (prev) { %><a class="btn ghost" href="/cours/<%= course.slug %>/lecon/<%= prev.id %>">← <%= prev.title %></a><% } else { %><span></span><% } %>
+      <% if (next) { %>
+        <a class="btn" data-next href="/cours/<%= course.slug %>/lecon/<%= next.id %>"><%= next.title %> →</a>
+      <% } else { %>
+        <a class="btn" href="/cours/<%= course.slug %>">Terminer le cours 🎉</a>
+      <% } %>
+    </nav>
+  </article>
+</div>
+<%- include('partials/foot') %>

@@ -1,0 +1,27 @@
+<%- include('../partials/head') %>
+<div class="page-head">
+  <h1>Mes cours</h1>
+  <a class="btn" href="/admin/cours/nouveau">+ Nouveau cours</a>
+</div>
+<% if (!courses.length) { %>
+  <div class="empty"><p>Vous n'avez encore aucun cours.</p><p><a class="btn" href="/admin/cours/nouveau">Créer un cours</a></p></div>
+<% } else { %>
+<table class="table">
+  <thead><tr><th>Cours</th><th>Catégorie</th><th>Leçons</th><th>Statut</th><th></th></tr></thead>
+  <tbody>
+  <% courses.forEach(c => { %>
+    <tr>
+      <td><a href="/admin/cours/<%= c.id %>"><strong><%= c.title %></strong></a></td>
+      <td><%= c.category || '—' %></td>
+      <td><%= c.lesson_count %></td>
+      <td><span class="status <%= c.published ? 'on' : 'off' %>"><%= c.published ? 'Publié' : 'Brouillon' %></span></td>
+      <td class="right">
+        <a href="/cours/<%= c.slug %>">Voir</a> ·
+        <a href="/admin/cours/<%= c.id %>">Modifier</a>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+<% } %>
+<%- include('../partials/foot') %>
