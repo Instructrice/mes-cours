@@ -17,36 +17,6 @@
       ],
       "updated_at": "2026-11-05T13:22:05.135Z",
       "slug": "tableau-de-karnaugh"
-    },
-    {
-      "id": "exemple",
-      "slug": "bien-demarrer",
-      "title": "Bien démarrer",
-      "category": "Tutoriel",
-      "cover_url": "",
-      "published": true,
-      "updated_at": "2026-11-05T12:00:00.000Z",
-      "description": "Un cours d'exemple pour découvrir **comment fonctionne la plateforme**. Modifiez-le ou supprimez-le depuis l'admin.",
-      "lessons": [
-        {
-          "id": "video",
-          "title": "Regarder une vidéo",
-          "youtube_url": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
-          "content": "## Bienvenue 👋\n\nChaque leçon peut contenir **une vidéo YouTube** et un **contenu en Markdown** en dessous.\n\n- Collez simplement le lien de la vidéo dans l'admin\n- Formats acceptés : `youtube.com/watch?v=…`, `youtu.be/…`, `/shorts/…`, avec ou sans `?t=90`\n\n> Astuce : utilisez les flèches ← → du clavier pour naviguer entre les leçons."
-        },
-        {
-          "id": "markdown",
-          "title": "Écrire ses notes en Markdown",
-          "youtube_url": "",
-          "content": "## Mettre en forme son cours\n\n1. Des **listes numérotées**\n2. Du texte *en italique* ou **en gras**\n3. Des [liens](https://www.markdownguide.org/basic-syntax/)\n\n```js\n// Et même du code !\nconsole.log('Bonjour');\n```\n\n| Colonne A | Colonne B |\n|-----------|-----------|\n| Tableaux  | ✅        |"
-        },
-        {
-          "id": "progression",
-          "title": "Suivre sa progression",
-          "youtube_url": "",
-          "content": "Cliquez sur **« Marquer comme terminée »** en bas de chaque leçon (ou passez à la suivante).\n\nVotre progression est enregistrée **dans votre navigateur** et s'affiche sur la page du cours et sur l'accueil."
-        }
-      ]
     }
   ]
 }
