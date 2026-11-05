@@ -175,3 +175,14 @@ details summary { cursor: pointer; color: var(--muted); margin-bottom: 8px; }
 .help { padding-left: 20px; } .help li { margin-bottom: 4px; }
 .ok-text { color: var(--success); font-weight: 600; } .error-text { color: var(--danger); font-weight: 600; }
 .panel code { background: var(--surface-2); padding: 1px 5px; border-radius: 5px; }
+
+/* ---- Leçons HTML ---- */
+iframe.html-lesson { display: block; width: 100%; height: 400px; border: 0; background: transparent; color-scheme: normal; }
+.preview-box iframe.html-lesson { height: 300px; }
+.format-choice { border: 1px solid var(--border); border-radius: 9px; padding: 8px 14px 4px; margin: 0 0 16px; }
+.format-choice legend { font-weight: 600; padding: 0 6px; }
+.format-choice label.checkbox { margin-bottom: 8px; }
+.format-choice input { width: auto; }
+.import-row { align-items: center; margin: -6px 0 16px; }
+.import-row .file-btn { margin: 0; font-weight: 600; }
+[hidden] { display: none !important; }

@@ -18,3 +18,9 @@ test('data/courses.json est valide', () => {
     }
   }
 });
+
+test('le format des leçons est connu', () => {
+  const { courses } = JSON.parse(readFileSync(new URL('../data/courses.json', import.meta.url), 'utf8'));
+  for (const c of courses) for (const l of c.lessons)
+    assert.ok(!l.format || ['markdown', 'html'].includes(l.format), `format inconnu : ${l.format}`);
+});
