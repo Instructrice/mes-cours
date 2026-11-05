@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Les premiers secours</title>
+<style>:root{--t1:#C8102E;--t2:#7A0F2A}
+:root{--bg:#F6F7FB;--card:#FFFFFF;--ink:#18202B;--muted:#5B6675;--rule:#E1E5EC;
+  --red:#C8102E;--blue:#0055A4;--yellow:#FFC20E;--green:#1E9E55;--orange:#F28C00;--purple:#7B3FC4;
+  --accent:var(--t1);--accent-soft:color-mix(in srgb,var(--t1) 12%,#fff);--good:#1E9E55;--bad:#C8102E;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;padding:0 0 24px;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+h1,h2,h3{line-height:1.2;margin:0}
+h2{font-size:1.4rem;margin:26px 0 6px}
+h3{font-size:1.05rem;margin-bottom:4px}
+p{margin:.4em 0}
+.muted{color:var(--muted)}
+.hero{background:linear-gradient(120deg,var(--t1) 0%,var(--t2) 100%);color:#fff;border-radius:0 0 22px 22px;padding:24px 0 22px;margin-bottom:14px}
+.hero .badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 12px;font-size:.82rem;font-weight:600;margin-bottom:8px}
+.hero h1{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:800;display:flex;gap:12px;align-items:center}
+.hero h1 .emo{font-size:1.3em}
+.hero p{opacity:.93;max-width:62ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+.tab{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:.95rem;cursor:pointer}
+.tab:hover{border-color:var(--accent)}
+.tab[aria-selected="true"]{background:var(--t1);border-color:var(--t1);color:#fff;font-weight:600}
+.panel[hidden]{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.grid.two{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:14px}
+.card .ico{font-size:1.9rem;line-height:1;margin-bottom:6px;display:block}
+.card.top{border-top:5px solid var(--c,var(--t1))}
+.note{border-left:4px solid var(--yellow);background:var(--card);padding:10px 14px;border-radius:8px;margin:12px 0}
+.note.red{border-color:var(--red)}.note.blue{border-color:var(--blue)}.note.green{border-color:var(--green)}
+.big{font-size:1.7rem;font-weight:800}
+ul.tight{margin:.3em 0;padding-left:1.2em} ul.tight li{margin:.2em 0}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+.steps li{counter-increment:s;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:10px 12px 10px 52px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--t1);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tbl{overflow-x:auto;margin-top:10px;border:1px solid var(--rule);border-radius:12px}
+table{border-collapse:collapse;width:100%;background:var(--card);font-size:.95rem}
+th,td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{background:var(--accent-soft);color:var(--accent)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.82rem;font-weight:700;color:#fff;background:var(--c,var(--t1))}
+.illu{width:100%;height:auto;display:block;border-radius:10px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;color:#fff;background:var(--t1)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--rule)}
+.chip{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 11px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--t1)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;cursor:pointer}
+.check:hover{background:var(--accent-soft)}
+.check input{width:20px;height:20px;accent-color:var(--good);margin-top:2px;flex:none}
+.flip{cursor:pointer}
+.flip .back{display:none;color:var(--muted);font-size:.92rem;margin-top:6px}
+.flip.open .back{display:block}
+.flip .hint{font-size:.78rem;color:var(--accent);margin-top:6px}
+.flip.open .hint{display:none}
+/* Quiz */
+.quiz{max-width:720px;margin:12px auto 0}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.progress{height:8px;background:var(--rule);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.progress i{display:block;height:100%;background:var(--t1);width:0;transition:width .3s}
+.qtext{font-size:1.15rem;font-weight:650;margin:4px 0 12px}
+.opts{display:grid;gap:8px}
+.opt{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit;cursor:pointer;text-align:left}
+.opt:hover{border-color:var(--accent)}
+.opt.ok{background:color-mix(in srgb,var(--good) 18%,var(--card));border-color:var(--good)}
+.opt.ko{background:color-mix(in srgb,var(--bad) 18%,var(--card));border-color:var(--bad)}
+.expl{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--accent-soft)}
+.result{text-align:center;padding:20px}
+.result .big{font-size:3rem}
+footer{margin-top:28px;font-size:.85rem;color:var(--muted)}
+.num{display:flex;gap:12px;align-items:center}.num b.n{font-size:1.7rem;font-weight:800;min-width:62px;text-align:center;border-radius:12px;color:#fff;padding:6px 0;background:var(--c)}</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <span class="badge">Code de la route · Thème P</span>
+  <h1><span class="emo">🚑</span>Les premiers secours</h1>
+  <p>Protéger, Alerter, Secourir : les bons gestes en cas d'accident.</p>
+</div></header>
+<main class="wrap">
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-tab="pas" aria-selected="true">🛡️ P.A.S.</button>
+    <button class="tab" role="tab" data-tab="gestes" aria-selected="false">🩹 Les gestes</button>
+    <button class="tab" role="tab" data-tab="quiz" aria-selected="false">🧠 Quiz</button>
+  </nav>
+  <section class="panel" id="pas">
+
+<h2>Les 3 réflexes : Protéger · Alerter · Secourir</h2>
+<div class="grid">
+  <div class="card top" style="--c:var(--orange)"><span class="ico">🛡️</span><h3>1. Protéger</h3><ul class="tight"><li>Gare-toi après l'accident, <b>feux de détresse</b>.</li><li><b>Gilet</b> enfilé avant de sortir.</li><li>Fais sortir les passagers du côté sûr, derrière la glissière.</li><li>Balise : triangle à au moins 30 m, ou personnes qui préviennent à 150-200 m de chaque côté.</li><li>Coupe le contact des véhicules accidentés, ne fume pas.</li></ul></div>
+  <div class="card top" style="--c:var(--blue)"><span class="ico">📞</span><h3>2. Alerter</h3><p>Donne un <b>message clair</b> :</p><ul class="tight"><li>Ton numéro de téléphone</li><li>Le <b>lieu</b> précis (route, sens, borne kilométrique)</li><li>La nature de l'accident et les risques (incendie…)</li><li>Le <b>nombre de victimes</b> et leur état</li></ul><p>Ne raccroche <b>que si on te le dit</b>.</p></div>
+  <div class="card top" style="--c:var(--green)"><span class="ico">❤️‍🩹</span><h3>3. Secourir</h3><ul class="tight"><li><b>Ne déplace pas</b> un blessé, sauf danger immédiat (feu, sur-accident).</li><li>Parle-lui, rassure-le, couvre-le.</li><li>Ne lui donne <b>rien à boire ni à manger</b>.</li><li>Ne retire <b>jamais le casque</b> d'un motard.</li></ul></div>
+</div>
+<h2>Les numéros d'urgence</h2>
+<div class="grid">
+  <div class="card num" style="--c:#0055A4"><b class="n">112</b><div><b>Urgence européenne</b><br><span class="muted">Fonctionne partout en Europe, même sans réseau de ton opérateur</span></div></div>
+  <div class="card num" style="--c:#C8102E"><b class="n">15</b><div><b>SAMU</b><br><span class="muted">Urgence médicale</span></div></div>
+  <div class="card num" style="--c:#E2231A"><b class="n">18</b><div><b>Pompiers</b><br><span class="muted">Accident, incendie, personne coincée</span></div></div>
+  <div class="card num" style="--c:#1B3F8F"><b class="n">17</b><div><b>Police, gendarmerie</b><br><span class="muted">Agression, délit de fuite</span></div></div>
+  <div class="card num" style="--c:#7B3FC4"><b class="n">114</b><div><b>Par SMS</b><br><span class="muted">Pour les personnes sourdes ou malentendantes</span></div></div>
+</div>
+
+  </section>
+  <section class="panel" id="gestes" hidden>
+
+<h2>Quelle situation ? Quel geste ?</h2>
+<p class="muted">Clique sur une situation pour voir le geste.</p>
+<div class="grid two">
+  <div class="card flip"><span class="ico">🩸</span><h3>La victime saigne abondamment</h3><div class="hint">Voir le geste</div><div class="back"><b>Appuie fort</b> directement sur la plaie avec ta main (protégée par un tissu ou un gant) et ne relâche pas. Allonge la victime et alerte. Le garrot n'est posé que si on est formé et que la compression ne suffit pas.</div></div>
+  <div class="card flip"><span class="ico">😶</span><h3>Elle ne répond pas mais respire</h3><div class="hint">Voir le geste</div><div class="back">Mets-la en <b>position latérale de sécurité (PLS)</b> pour libérer ses voies respiratoires, puis alerte et surveille sa respiration. Cas particulier : un motard casqué n'est mis sur le côté qu'en gardant tête, cou et tronc alignés.</div></div>
+  <div class="card flip"><span class="ico">💔</span><h3>Elle ne répond pas et ne respire pas</h3><div class="hint">Voir le geste</div><div class="back">C'est un <b>arrêt cardiaque</b> : alerte (112), puis <b>massage cardiaque</b> au centre de la poitrine, 100 à 120 compressions par minute, sans t'arrêter. Utilise un <b>défibrillateur</b> dès qu'il arrive : il te guide à voix haute.</div></div>
+  <div class="card flip"><span class="ico">🔥</span><h3>Elle est brûlée</h3><div class="hint">Voir le geste</div><div class="back">Refroidis la brûlure sous de l'eau tempérée pendant au moins <b>10 minutes</b>. Ne retire pas les vêtements collés à la peau.</div></div>
+  <div class="card flip"><span class="ico">🏍️</span><h3>Un motard est à terre</h3><div class="hint">Voir le geste</div><div class="back"><b>Ne retire jamais son casque</b> : tu risques d'aggraver une blessure au cou. Rassure-le, ne le bouge pas et alerte.</div></div>
+  <div class="card flip"><span class="ico">🚗🔥</span><h3>La voiture prend feu</h3><div class="hint">Voir le geste</div><div class="back">Coupe le contact, fais sortir tout le monde et éloigne-toi. Si la victime ne peut pas sortir seule et qu'il y a un danger immédiat, c'est le seul cas où on la dégage.</div></div>
+</div>
+<div class="note green">Une formation aux gestes de premiers secours (PSC1, environ 7 h) apprend tout cela en pratique. Elle est très recommandée.</div>
+
+  </section>
+  <section class="panel" id="quiz" hidden>
+<h2>Teste-toi</h2><p class="muted">9 questions dans le style de l'examen. L'explication s'affiche après chaque réponse.</p><div class="quiz" id="quizBox"></div>
+  </section>
+  <footer>Règles en vigueur en France en 2026, résumées pour réviser. En cas de doute, la référence officielle est securite-routiere.gouv.fr.</footer>
+</main>
+<script>
+(function(){
+var QUIZ=[{"q":"Dans quel ordre agir sur un accident ?","o":["Secourir, Alerter, Protéger","Protéger, Alerter, Secourir","Alerter, Protéger, Secourir"],"a":1,"e":"On protège d'abord pour éviter un sur-accident, puis on alerte et on secourt."},{"q":"Le numéro d'urgence européen est :","o":["911","112","15"],"a":1,"e":"Le 112 fonctionne dans toute l'Union européenne."},{"q":"Le 114 permet :","o":["D'appeler la police","De contacter les secours par SMS","De joindre une dépanneuse"],"a":1,"e":"Il est destiné aux personnes sourdes ou malentendantes."},{"q":"Un motard blessé est à terre. Je :","o":["Retire son casque pour qu'il respire","Laisse son casque","Retire seulement la visière"],"a":1,"e":"Retirer le casque peut aggraver une lésion de la colonne vertébrale."},{"q":"Un blessé conscient me demande à boire :","o":["Je lui donne de l'eau","Je ne lui donne rien","Je lui donne du sucre"],"a":1,"e":"Il pourrait devoir être opéré : on ne donne ni à boire ni à manger."},{"q":"La victime ne répond pas mais respire. Je la place :","o":["Sur le dos, jambes levées","En position latérale de sécurité","Assise"],"a":1,"e":"La PLS évite qu'elle s'étouffe avec sa langue ou ses vomissements."},{"q":"Face à un saignement abondant, je :","o":["Pose un garrot tout de suite","Appuie fort sur la plaie","Lave la plaie"],"a":1,"e":"La compression directe est le premier geste."},{"q":"Quand j'alerte les secours, je raccroche :","o":["Dès que j'ai donné l'adresse","Quand on me dit de raccrocher","Après 1 minute"],"a":1,"e":"Les secours peuvent avoir besoin d'informations ou te guider dans les gestes."},{"q":"Je peux déplacer un blessé :","o":["Toujours, pour le mettre à l'aise","Seulement en cas de danger immédiat (feu…)","Jamais, même s'il y a le feu"],"a":1,"e":"On ne déplace une victime que si elle est menacée par un danger immédiat."}];
+
+var tabs=document.getElementById('tabs');
+tabs.addEventListener('click',function(e){var t=e.target.closest('.tab');if(!t)return;
+  [].forEach.call(tabs.children,function(x){x.setAttribute('aria-selected',x===t);});
+  [].forEach.call(document.querySelectorAll('.panel'),function(p){p.hidden=p.id!==t.dataset.tab;});});
+document.addEventListener('click',function(e){var f=e.target.closest('.flip');if(f)f.classList.toggle('open');});
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var QZ=document.getElementById('quizBox'), order, qi, score, done;
+function startQuiz(){order=shuffle(QUIZ.map(function(_,i){return i;}));qi=0;score=0;renderQ();}
+function renderQ(){
+  if(qi>=order.length){var pct=Math.round(score/order.length*100);
+    QZ.innerHTML='<div class="card result"><div class="big">'+(pct>=80?'🏆':pct>=50?'👍':'📚')+'</div><h2>'+score+' / '+order.length+'</h2><p>'+(pct>=80?'Excellent, ce thème est maîtrisé !':pct>=50?'Pas mal ! Relis les points ratés et recommence.':'Relis la leçon puis retente le quiz.')+'</p><div class="btns" style="justify-content:center"><button class="btn" id="qRestart">↻ Recommencer</button></div></div>';
+    document.getElementById('qRestart').onclick=startQuiz;return;}
+  var q=QUIZ[order[qi]];done=false;
+  var opts=shuffle(q.o.map(function(t,i){return {t:t,i:i};}));
+  QZ.innerHTML='<div class="card"><div class="qhead"><b>Question '+(qi+1)+' / '+order.length+'</b><span class="muted">Score : '+score+'</span></div><div class="progress"><i style="width:'+(qi/order.length*100)+'%"></i></div><div class="qtext">'+q.q+'</div><div class="opts">'+
+    opts.map(function(o){return '<button class="opt" data-i="'+o.i+'">'+o.t+'</button>';}).join('')+'</div><div id="qAfter"></div></div>';
+  QZ.querySelector('.opts').onclick=function(e){var b=e.target.closest('.opt');if(!b||done)return;done=true;
+    var ok=+b.dataset.i===q.a;if(ok)score++;
+    [].forEach.call(this.children,function(c){if(+c.dataset.i===q.a)c.classList.add('ok');else if(c===b)c.classList.add('ko');});
+    document.getElementById('qAfter').innerHTML='<div class="expl">'+(ok?'✅ <b>Bonne réponse !</b> ':'❌ <b>Raté.</b> ')+q.e+'</div><div class="btns"><button class="btn" id="qNext">'+(qi+1<order.length?'Question suivante →':'Voir mon score')+'</button></div>';
+    document.getElementById('qNext').onclick=function(){qi++;renderQ();};};
+}
+startQuiz();
+
+
+})();
+</script>
+</body>
+</html>

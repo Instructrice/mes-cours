@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Les autres usagers</title>
+<style>:root{--t1:#1E9E55;--t2:#0A7B83}
+:root{--bg:#F6F7FB;--card:#FFFFFF;--ink:#18202B;--muted:#5B6675;--rule:#E1E5EC;
+  --red:#C8102E;--blue:#0055A4;--yellow:#FFC20E;--green:#1E9E55;--orange:#F28C00;--purple:#7B3FC4;
+  --accent:var(--t1);--accent-soft:color-mix(in srgb,var(--t1) 12%,#fff);--good:#1E9E55;--bad:#C8102E;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;padding:0 0 24px;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+h1,h2,h3{line-height:1.2;margin:0}
+h2{font-size:1.4rem;margin:26px 0 6px}
+h3{font-size:1.05rem;margin-bottom:4px}
+p{margin:.4em 0}
+.muted{color:var(--muted)}
+.hero{background:linear-gradient(120deg,var(--t1) 0%,var(--t2) 100%);color:#fff;border-radius:0 0 22px 22px;padding:24px 0 22px;margin-bottom:14px}
+.hero .badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 12px;font-size:.82rem;font-weight:600;margin-bottom:8px}
+.hero h1{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:800;display:flex;gap:12px;align-items:center}
+.hero h1 .emo{font-size:1.3em}
+.hero p{opacity:.93;max-width:62ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+.tab{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:.95rem;cursor:pointer}
+.tab:hover{border-color:var(--accent)}
+.tab[aria-selected="true"]{background:var(--t1);border-color:var(--t1);color:#fff;font-weight:600}
+.panel[hidden]{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.grid.two{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:14px}
+.card .ico{font-size:1.9rem;line-height:1;margin-bottom:6px;display:block}
+.card.top{border-top:5px solid var(--c,var(--t1))}
+.note{border-left:4px solid var(--yellow);background:var(--card);padding:10px 14px;border-radius:8px;margin:12px 0}
+.note.red{border-color:var(--red)}.note.blue{border-color:var(--blue)}.note.green{border-color:var(--green)}
+.big{font-size:1.7rem;font-weight:800}
+ul.tight{margin:.3em 0;padding-left:1.2em} ul.tight li{margin:.2em 0}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+.steps li{counter-increment:s;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:10px 12px 10px 52px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--t1);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tbl{overflow-x:auto;margin-top:10px;border:1px solid var(--rule);border-radius:12px}
+table{border-collapse:collapse;width:100%;background:var(--card);font-size:.95rem}
+th,td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{background:var(--accent-soft);color:var(--accent)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.82rem;font-weight:700;color:#fff;background:var(--c,var(--t1))}
+.illu{width:100%;height:auto;display:block;border-radius:10px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;color:#fff;background:var(--t1)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--rule)}
+.chip{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 11px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--t1)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;cursor:pointer}
+.check:hover{background:var(--accent-soft)}
+.check input{width:20px;height:20px;accent-color:var(--good);margin-top:2px;flex:none}
+.flip{cursor:pointer}
+.flip .back{display:none;color:var(--muted);font-size:.92rem;margin-top:6px}
+.flip.open .back{display:block}
+.flip .hint{font-size:.78rem;color:var(--accent);margin-top:6px}
+.flip.open .hint{display:none}
+/* Quiz */
+.quiz{max-width:720px;margin:12px auto 0}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.progress{height:8px;background:var(--rule);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.progress i{display:block;height:100%;background:var(--t1);width:0;transition:width .3s}
+.qtext{font-size:1.15rem;font-weight:650;margin:4px 0 12px}
+.opts{display:grid;gap:8px}
+.opt{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit;cursor:pointer;text-align:left}
+.opt:hover{border-color:var(--accent)}
+.opt.ok{background:color-mix(in srgb,var(--good) 18%,var(--card));border-color:var(--good)}
+.opt.ko{background:color-mix(in srgb,var(--bad) 18%,var(--card));border-color:var(--bad)}
+.expl{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--accent-soft)}
+.result{text-align:center;padding:20px}
+.result .big{font-size:3rem}
+footer{margin-top:28px;font-size:.85rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <span class="badge">Code de la route · Thème U</span>
+  <h1><span class="emo">🚴</span>Les autres usagers</h1>
+  <p>Piétons, cyclistes, trottinettes, motards, poids lourds, bus, tracteurs : partager la route en sécurité.</p>
+</div></header>
+<main class="wrap">
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-tab="vulnerables" aria-selected="true">🚶 Les plus fragiles</button>
+    <button class="tab" role="tab" data-tab="motards" aria-selected="false">🏍️ Deux-roues motorisés</button>
+    <button class="tab" role="tab" data-tab="gros" aria-selected="false">🚛 Poids lourds & bus</button>
+    <button class="tab" role="tab" data-tab="quiz" aria-selected="false">🧠 Quiz</button>
+  </nav>
+  <section class="panel" id="vulnerables">
+
+<h2>Les usagers vulnérables</h2>
+<p class="muted">Clique sur une carte pour voir le conseil.</p>
+<div class="grid">
+  <div class="card flip"><span class="ico">🚶</span><h3>Les piétons</h3><p>Prioritaires dès qu'ils sont engagés ou montrent l'intention de traverser.</p><div class="hint">Voir le conseil</div><div class="back">Ne pas les laisser passer : <b>6 points</b>. Attention à celui qui sort de derrière un bus ou une voiture garée.</div></div>
+  <div class="card flip"><span class="ico">🧒</span><h3>Les enfants</h3><p>Imprévisibles, petits, ils évaluent mal la vitesse.</p><div class="hint">Voir le conseil</div><div class="back">Près d'une école, d'un ballon qui roule ou d'un bus scolaire : ralentis fortement, un enfant peut suivre.</div></div>
+  <div class="card flip"><span class="ico">🧓</span><h3>Les personnes âgées</h3><p>Elles traversent plus lentement et entendent parfois mal.</p><div class="hint">Voir le conseil</div><div class="back">Sois patient, ne klaxonne pas : laisse-leur le temps de finir de traverser.</div></div>
+  <div class="card flip"><span class="ico">🦯</span><h3>Personnes aveugles</h3><p>Canne blanche ou chien guide.</p><div class="hint">Voir le conseil</div><div class="back">Elles sont <b>toujours prioritaires</b> quand elles traversent, même en dehors d'un passage piéton.</div></div>
+</div>
+<h2>Les cyclistes</h2>
+<div class="grid">
+  <div class="card top"><span class="ico">↔️</span><h3>Pour les dépasser</h3><p><b>1 m</b> en agglomération, <b>1,50 m</b> hors agglomération. Ils peuvent faire un écart (vent, trou, portière).</p></div>
+  <div class="card top"><span class="ico">🟩</span><h3>Le sas vélo</h3><p>Zone devant le feu, réservée aux vélos. Les voitures s'arrêtent <b>avant</b> la première ligne : s'arrêter dans le sas est verbalisé.</p></div>
+  <div class="card top"><span class="ico">⇅</span><h3>Double sens cyclable</h3><p>Dans une rue à sens unique, les vélos peuvent arriver <b>en face</b>. Un panonceau l'indique.</p></div>
+  <div class="card top"><span class="ico">🚪</span><h3>L'ouverture de portière</h3><p>Ouvre avec la <b>main opposée</b> (main droite pour le conducteur) : ça t'oblige à regarder derrière toi.</p></div>
+</div>
+<h2>Trottinettes électriques</h2>
+<div class="card"><ul class="tight">
+  <li>Dès <b>14 ans</b>, une seule personne, <b>25 km/h</b> au maximum.</li>
+  <li>Interdites sur le trottoir (sauf à la main), roulent sur les pistes cyclables ou la chaussée.</li>
+  <li>Écouteurs interdits, éclairage obligatoire, gilet ou équipement rétroréfléchissant la nuit hors agglomération.</li>
+</ul></div>
+
+  </section>
+  <section class="panel" id="motards" hidden>
+
+<h2>Motos et scooters</h2>
+<div class="grid">
+  <div class="card top" style="--c:var(--orange)"><span class="ico">👀</span><h3>Peu visibles</h3><p>Leur silhouette fine se cache derrière un montant de pare-brise ou dans l'<b>angle mort</b>. Regarde deux fois avant de changer de voie ou de tourner.</p></div>
+  <div class="card top" style="--c:var(--orange)"><span class="ico">⚡</span><h3>Ils arrivent vite</h3><p>On sous-estime souvent leur vitesse. Aux intersections, beaucoup d'accidents viennent d'un refus de priorité d'une voiture.</p></div>
+  <div class="card top" style="--c:var(--orange)"><span class="ico">🛑</span><h3>Distances</h3><p>Une moto peut freiner plus fort que toi : garde une bonne distance derrière elle.</p></div>
+  <div class="card top" style="--c:var(--red)"><span class="ico">🪖</span><h3>Équipement obligatoire</h3><p>Casque homologué attaché, <b>gants</b> certifiés, gilet de sécurité dans le véhicule. Le motard représente environ 2 % du trafic mais plus de 20 % des morts.</p></div>
+</div>
+
+  </section>
+  <section class="panel" id="gros" hidden>
+
+<h2>Les angles morts des poids lourds</h2>
+<svg class="illu" viewBox="0 0 520 260" role="img" aria-label="Angles morts autour d'un camion">
+  <rect width="520" height="260" fill="#3A3F47" rx="10"/>
+  <line x1="0" y1="92" x2="520" y2="92" stroke="#fff" stroke-width="2" stroke-dasharray="14 12" opacity=".5"/>
+  <g fill="#E0475B" opacity=".75">
+    <rect x="20" y="104" width="150" height="62"/>
+    <rect x="372" y="104" width="70" height="62"/>
+    <path d="M372 104 L330 40 L250 40 L300 104 Z"/>
+    <path d="M372 166 L450 252 L170 252 L260 166 Z"/>
+  </g>
+  <rect x="170" y="108" width="150" height="54" rx="3" fill="#E6E9EE"/>
+  <rect x="322" y="110" width="48" height="50" rx="6" fill="#0055A4"/>
+  <circle cx="352" cy="122" r="5" fill="#FFC20E"/>
+  <text x="245" y="140" text-anchor="middle" font-size="14" font-weight="700" fill="#333">camion →</text>
+  <g fill="#fff" font-size="13" font-weight="700" text-anchor="middle">
+    <text x="95" y="140">derrière</text>
+    <text x="407" y="140">devant</text>
+    <text x="300" y="62">à gauche</text>
+    <text x="310" y="222">à droite : le plus grand</text>
+  </g>
+  <text x="352" y="100" fill="#FFC20E" font-size="11" text-anchor="middle">chauffeur</text>
+</svg>
+<div class="grid">
+  <div class="card top" style="--c:var(--red)"><span class="ico">⚠️</span><h3>L'autocollant « Angles morts »</h3><p>Obligatoire sur les véhicules de plus de 3,5 t. <b>Si tu ne vois pas ses rétroviseurs, il ne te voit pas.</b></p></div>
+  <div class="card top"><span class="ico">↪️</span><h3>Quand il tourne</h3><p>Il se déporte d'abord du côté opposé. Ne te glisse <b>jamais à sa droite</b> à un carrefour.</p></div>
+  <div class="card top"><span class="ico">🌬️</span><h3>Le dépasser</h3><p>Plus long qu'une voiture : il faut beaucoup de place. Attention à l'appel d'air et aux projections d'eau.</p></div>
+  <div class="card top" style="--c:var(--blue)"><span class="ico">🚌</span><h3>Les bus</h3><p>En agglomération, laisse partir un bus qui quitte son arrêt. Un bus scolaire à l'arrêt, feux de détresse allumés : <b>des enfants peuvent traverser</b>.</p></div>
+  <div class="card top" style="--c:var(--green)"><span class="ico">🚜</span><h3>Les engins agricoles</h3><p>Lents, larges, ils sortent des champs sans prévenir et salissent la chaussée (boue glissante).</p></div>
+  <div class="card top" style="--c:var(--purple)"><span class="ico">🚊</span><h3>Le tramway</h3><p>Il ne peut ni dévier ni freiner court : il est <b>prioritaire</b> sauf signalisation contraire. Ne t'arrête jamais sur les rails.</p></div>
+</div>
+
+  </section>
+  <section class="panel" id="quiz" hidden>
+<h2>Teste-toi</h2><p class="muted">9 questions dans le style de l'examen. L'explication s'affiche après chaque réponse.</p><div class="quiz" id="quizBox"></div>
+  </section>
+  <footer>Règles en vigueur en France en 2026, résumées pour réviser. En cas de doute, la référence officielle est securite-routiere.gouv.fr.</footer>
+</main>
+<script>
+(function(){
+var QUIZ=[{"q":"Une personne avec une canne blanche traverse hors passage piéton :","o":["Je klaxonne pour la prévenir","Je la laisse traverser, elle est prioritaire","Je la contourne"],"a":1,"e":"Les personnes aveugles sont toujours prioritaires quand elles traversent."},{"q":"En agglomération, je dépasse un cycliste en laissant au moins :","o":["50 cm","1 m","2 m"],"a":1,"e":"1 m en agglomération, 1,50 m hors agglomération."},{"q":"Le sas vélo devant un feu rouge est :","o":["Réservé aux cyclistes","Ouvert à tous en cas de bouchon","Réservé aux bus"],"a":0,"e":"Les voitures doivent s'arrêter avant la première ligne du sas."},{"q":"Pour ouvrir ma portière de conducteur, j'utilise de préférence :","o":["La main gauche","La main droite","N'importe laquelle"],"a":1,"e":"La main droite oblige à tourner le buste et à regarder si un cycliste arrive."},{"q":"L'angle mort le plus grand d'un poids lourd se trouve :","o":["À sa gauche","À sa droite","Devant lui"],"a":1,"e":"Le côté droit, opposé au conducteur, est le moins visible. Ne jamais se placer à sa droite à un carrefour."},{"q":"Si je ne vois pas les rétroviseurs du camion devant moi :","o":["Le chauffeur me voit","Le chauffeur ne me voit pas","Je suis à bonne distance"],"a":1,"e":"Pas de rétroviseur visible = je suis dans son angle mort."},{"q":"Un bus scolaire est arrêté avec ses feux de détresse :","o":["Je le dépasse vite","Je ralentis fortement, des enfants peuvent traverser","Je klaxonne"],"a":1,"e":"Les feux de détresse signalent la montée ou la descente d'enfants."},{"q":"L'âge minimum pour conduire une trottinette électrique est :","o":["12 ans","14 ans","16 ans"],"a":1,"e":"14 ans minimum depuis 2023, vitesse limitée à 25 km/h."},{"q":"Une rue à sens unique porte le panonceau « sauf cycles » :","o":["Des vélos peuvent arriver en face","Les vélos y sont interdits","Je peux y rouler à contresens"],"a":0,"e":"C'est un double sens cyclable : les vélos peuvent circuler dans les deux sens."}];
+
+var tabs=document.getElementById('tabs');
+tabs.addEventListener('click',function(e){var t=e.target.closest('.tab');if(!t)return;
+  [].forEach.call(tabs.children,function(x){x.setAttribute('aria-selected',x===t);});
+  [].forEach.call(document.querySelectorAll('.panel'),function(p){p.hidden=p.id!==t.dataset.tab;});});
+document.addEventListener('click',function(e){var f=e.target.closest('.flip');if(f)f.classList.toggle('open');});
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var QZ=document.getElementById('quizBox'), order, qi, score, done;
+function startQuiz(){order=shuffle(QUIZ.map(function(_,i){return i;}));qi=0;score=0;renderQ();}
+function renderQ(){
+  if(qi>=order.length){var pct=Math.round(score/order.length*100);
+    QZ.innerHTML='<div class="card result"><div class="big">'+(pct>=80?'🏆':pct>=50?'👍':'📚')+'</div><h2>'+score+' / '+order.length+'</h2><p>'+(pct>=80?'Excellent, ce thème est maîtrisé !':pct>=50?'Pas mal ! Relis les points ratés et recommence.':'Relis la leçon puis retente le quiz.')+'</p><div class="btns" style="justify-content:center"><button class="btn" id="qRestart">↻ Recommencer</button></div></div>';
+    document.getElementById('qRestart').onclick=startQuiz;return;}
+  var q=QUIZ[order[qi]];done=false;
+  var opts=shuffle(q.o.map(function(t,i){return {t:t,i:i};}));
+  QZ.innerHTML='<div class="card"><div class="qhead"><b>Question '+(qi+1)+' / '+order.length+'</b><span class="muted">Score : '+score+'</span></div><div class="progress"><i style="width:'+(qi/order.length*100)+'%"></i></div><div class="qtext">'+q.q+'</div><div class="opts">'+
+    opts.map(function(o){return '<button class="opt" data-i="'+o.i+'">'+o.t+'</button>';}).join('')+'</div><div id="qAfter"></div></div>';
+  QZ.querySelector('.opts').onclick=function(e){var b=e.target.closest('.opt');if(!b||done)return;done=true;
+    var ok=+b.dataset.i===q.a;if(ok)score++;
+    [].forEach.call(this.children,function(c){if(+c.dataset.i===q.a)c.classList.add('ok');else if(c===b)c.classList.add('ko');});
+    document.getElementById('qAfter').innerHTML='<div class="expl">'+(ok?'✅ <b>Bonne réponse !</b> ':'❌ <b>Raté.</b> ')+q.e+'</div><div class="btns"><button class="btn" id="qNext">'+(qi+1<order.length?'Question suivante →':'Voir mon score')+'</button></div>';
+    document.getElementById('qNext').onclick=function(){qi++;renderQ();};};
+}
+startQuiz();
+
+
+})();
+</script>
+</body>
+</html>

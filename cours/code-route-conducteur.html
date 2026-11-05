@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le conducteur</title>
+<style>:root{--t1:#7B3FC4;--t2:#C2378F}
+:root{--bg:#F6F7FB;--card:#FFFFFF;--ink:#18202B;--muted:#5B6675;--rule:#E1E5EC;
+  --red:#C8102E;--blue:#0055A4;--yellow:#FFC20E;--green:#1E9E55;--orange:#F28C00;--purple:#7B3FC4;
+  --accent:var(--t1);--accent-soft:color-mix(in srgb,var(--t1) 12%,#fff);--good:#1E9E55;--bad:#C8102E;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;padding:0 0 24px;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+h1,h2,h3{line-height:1.2;margin:0}
+h2{font-size:1.4rem;margin:26px 0 6px}
+h3{font-size:1.05rem;margin-bottom:4px}
+p{margin:.4em 0}
+.muted{color:var(--muted)}
+.hero{background:linear-gradient(120deg,var(--t1) 0%,var(--t2) 100%);color:#fff;border-radius:0 0 22px 22px;padding:24px 0 22px;margin-bottom:14px}
+.hero .badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 12px;font-size:.82rem;font-weight:600;margin-bottom:8px}
+.hero h1{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:800;display:flex;gap:12px;align-items:center}
+.hero h1 .emo{font-size:1.3em}
+.hero p{opacity:.93;max-width:62ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+.tab{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:.95rem;cursor:pointer}
+.tab:hover{border-color:var(--accent)}
+.tab[aria-selected="true"]{background:var(--t1);border-color:var(--t1);color:#fff;font-weight:600}
+.panel[hidden]{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.grid.two{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:14px}
+.card .ico{font-size:1.9rem;line-height:1;margin-bottom:6px;display:block}
+.card.top{border-top:5px solid var(--c,var(--t1))}
+.note{border-left:4px solid var(--yellow);background:var(--card);padding:10px 14px;border-radius:8px;margin:12px 0}
+.note.red{border-color:var(--red)}.note.blue{border-color:var(--blue)}.note.green{border-color:var(--green)}
+.big{font-size:1.7rem;font-weight:800}
+ul.tight{margin:.3em 0;padding-left:1.2em} ul.tight li{margin:.2em 0}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+.steps li{counter-increment:s;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:10px 12px 10px 52px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--t1);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tbl{overflow-x:auto;margin-top:10px;border:1px solid var(--rule);border-radius:12px}
+table{border-collapse:collapse;width:100%;background:var(--card);font-size:.95rem}
+th,td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{background:var(--accent-soft);color:var(--accent)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.82rem;font-weight:700;color:#fff;background:var(--c,var(--t1))}
+.illu{width:100%;height:auto;display:block;border-radius:10px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;color:#fff;background:var(--t1)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--rule)}
+.chip{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 11px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--t1)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;cursor:pointer}
+.check:hover{background:var(--accent-soft)}
+.check input{width:20px;height:20px;accent-color:var(--good);margin-top:2px;flex:none}
+.flip{cursor:pointer}
+.flip .back{display:none;color:var(--muted);font-size:.92rem;margin-top:6px}
+.flip.open .back{display:block}
+.flip .hint{font-size:.78rem;color:var(--accent);margin-top:6px}
+.flip.open .hint{display:none}
+/* Quiz */
+.quiz{max-width:720px;margin:12px auto 0}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.progress{height:8px;background:var(--rule);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.progress i{display:block;height:100%;background:var(--t1);width:0;transition:width .3s}
+.qtext{font-size:1.15rem;font-weight:650;margin:4px 0 12px}
+.opts{display:grid;gap:8px}
+.opt{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit;cursor:pointer;text-align:left}
+.opt:hover{border-color:var(--accent)}
+.opt.ok{background:color-mix(in srgb,var(--good) 18%,var(--card));border-color:var(--good)}
+.opt.ko{background:color-mix(in srgb,var(--bad) 18%,var(--card));border-color:var(--bad)}
+.expl{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--accent-soft)}
+.result{text-align:center;padding:20px}
+.result .big{font-size:3rem}
+footer{margin-top:28px;font-size:.85rem;color:var(--muted)}
+.glass{display:flex;gap:6px;flex-wrap:wrap;font-size:1.8rem;min-height:2.2rem}
+.gauge{height:26px;border-radius:8px;background:var(--rule);overflow:hidden;position:relative;margin:8px 0}
+.gauge i{position:absolute;top:0;bottom:0;left:0;transition:width .25s}
+.gauge b{position:absolute;top:0;bottom:0;width:2px;background:#111}
+.pict{display:flex;gap:12px;align-items:center}
+.pict svg{width:70px;height:62px;flex:none}</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <span class="badge">Code de la route · Thème C</span>
+  <h1><span class="emo">🧠</span>Le conducteur</h1>
+  <p>Alcool, drogues, médicaments, fatigue, téléphone, champ de vision : tout ce qui change ta façon de conduire.</p>
+</div></header>
+<main class="wrap">
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-tab="alcool" aria-selected="true">🍷 Alcool</button>
+    <button class="tab" role="tab" data-tab="substances" aria-selected="false">💊 Drogues & médicaments</button>
+    <button class="tab" role="tab" data-tab="fatigue" aria-selected="false">😴 Fatigue & distraction</button>
+    <button class="tab" role="tab" data-tab="vision" aria-selected="false">👁️ Vision & réaction</button>
+    <button class="tab" role="tab" data-tab="quiz" aria-selected="false">🧠 Quiz</button>
+  </nav>
+  <section class="panel" id="alcool">
+
+<h2>L'alcool au volant</h2>
+<div class="grid">
+  <div class="card top"><span class="ico">⚖️</span><h3>Les limites</h3><p><b>0,5 g/L</b> de sang (0,25 mg/L d'air).<br>Permis probatoire et conducteurs de bus : <b>0,2 g/L</b>, autrement dit <b>zéro verre</b>.</p></div>
+  <div class="card top"><span class="ico">🍺🍷🥃</span><h3>Un verre « standard »</h3><p>Un demi de bière, un verre de vin, un whisky servi au bar : la même quantité d'alcool. Chacun fait monter le taux d'environ <b>0,20 à 0,25 g/L</b>.</p></div>
+  <div class="card top"><span class="ico">⏳</span><h3>L'élimination</h3><p>Le corps élimine seulement <b>0,10 à 0,15 g/L par heure</b>. Café, douche froide ou mâcher un chewing-gum ne changent <b>rien</b>.</p></div>
+  <div class="card top"><span class="ico">👁️</span><h3>Les effets</h3><p>Champ de vision réduit, réflexes plus lents, mauvaise estimation des distances et sentiment de toute-puissance.</p></div>
+</div>
+<h2>Simulateur</h2>
+<div class="card">
+  <p class="muted">Estimation pédagogique : chaque organisme est différent. Seule règle sûre : si tu bois, tu ne conduis pas.</p>
+  <label>Nombre de verres standard : <b id="nbV">2</b></label>
+  <input type="range" id="verres" min="0" max="8" value="2">
+  <div class="glass" id="glasses"></div>
+  <label>Heures écoulées depuis le dernier verre : <b id="nbH">1</b> h</label>
+  <input type="range" id="heures" min="0" max="12" value="1">
+  <div class="gauge"><i id="gFill"></i><b style="left:10%" title="0,2 g/L"></b><b style="left:25%" title="0,5 g/L"></b></div>
+  <div class="muted" style="font-size:.82rem;display:flex;justify-content:space-between"><span>0</span><span>0,2</span><span>0,5</span><span>1</span><span>2 g/L</span></div>
+  <p id="alcRes" style="margin-top:10px"></p>
+</div>
+<div class="note red"><b>Sanctions :</b> de 0,5 à 0,8 g/L : 6 points et 135 €. À partir de 0,8 g/L c'est un <b>délit</b> : 6 points, jusqu'à 4 500 € et 2 ans de prison, suspension du permis. Le juge peut imposer un éthylotest anti-démarrage.</div>
+
+  </section>
+  <section class="panel" id="substances" hidden>
+
+<h2>Les médicaments : 3 pictogrammes</h2>
+<p class="muted">Ils figurent sur la boîte des médicaments qui peuvent gêner la conduite.</p>
+<div class="grid">
+  <div class="card pict"><svg viewBox="0 0 70 62"><path d="M35 3 L67 58 L3 58 Z" fill="#FFD400" stroke="#111" stroke-width="3"/><text x="35" y="52" font-size="24" font-weight="800" text-anchor="middle" fill="#111">1</text><text x="35" y="34" font-size="14" text-anchor="middle">🚗</text></svg><div><b>Niveau 1, jaune</b><br>« Soyez <b>prudent</b> » : lis la notice avant de conduire.</div></div>
+  <div class="card pict"><svg viewBox="0 0 70 62"><path d="M35 3 L67 58 L3 58 Z" fill="#F28C00" stroke="#111" stroke-width="3"/><text x="35" y="52" font-size="24" font-weight="800" text-anchor="middle" fill="#111">2</text><text x="35" y="34" font-size="14" text-anchor="middle">🚗</text></svg><div><b>Niveau 2, orange</b><br>« Soyez <b>très prudent</b> » : demande l'avis d'un médecin ou d'un pharmacien.</div></div>
+  <div class="card pict"><svg viewBox="0 0 70 62"><path d="M35 3 L67 58 L3 58 Z" fill="#E2231A" stroke="#111" stroke-width="3"/><text x="35" y="52" font-size="24" font-weight="800" text-anchor="middle" fill="#fff">3</text><text x="35" y="34" font-size="14" text-anchor="middle">🚗</text></svg><div><b>Niveau 3, rouge</b><br>« <b>Ne conduis pas</b> » : la conduite est déconseillée pendant le traitement.</div></div>
+</div>
+<h2>Les drogues</h2>
+<div class="grid">
+  <div class="card top" style="--c:var(--red)"><span class="ico">🚫</span><h3>Tolérance zéro</h3><p>Une seule trace détectée par un test salivaire et c'est un <b>délit</b>, même si tu as consommé plusieurs jours avant.</p></div>
+  <div class="card top" style="--c:var(--red)"><span class="ico">⚠️</span><h3>Alcool + cannabis</h3><p>Le risque d'accident mortel est multiplié par <b>29</b> environ. Les effets s'additionnent.</p></div>
+  <div class="card top" style="--c:var(--orange)"><span class="ico">⚖️</span><h3>Sanctions</h3><p>6 points, jusqu'à 4 500 € et 2 ans de prison. Jusqu'à 9 000 € et 3 ans en cas d'alcool en plus.</p></div>
+</div>
+
+  </section>
+  <section class="panel" id="fatigue" hidden>
+
+<h2>La fatigue</h2>
+<div class="grid">
+  <div class="card top"><span class="ico">🥱</span><h3>Les signes</h3><ul class="tight"><li>Bâillements, paupières lourdes</li><li>Raideur dans la nuque, besoin de bouger</li><li>Tu ne te souviens plus des derniers kilomètres</li><li>Trajectoire qui dévie</li></ul></div>
+  <div class="card top" style="--c:var(--green)"><span class="ico">⏱️</span><h3>La règle des 2 heures</h3><p>Une pause d'au moins <b>15 minutes toutes les 2 heures</b>. Au premier signe de fatigue, arrête-toi et fais une sieste de 15 à 20 minutes.</p></div>
+  <div class="card top" style="--c:var(--red)"><span class="ico">🌙</span><h3>Les heures à risque</h3><p>Entre <b>2 h et 5 h</b> du matin et en début d'après-midi (13 h-15 h), le corps veut dormir.</p></div>
+</div>
+<h2>Les distractions</h2>
+<div class="grid">
+  <div class="card top" style="--c:var(--red)"><span class="ico">📱</span><h3>Le téléphone</h3><p>Le tenir en main : 3 points et 135 €. Les <b>écouteurs et oreillettes sont interdits</b> eux aussi. Seul un kit intégré au véhicule est toléré, mais il distrait autant.</p></div>
+  <div class="card top" style="--c:var(--red)"><span class="ico">💬</span><h3>Écrire un message</h3><p>Pendant les ~5 secondes où l'on regarde un SMS à 90 km/h, on parcourt <b>plus de 120 m</b> les yeux fermés sur la route.</p></div>
+  <div class="card top"><span class="ico">📺</span><h3>Écrans</h3><p>Un écran qui n'aide pas à la conduite (vidéo…) est interdit dans le champ de vision du conducteur : 1 500 € et 3 points.</p></div>
+  <div class="card top"><span class="ico">😡</span><h3>Les émotions</h3><p>Colère, stress, euphorie : on prend plus de risques. Respire, et laisse partir le conducteur agressif.</p></div>
+</div>
+
+  </section>
+  <section class="panel" id="vision" hidden>
+
+<h2>Plus tu vas vite, moins tu vois</h2>
+<div class="card">
+  <label>Vitesse : <b id="visV">90</b> km/h</label>
+  <input type="range" id="visR" min="0" max="130" step="10" value="90">
+  <svg class="illu" viewBox="0 0 400 220" id="visSvg" style="max-width:520px;margin:10px auto 0">
+    <rect width="400" height="220" fill="#7DBA6A" rx="10"/>
+    <path id="cone" fill="rgba(255,235,120,.75)"/>
+    <rect x="186" y="186" width="28" height="30" rx="5" fill="#0055A4"/>
+    <text x="200" y="22" text-anchor="middle" font-size="16" font-weight="700" fill="#fff" id="visDeg"></text>
+  </svg>
+  <p class="muted">Champ visuel : environ 180° à l'arrêt, 100° à 40 km/h, 75° à 70 km/h, 45° à 100 km/h, 30° à 130 km/h. À grande vitesse, tu ne vois plus ce qui arrive sur les côtés.</p>
+</div>
+<h2>Le temps de réaction</h2>
+<div class="grid">
+  <div class="card"><span class="ico">⏱️</span><h3>≈ 1 seconde</h3><p>C'est le temps entre le moment où tu vois un danger et celui où tu commences à freiner.</p></div>
+  <div class="card"><span class="ico">🍷📱😴</span><h3>Ce qui l'allonge</h3><p>Alcool, fatigue, téléphone, médicaments : le temps de réaction peut <b>doubler</b>.</p></div>
+  <div class="card"><span class="ico">👓</span><h3>Ta vue</h3><p>Si ton permis porte la mention « verres correcteurs », tu dois les porter et avoir une paire de rechange conseillée.</p></div>
+</div>
+
+  </section>
+  <section class="panel" id="quiz" hidden>
+<h2>Teste-toi</h2><p class="muted">9 questions dans le style de l'examen. L'explication s'affiche après chaque réponse.</p><div class="quiz" id="quizBox"></div>
+  </section>
+  <footer>Règles en vigueur en France en 2026, résumées pour réviser. En cas de doute, la référence officielle est securite-routiere.gouv.fr.</footer>
+</main>
+<script>
+(function(){
+var QUIZ=[{"q":"En permis probatoire, le taux d'alcool maximal est de :","o":["0,5 g/L de sang","0,2 g/L de sang","0,8 g/L de sang"],"a":1,"e":"0,2 g/L, soit 0,1 mg/L d'air expiré : en pratique, zéro verre."},{"q":"Un café fort après avoir bu :","o":["Fait baisser le taux d'alcool","N'a aucun effet sur le taux d'alcool","Permet de conduire plus vite en sécurité"],"a":1,"e":"Seul le temps fait baisser le taux, d'environ 0,10 à 0,15 g/L par heure."},{"q":"Un pictogramme rouge de niveau 3 sur une boîte de médicament signifie :","o":["Soyez prudent","Demandez conseil","Ne conduisez pas"],"a":2,"e":"Niveau 1 jaune : prudent. Niveau 2 orange : très prudent. Niveau 3 rouge : ne pas conduire."},{"q":"Il est recommandé de faire une pause :","o":["Toutes les 2 heures","Toutes les 4 heures","Seulement quand on a faim"],"a":0,"e":"Au moins 15 minutes toutes les 2 heures, et dès les premiers signes de fatigue."},{"q":"Téléphoner avec des écouteurs dans les oreilles en conduisant est :","o":["Autorisé","Interdit","Autorisé hors agglomération"],"a":1,"e":"Écouteurs et oreillettes sont interdits au volant : 3 points et 135 €."},{"q":"Quand la vitesse augmente, le champ visuel :","o":["S'élargit","Ne change pas","Se rétrécit"],"a":2,"e":"Environ 100° à 40 km/h mais seulement 30° à 130 km/h."},{"q":"Le temps de réaction moyen d'un conducteur en forme est d'environ :","o":["1 seconde","3 secondes","0,1 seconde"],"a":0,"e":"Environ 1 seconde. Il s'allonge avec l'alcool, la fatigue ou les distractions."},{"q":"Un test salivaire positif au cannabis consommé 2 jours avant :","o":["N'est pas sanctionné","Est un délit","Coûte seulement 1 point"],"a":1,"e":"La loi sanctionne la présence de stupéfiants, quelle que soit la date de consommation."},{"q":"Les heures où le risque d'endormissement est le plus fort :","o":["Entre 2 h et 5 h du matin","Entre 9 h et 11 h","Entre 18 h et 20 h"],"a":0,"e":"La nuit (2 h-5 h) et en début d'après-midi."}];
+
+var tabs=document.getElementById('tabs');
+tabs.addEventListener('click',function(e){var t=e.target.closest('.tab');if(!t)return;
+  [].forEach.call(tabs.children,function(x){x.setAttribute('aria-selected',x===t);});
+  [].forEach.call(document.querySelectorAll('.panel'),function(p){p.hidden=p.id!==t.dataset.tab;});});
+document.addEventListener('click',function(e){var f=e.target.closest('.flip');if(f)f.classList.toggle('open');});
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var QZ=document.getElementById('quizBox'), order, qi, score, done;
+function startQuiz(){order=shuffle(QUIZ.map(function(_,i){return i;}));qi=0;score=0;renderQ();}
+function renderQ(){
+  if(qi>=order.length){var pct=Math.round(score/order.length*100);
+    QZ.innerHTML='<div class="card result"><div class="big">'+(pct>=80?'🏆':pct>=50?'👍':'📚')+'</div><h2>'+score+' / '+order.length+'</h2><p>'+(pct>=80?'Excellent, ce thème est maîtrisé !':pct>=50?'Pas mal ! Relis les points ratés et recommence.':'Relis la leçon puis retente le quiz.')+'</p><div class="btns" style="justify-content:center"><button class="btn" id="qRestart">↻ Recommencer</button></div></div>';
+    document.getElementById('qRestart').onclick=startQuiz;return;}
+  var q=QUIZ[order[qi]];done=false;
+  var opts=shuffle(q.o.map(function(t,i){return {t:t,i:i};}));
+  QZ.innerHTML='<div class="card"><div class="qhead"><b>Question '+(qi+1)+' / '+order.length+'</b><span class="muted">Score : '+score+'</span></div><div class="progress"><i style="width:'+(qi/order.length*100)+'%"></i></div><div class="qtext">'+q.q+'</div><div class="opts">'+
+    opts.map(function(o){return '<button class="opt" data-i="'+o.i+'">'+o.t+'</button>';}).join('')+'</div><div id="qAfter"></div></div>';
+  QZ.querySelector('.opts').onclick=function(e){var b=e.target.closest('.opt');if(!b||done)return;done=true;
+    var ok=+b.dataset.i===q.a;if(ok)score++;
+    [].forEach.call(this.children,function(c){if(+c.dataset.i===q.a)c.classList.add('ok');else if(c===b)c.classList.add('ko');});
+    document.getElementById('qAfter').innerHTML='<div class="expl">'+(ok?'✅ <b>Bonne réponse !</b> ':'❌ <b>Raté.</b> ')+q.e+'</div><div class="btns"><button class="btn" id="qNext">'+(qi+1<order.length?'Question suivante →':'Voir mon score')+'</button></div>';
+    document.getElementById('qNext').onclick=function(){qi++;renderQ();};};
+}
+startQuiz();
+
+
+var vr=document.getElementById('verres'),hr=document.getElementById('heures');
+function alc(){var n=+vr.value,h=+hr.value;document.getElementById('nbV').textContent=n;document.getElementById('nbH').textContent=h;
+  document.getElementById('glasses').textContent=n?'🍷'.repeat(n):'🥤';
+  var hi=Math.max(0,n*0.25-h*0.10),lo=Math.max(0,n*0.20-h*0.15);
+  var f=document.getElementById('gFill'),col=hi>=0.5?'#C8102E':hi>=0.2?'#F28C00':'#1E9E55';
+  f.style.width=Math.min(100,hi/2*100)+'%';f.style.background=col;
+  var r=document.getElementById('alcRes');
+  if(hi===0){r.innerHTML='✅ Taux estimé : <b>0 g/L</b>.';return;}
+  r.innerHTML='Taux estimé : entre <b>'+lo.toFixed(2).replace('.',',')+'</b> et <b>'+hi.toFixed(2).replace('.',',')+' g/L</b>. '+
+   (hi>=0.5?'⛔ <b>Interdit à tous les conducteurs.</b>':hi>=0.2?'⚠️ <b>Interdit en permis probatoire</b>, et risqué pour tous.':'⚠️ Faible, mais le risque n\'est pas nul (interdit en probatoire dès 0,2).')+
+   ' Attends encore environ <b>'+Math.ceil(hi/0.10)+' h</b> pour revenir à zéro.';}
+vr.oninput=alc;hr.oninput=alc;alc();
+var visR=document.getElementById('visR');
+function vis(){var v=+visR.value,pts=[[0,180],[40,100],[70,75],[100,45],[130,30]],deg=180;
+  for(var i=1;i<pts.length;i++){if(v<=pts[i][0]){var a=pts[i-1],b=pts[i];deg=a[1]+(b[1]-a[1])*(v-a[0])/(b[0]-a[0]);break;}}
+  document.getElementById('visV').textContent=v;document.getElementById('visDeg').textContent='Champ visuel ≈ '+Math.round(deg)+'°';
+  var r=170,cx=200,cy=190,h=deg/2*Math.PI/180;
+  var x1=cx-r*Math.sin(h),y1=cy-r*Math.cos(h),x2=cx+r*Math.sin(h),y2=cy-r*Math.cos(h);
+  document.getElementById('cone').setAttribute('d','M'+cx+' '+cy+' L'+x1.toFixed(1)+' '+y1.toFixed(1)+' A'+r+' '+r+' 0 0 1 '+x2.toFixed(1)+' '+y2.toFixed(1)+' Z');}
+visR.oninput=vis;vis();
+
+})();
+</script>
+</body>
+</html>
