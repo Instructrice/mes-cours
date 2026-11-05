@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chiffrement, hachage et certificats</title>
+<style>:root{--t1:#B91C1C;--t2:#F97316}
+:root{--bg:#F6F7FB;--card:#FFFFFF;--ink:#18202B;--muted:#5B6675;--rule:#E1E5EC;
+  --red:#C8102E;--blue:#0055A4;--yellow:#FFC20E;--green:#1E9E55;--orange:#F28C00;--purple:#7B3FC4;
+  --accent:var(--t1);--accent-soft:color-mix(in srgb,var(--t1) 12%,#fff);--good:#1E9E55;--bad:#C8102E;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;padding:0 0 24px;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+h1,h2,h3{line-height:1.2;margin:0}
+h2{font-size:1.4rem;margin:26px 0 6px}
+h3{font-size:1.05rem;margin-bottom:4px}
+p{margin:.4em 0}
+.muted{color:var(--muted)}
+.hero{background:linear-gradient(120deg,var(--t1) 0%,var(--t2) 100%);color:#fff;border-radius:0 0 22px 22px;padding:24px 0 22px;margin-bottom:14px}
+.hero .badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 12px;font-size:.82rem;font-weight:600;margin-bottom:8px}
+.hero h1{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:800;display:flex;gap:12px;align-items:center}
+.hero h1 .emo{font-size:1.3em}
+.hero p{opacity:.93;max-width:62ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+.tab{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:.95rem;cursor:pointer}
+.tab:hover{border-color:var(--accent)}
+.tab[aria-selected="true"]{background:var(--t1);border-color:var(--t1);color:#fff;font-weight:600}
+.panel[hidden]{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.grid.two{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:14px}
+.card .ico{font-size:1.9rem;line-height:1;margin-bottom:6px;display:block}
+.card.top{border-top:5px solid var(--c,var(--t1))}
+.note{border-left:4px solid var(--yellow);background:var(--card);padding:10px 14px;border-radius:8px;margin:12px 0}
+.note.red{border-color:var(--red)}.note.blue{border-color:var(--blue)}.note.green{border-color:var(--green)}
+.big{font-size:1.7rem;font-weight:800}
+ul.tight{margin:.3em 0;padding-left:1.2em} ul.tight li{margin:.2em 0}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+.steps li{counter-increment:s;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:10px 12px 10px 52px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--t1);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tbl{overflow-x:auto;margin-top:10px;border:1px solid var(--rule);border-radius:12px}
+table{border-collapse:collapse;width:100%;background:var(--card);font-size:.95rem}
+th,td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{background:var(--accent-soft);color:var(--accent)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.82rem;font-weight:700;color:#fff;background:var(--c,var(--t1))}
+.illu{width:100%;height:auto;display:block;border-radius:10px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;color:#fff;background:var(--t1)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--rule)}
+.chip{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 11px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--t1)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;cursor:pointer}
+.check:hover{background:var(--accent-soft)}
+.check input{width:20px;height:20px;accent-color:var(--good);margin-top:2px;flex:none}
+.flip{cursor:pointer}
+.flip .back{display:none;color:var(--muted);font-size:.92rem;margin-top:6px}
+.flip.open .back{display:block}
+.flip .hint{font-size:.78rem;color:var(--accent);margin-top:6px}
+.flip.open .hint{display:none}
+/* Quiz */
+.quiz{max-width:720px;margin:12px auto 0}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.progress{height:8px;background:var(--rule);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.progress i{display:block;height:100%;background:var(--t1);width:0;transition:width .3s}
+.qtext{font-size:1.15rem;font-weight:650;margin:4px 0 12px}
+.opts{display:grid;gap:8px}
+.opt{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit;cursor:pointer;text-align:left}
+.opt:hover{border-color:var(--accent)}
+.opt.ok{background:color-mix(in srgb,var(--good) 18%,var(--card));border-color:var(--good)}
+.opt.ko{background:color-mix(in srgb,var(--bad) 18%,var(--card));border-color:var(--bad)}
+.expl{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--accent-soft)}
+.result{text-align:center;padding:20px}
+.result .big{font-size:3rem}
+footer{margin-top:28px;font-size:.85rem;color:var(--muted)}
+
+code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:6px;font-size:.9em}
+.term{background:#0F1720;color:#D7E3EE;border-radius:12px;padding:12px 14px;font:14px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-x:auto;margin:10px 0;white-space:pre}
+.term .p{color:#7EE787}.term .k{color:#7D8B99}.term .o{color:#FFD479}
+.layer{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;color:#fff;background:var(--c);cursor:pointer;margin:6px 0;font-weight:600;border:0;width:100%;font:inherit;text-align:left;transition:transform .15s}
+.layer:hover{transform:translateX(4px)}
+.layer .n{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.layer .pdu{margin-left:auto;font-size:.82rem;background:rgba(0,0,0,.18);padding:2px 10px;border-radius:999px;font-weight:600}
+.layer[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:2px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:720px){.split{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px;font-size:.9rem;color:var(--muted)}
+.field input,.field select{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:10px;padding:8px 10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.out{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin-top:12px}
+.out b{color:var(--muted);font-weight:600}
+.out span{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:700}
+.bits{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.bits div{text-align:center;min-width:38px}
+.bits small{display:block;color:var(--muted);font-size:.72rem}
+.bits .b{display:block;border-radius:8px;padding:6px 0;font-weight:800;font-family:ui-monospace,monospace;background:var(--rule);color:var(--muted)}
+.bits .b.on{background:var(--t1);color:#fff}
+.enc{display:flex;align-items:stretch;justify-content:center;flex-wrap:wrap;gap:0;margin:14px 0;font-weight:700;font-size:.9rem}
+.enc div{padding:12px 10px;color:#fff;display:flex;align-items:center}
+.enc .hide{display:none}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.vs{grid-template-columns:1fr}}
+.perm{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;align-items:center;max-width:420px}
+.perm label{display:flex;justify-content:center}
+.perm input{width:22px;height:22px;accent-color:var(--t1)}
+.meter{height:12px;background:var(--rule);border-radius:99px;overflow:hidden;margin:8px 0}
+.meter i{display:block;height:100%;width:0;transition:width .3s,background .3s}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <span class="badge">BTS SIO SISR · Cybersécurité</span>
+  <h1><span class="emo">🔑</span>Chiffrement, hachage et certificats</h1>
+  <p>Symétrique ou asymétrique, à quoi sert un hash, et comment HTTPS te protège grâce aux certificats.</p>
+</div></header>
+<main class="wrap">
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-tab="chiffre" aria-selected="true">🔐 Chiffrement</button>
+    <button class="tab" role="tab" data-tab="hash" aria-selected="false">🧬 Hachage</button>
+    <button class="tab" role="tab" data-tab="certif" aria-selected="false">📜 Signature et certificats</button>
+    <button class="tab" role="tab" data-tab="quiz" aria-selected="false">🧠 Quiz</button>
+  </nav>
+  <section class="panel" id="chiffre">
+<h2>Chiffrer = rendre illisible sans la clé</h2>
+<div class="vs">
+  <div class="card top" style="--c:#2563EB"><h3>🔑 Symétrique</h3><p><b>Une seule clé</b>, la même pour chiffrer et déchiffrer.</p><ul class="tight"><li>⚡ Très rapide</li><li>❌ Comment partager la clé en sécurité ?</li><li>Ex : <b>AES</b></li></ul></div>
+  <div class="card top" style="--c:#B91C1C"><h3>🗝️🔓 Asymétrique</h3><p><b>Deux clés</b> liées : une <b>publique</b> (que tout le monde peut avoir) et une <b>privée</b> (secrète).</p><ul class="tight"><li>✅ Pas besoin de partager de secret</li><li>🐢 Plus lent</li><li>Ex : <b>RSA</b>, courbes elliptiques</li></ul></div>
+</div>
+<div class="note"><b>L'image à retenir :</b> la clé publique est un <b>cadenas ouvert</b> que tu distribues. N'importe qui peut fermer une boîte avec, mais <b>seul toi</b> as la clé (privée) pour l'ouvrir.</div>
+<div class="note blue"><b>En pratique (HTTPS, VPN)</b>, on combine les deux : l'asymétrique sert à échanger une clé de session, puis le symétrique chiffre les données rapidement.</div>
+<h2>Essaie : le chiffre de César</h2>
+<p class="muted">Le plus vieux chiffrement symétrique : on décale chaque lettre. La clé, c'est le décalage. (Évidemment, il ne protège plus rien aujourd'hui 😄)</p>
+<div class="card">
+  <div class="row"><label class="field" style="flex:1">Message<input id="cMsg" value="BTS SIO SISR"></label><label class="field">Clé (décalage)<input id="cKey" type="number" value="3" min="0" max="25"></label></div>
+  <div class="out"><b>Chiffré</b><span id="cOut"></span><b>Déchiffré</b><span id="cBack"></span></div>
+</div>
+  </section>
+  <section class="panel" id="hash" hidden>
+<h2>Le hachage : une empreinte</h2>
+<p>Une fonction de hachage transforme n'importe quelle donnée en une <b>empreinte de taille fixe</b>.</p>
+<div class="term"><span class="k">SHA-256("bonjour")</span>
+<span class="o">2cb4b1431b84ec15d35ed83bb927e27e8967d75f4bcd9cc4b25c8d879ae23e18</span>
+<span class="k">SHA-256("Bonjour")   ← une seule lettre change…</span>
+<span class="o">9172e8eec99f144f72eca9a568759580edadb2cfd154857f07e657569493bc44</span></div>
+<div class="grid">
+  <div class="card top"><span class="ico">↩️🚫</span><h3>Irréversible</h3><p>Impossible de retrouver la donnée à partir de l'empreinte. Ce n'est <b>pas</b> du chiffrement.</p></div>
+  <div class="card top" style="--c:var(--t2)"><span class="ico">🎯</span><h3>Toujours pareil</h3><p>La même donnée donne toujours la même empreinte.</p></div>
+  <div class="card top" style="--c:#16A34A"><span class="ico">🌪️</span><h3>Effet avalanche</h3><p>Un tout petit changement donne une empreinte complètement différente.</p></div>
+</div>
+<h2>À quoi ça sert ?</h2>
+<div class="grid two">
+  <div class="card"><h3>✅ Vérifier l'intégrité</h3><p>On compare l'empreinte d'un fichier téléchargé avec celle publiée par le site (ex : une ISO Debian).</p></div>
+  <div class="card"><h3>🔑 Stocker les mots de passe</h3><p>Le serveur garde le <b>hash</b>, pas le mot de passe. On ajoute un <b>sel</b> (valeur aléatoire) pour que deux mots de passe identiques n'aient pas le même hash.</p></div>
+</div>
+<div class="note red"><b>MD5 et SHA-1</b> sont <b>obsolètes</b> (on sait créer des collisions). Utilise <b>SHA-256</b> ou plus ; pour les mots de passe : <b>bcrypt</b> ou <b>Argon2</b>.</div>
+  </section>
+  <section class="panel" id="certif" hidden>
+<h2>La signature électronique</h2>
+<ol class="steps">
+  <li>Alice calcule le <b>hash</b> de son document.</li>
+  <li>Elle le chiffre avec sa <b>clé privée</b> : c'est la signature.</li>
+  <li>Bob déchiffre la signature avec la <b>clé publique</b> d'Alice et compare avec le hash du document.</li>
+  <li>Identiques ? Le document vient bien d'Alice (<b>authenticité</b>) et n'a pas été modifié (<b>intégrité</b>).</li>
+</ol>
+<h2>Le certificat : une carte d'identité numérique</h2>
+<p>Comment être sûr que la clé publique est bien celle de <code>mabanque.fr</code> ? Grâce à un <b>certificat</b> signé par une <b>autorité de certification</b> (AC) de confiance.</p>
+<div class="grid">
+  <div class="card"><span class="ico">🏷️</span><h3>Contient</h3><p>Le nom du site, sa clé publique, les dates de validité, la signature de l'AC.</p></div>
+  <div class="card"><span class="ico">🏛️</span><h3>Autorités</h3><p>Let's Encrypt, DigiCert… Leurs certificats racines sont déjà dans ton navigateur.</p></div>
+  <div class="card"><span class="ico">⚠️</span><h3>Alerte navigateur</h3><p>Certificat expiré ou pour un autre nom → <b>ne continue pas</b> sans comprendre pourquoi.</p></div>
+</div>
+<h2>HTTPS = HTTP + TLS</h2>
+<div class="grid two">
+  <div class="card top" style="--c:#16A34A"><h3>🔒 Ce que HTTPS garantit</h3><p>Les échanges sont <b>chiffrés</b> et tu parles bien au <b>vrai serveur</b>.</p></div>
+  <div class="card top" style="--c:#B91C1C"><h3>❗ Ce qu'il ne garantit pas</h3><p>Que le site est <b>honnête</b> : un site de phishing peut très bien avoir un cadenas !</p></div>
+</div>
+  </section>
+  <section class="panel" id="quiz" hidden>
+<h2>Teste-toi</h2><p class="muted">9 questions. L'explication s'affiche après chaque réponse.</p><div class="quiz" id="quizBox"></div>
+  </section>
+  <footer>Cours de révision BTS SIO option SISR · bloc 3 cybersécurité. Références : ANSSI, CNIL, cybermalveillance.gouv.fr.</footer>
+</main>
+<script>
+(function(){
+var QUIZ=[{"q": "Le chiffrement symétrique utilise :", "o": ["Une seule clé partagée", "Une clé publique et une clé privée", "Aucune clé"], "a": 0, "e": "Même clé pour chiffrer et déchiffrer, ex : AES."}, {"q": "En asymétrique, pour envoyer un message secret à Bob, on chiffre avec :", "o": ["La clé privée de Bob", "La clé publique de Bob", "Sa propre clé publique"], "a": 1, "e": "Seul Bob pourra déchiffrer avec sa clé privée."}, {"q": "RSA est un algorithme :", "o": ["Symétrique", "Asymétrique", "De hachage"], "a": 1, "e": "RSA utilise une paire de clés."}, {"q": "Une fonction de hachage est :", "o": ["Réversible avec la clé", "Irréversible", "Un type de pare-feu"], "a": 1, "e": "On ne peut pas retrouver la donnée d'origine depuis l'empreinte."}, {"q": "Pourquoi ajoute-t-on un « sel » avant de hacher un mot de passe ?", "o": ["Pour l'accélérer", "Pour que deux mots de passe identiques n'aient pas le même hash", "Pour pouvoir le déchiffrer"], "a": 1, "e": "Le sel rend inutiles les tables de hash précalculées."}, {"q": "Quel algorithme est obsolète ?", "o": ["SHA-256", "MD5", "AES"], "a": 1, "e": "MD5 (et SHA-1) ne sont plus sûrs."}, {"q": "Signer un document se fait avec :", "o": ["Sa clé privée", "La clé publique du destinataire", "Un mot de passe Wi-Fi"], "a": 0, "e": "On signe avec sa clé privée, tout le monde vérifie avec la clé publique."}, {"q": "Le cadenas HTTPS prouve que :", "o": ["Le site est honnête", "La connexion est chiffrée avec le serveur du nom affiché", "Le site n'a pas de virus"], "a": 1, "e": "Un site de phishing peut aussi avoir un certificat valide."}, {"q": "Qui signe un certificat de site web ?", "o": ["L'utilisateur", "Une autorité de certification", "Le FAI"], "a": 1, "e": "L'AC garantit que la clé publique appartient bien au domaine."}];
+
+var tabs=document.getElementById('tabs');
+tabs.addEventListener('click',function(e){var t=e.target.closest('.tab');if(!t)return;
+  [].forEach.call(tabs.children,function(x){x.setAttribute('aria-selected',x===t);});
+  [].forEach.call(document.querySelectorAll('.panel'),function(p){p.hidden=p.id!==t.dataset.tab;});});
+document.addEventListener('click',function(e){var f=e.target.closest('.flip');if(f)f.classList.toggle('open');});
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var QZ=document.getElementById('quizBox'), order, qi, score, done;
+function startQuiz(){order=shuffle(QUIZ.map(function(_,i){return i;}));qi=0;score=0;renderQ();}
+function renderQ(){
+  if(qi>=order.length){var pct=Math.round(score/order.length*100);
+    QZ.innerHTML='<div class="card result"><div class="big">'+(pct>=80?'🏆':pct>=50?'👍':'📚')+'</div><h2>'+score+' / '+order.length+'</h2><p>'+(pct>=80?'Excellent, cette notion est maîtrisée !':pct>=50?'Pas mal ! Relis les points ratés et recommence.':'Relis la leçon puis retente le quiz.')+'</p><div class="btns" style="justify-content:center"><button class="btn" id="qRestart">↻ Recommencer</button></div></div>';
+    document.getElementById('qRestart').onclick=startQuiz;return;}
+  var q=QUIZ[order[qi]];done=false;
+  var opts=shuffle(q.o.map(function(t,i){return {t:t,i:i};}));
+  QZ.innerHTML='<div class="card"><div class="qhead"><b>Question '+(qi+1)+' / '+order.length+'</b><span class="muted">Score : '+score+'</span></div><div class="progress"><i style="width:'+(qi/order.length*100)+'%"></i></div><div class="qtext">'+q.q+'</div><div class="opts">'+
+    opts.map(function(o){return '<button class="opt" data-i="'+o.i+'">'+o.t+'</button>';}).join('')+'</div><div id="qAfter"></div></div>';
+  QZ.querySelector('.opts').onclick=function(e){var b=e.target.closest('.opt');if(!b||done)return;done=true;
+    var ok=+b.dataset.i===q.a;if(ok)score++;
+    [].forEach.call(this.children,function(c){if(+c.dataset.i===q.a)c.classList.add('ok');else if(c===b)c.classList.add('ko');});
+    document.getElementById('qAfter').innerHTML='<div class="expl">'+(ok?'✅ <b>Bonne réponse !</b> ':'❌ <b>Raté.</b> ')+q.e+'</div><div class="btns"><button class="btn" id="qNext">'+(qi+1<order.length?'Question suivante →':'Voir mon score')+'</button></div>';
+    document.getElementById('qNext').onclick=function(){qi++;renderQ();};};
+}
+startQuiz();
+
+
+function cesar(s,k){return s.replace(/[a-z]/gi,function(ch){var b=ch<='Z'?65:97;return String.fromCharCode((ch.charCodeAt(0)-b+k%26+26)%26+b);});}
+function cupd(){var m=document.getElementById('cMsg').value,k=parseInt(document.getElementById('cKey').value)||0,c=cesar(m,k);
+  document.getElementById('cOut').textContent=c;document.getElementById('cBack').textContent=cesar(c,-k);}
+document.getElementById('cMsg').oninput=cupd;document.getElementById('cKey').oninput=cupd;cupd();
+
+})();
+</script>
+</body>
+</html>

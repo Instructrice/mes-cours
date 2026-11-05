@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sauvegarde, RAID et virtualisation</title>
+<style>:root{--t1:#6D28D9;--t2:#DB2777}
+:root{--bg:#F6F7FB;--card:#FFFFFF;--ink:#18202B;--muted:#5B6675;--rule:#E1E5EC;
+  --red:#C8102E;--blue:#0055A4;--yellow:#FFC20E;--green:#1E9E55;--orange:#F28C00;--purple:#7B3FC4;
+  --accent:var(--t1);--accent-soft:color-mix(in srgb,var(--t1) 12%,#fff);--good:#1E9E55;--bad:#C8102E;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141A;--card:#19202A;--ink:#E7ECF2;--muted:#9AA6B4;--rule:#2B3542;
+  --accent:color-mix(in srgb,var(--t1) 55%,#fff);--accent-soft:color-mix(in srgb,var(--t1) 22%,#19202A);--good:#4FCB85;--bad:#FF6B7D;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;padding:0 0 24px;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+h1,h2,h3{line-height:1.2;margin:0}
+h2{font-size:1.4rem;margin:26px 0 6px}
+h3{font-size:1.05rem;margin-bottom:4px}
+p{margin:.4em 0}
+.muted{color:var(--muted)}
+.hero{background:linear-gradient(120deg,var(--t1) 0%,var(--t2) 100%);color:#fff;border-radius:0 0 22px 22px;padding:24px 0 22px;margin-bottom:14px}
+.hero .badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 12px;font-size:.82rem;font-weight:600;margin-bottom:8px}
+.hero h1{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:800;display:flex;gap:12px;align-items:center}
+.hero h1 .emo{font-size:1.3em}
+.hero p{opacity:.93;max-width:62ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+.tab{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:.95rem;cursor:pointer}
+.tab:hover{border-color:var(--accent)}
+.tab[aria-selected="true"]{background:var(--t1);border-color:var(--t1);color:#fff;font-weight:600}
+.panel[hidden]{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.grid.two{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:14px}
+.card .ico{font-size:1.9rem;line-height:1;margin-bottom:6px;display:block}
+.card.top{border-top:5px solid var(--c,var(--t1))}
+.note{border-left:4px solid var(--yellow);background:var(--card);padding:10px 14px;border-radius:8px;margin:12px 0}
+.note.red{border-color:var(--red)}.note.blue{border-color:var(--blue)}.note.green{border-color:var(--green)}
+.big{font-size:1.7rem;font-weight:800}
+ul.tight{margin:.3em 0;padding-left:1.2em} ul.tight li{margin:.2em 0}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+.steps li{counter-increment:s;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:10px 12px 10px 52px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--t1);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tbl{overflow-x:auto;margin-top:10px;border:1px solid var(--rule);border-radius:12px}
+table{border-collapse:collapse;width:100%;background:var(--card);font-size:.95rem}
+th,td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{background:var(--accent-soft);color:var(--accent)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.82rem;font-weight:700;color:#fff;background:var(--c,var(--t1))}
+.illu{width:100%;height:auto;display:block;border-radius:10px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;color:#fff;background:var(--t1)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--rule)}
+.chip{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 11px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--t1)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;cursor:pointer}
+.check:hover{background:var(--accent-soft)}
+.check input{width:20px;height:20px;accent-color:var(--good);margin-top:2px;flex:none}
+.flip{cursor:pointer}
+.flip .back{display:none;color:var(--muted);font-size:.92rem;margin-top:6px}
+.flip.open .back{display:block}
+.flip .hint{font-size:.78rem;color:var(--accent);margin-top:6px}
+.flip.open .hint{display:none}
+/* Quiz */
+.quiz{max-width:720px;margin:12px auto 0}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.progress{height:8px;background:var(--rule);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.progress i{display:block;height:100%;background:var(--t1);width:0;transition:width .3s}
+.qtext{font-size:1.15rem;font-weight:650;margin:4px 0 12px}
+.opts{display:grid;gap:8px}
+.opt{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit;cursor:pointer;text-align:left}
+.opt:hover{border-color:var(--accent)}
+.opt.ok{background:color-mix(in srgb,var(--good) 18%,var(--card));border-color:var(--good)}
+.opt.ko{background:color-mix(in srgb,var(--bad) 18%,var(--card));border-color:var(--bad)}
+.expl{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--accent-soft)}
+.result{text-align:center;padding:20px}
+.result .big{font-size:3rem}
+footer{margin-top:28px;font-size:.85rem;color:var(--muted)}
+
+code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:6px;font-size:.9em}
+.term{background:#0F1720;color:#D7E3EE;border-radius:12px;padding:12px 14px;font:14px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-x:auto;margin:10px 0;white-space:pre}
+.term .p{color:#7EE787}.term .k{color:#7D8B99}.term .o{color:#FFD479}
+.layer{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;color:#fff;background:var(--c);cursor:pointer;margin:6px 0;font-weight:600;border:0;width:100%;font:inherit;text-align:left;transition:transform .15s}
+.layer:hover{transform:translateX(4px)}
+.layer .n{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.layer .pdu{margin-left:auto;font-size:.82rem;background:rgba(0,0,0,.18);padding:2px 10px;border-radius:999px;font-weight:600}
+.layer[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:2px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:720px){.split{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px;font-size:.9rem;color:var(--muted)}
+.field input,.field select{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:10px;padding:8px 10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.out{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin-top:12px}
+.out b{color:var(--muted);font-weight:600}
+.out span{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:700}
+.bits{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.bits div{text-align:center;min-width:38px}
+.bits small{display:block;color:var(--muted);font-size:.72rem}
+.bits .b{display:block;border-radius:8px;padding:6px 0;font-weight:800;font-family:ui-monospace,monospace;background:var(--rule);color:var(--muted)}
+.bits .b.on{background:var(--t1);color:#fff}
+.enc{display:flex;align-items:stretch;justify-content:center;flex-wrap:wrap;gap:0;margin:14px 0;font-weight:700;font-size:.9rem}
+.enc div{padding:12px 10px;color:#fff;display:flex;align-items:center}
+.enc .hide{display:none}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.vs{grid-template-columns:1fr}}
+.perm{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;align-items:center;max-width:420px}
+.perm label{display:flex;justify-content:center}
+.perm input{width:22px;height:22px;accent-color:var(--t1)}
+.meter{height:12px;background:var(--rule);border-radius:99px;overflow:hidden;margin:8px 0}
+.meter i{display:block;height:100%;width:0;transition:width .3s,background .3s}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <span class="badge">BTS SIO SISR · Systèmes</span>
+  <h1><span class="emo">💾</span>Sauvegarde, RAID et virtualisation</h1>
+  <p>Ne jamais perdre de données, résister à la panne d'un disque, et faire tourner plusieurs serveurs sur une seule machine.</p>
+</div></header>
+<main class="wrap">
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-tab="sauvegarde" aria-selected="true">💾 Sauvegardes</button>
+    <button class="tab" role="tab" data-tab="raid" aria-selected="false">🗄️ RAID</button>
+    <button class="tab" role="tab" data-tab="virtu" aria-selected="false">☁️ Virtualisation</button>
+    <button class="tab" role="tab" data-tab="quiz" aria-selected="false">🧠 Quiz</button>
+  </nav>
+  <section class="panel" id="sauvegarde">
+<h2>Les 3 types de sauvegarde</h2>
+<div class="tbl"><table>
+<tr><th>Type</th><th>Ce qu'on copie</th><th>Restauration</th><th>Espace / temps</th></tr>
+<tr><td><span class="pill" style="--c:#6D28D9">Complète</span></td><td>Tout</td><td>✅ La plus simple : 1 seule sauvegarde</td><td>❌ Lent et volumineux</td></tr>
+<tr><td><span class="pill" style="--c:#DB2777">Incrémentielle</span></td><td>Ce qui a changé depuis la <b>dernière sauvegarde</b> (quelle qu'elle soit)</td><td>❌ La complète + <b>toutes</b> les incrémentielles</td><td>✅ Très rapide et léger</td></tr>
+<tr><td><span class="pill" style="--c:#0EA5E9">Différentielle</span></td><td>Ce qui a changé depuis la dernière <b>complète</b></td><td>🟡 La complète + <b>la dernière</b> différentielle</td><td>🟡 Grossit chaque jour</td></tr>
+</table></div>
+<h2>La règle du 3-2-1</h2>
+<div class="grid">
+  <div class="card top"><span class="big">3</span><h3>copies</h3><p>Les données d'origine + 2 sauvegardes.</p></div>
+  <div class="card top" style="--c:var(--t2)"><span class="big">2</span><h3>supports différents</h3><p>Ex : un NAS et une bande ou le cloud.</p></div>
+  <div class="card top" style="--c:#16A34A"><span class="big">1</span><h3>copie hors site</h3><p>Ailleurs que dans l'entreprise (incendie, vol, ransomware).</p></div>
+</div>
+<div class="grid two">
+  <div class="card"><h3>⏪ RPO</h3><p>Combien de données on accepte de <b>perdre</b> (ex : 24 h → sauvegarde chaque nuit).</p></div>
+  <div class="card"><h3>⏱️ RTO</h3><p>En combien de temps on doit <b>redémarrer</b> après un incident.</p></div>
+</div>
+<div class="note red">Une sauvegarde qu'on n'a <b>jamais testée</b> n'est pas une sauvegarde. Fais des <b>tests de restauration</b> réguliers !</div>
+  </section>
+  <section class="panel" id="raid" hidden>
+<h2>RAID : plusieurs disques qui travaillent ensemble</h2>
+<p>Objectif : plus de <b>performance</b> et/ou de <b>tolérance aux pannes</b>.</p>
+<div class="grid two">
+  <div class="card top" style="--c:#F59E0B"><span class="pill" style="--c:#D97706">RAID 0 · agrégat</span><p style="margin-top:8px">Les données sont <b>découpées</b> sur les disques.</p><ul class="tight"><li>⚡ Très rapide, 100 % de la capacité</li><li>💥 <b>Aucune tolérance</b> : 1 disque mort = tout perdu</li><li>Min. 2 disques</li></ul></div>
+  <div class="card top" style="--c:#16A34A"><span class="pill" style="--c:#16A34A">RAID 1 · miroir</span><p style="margin-top:8px">Les données sont <b>copiées</b> à l'identique.</p><ul class="tight"><li>🛡️ Supporte la panne d'1 disque</li><li>📉 50 % de la capacité</li><li>Min. 2 disques</li></ul></div>
+  <div class="card top" style="--c:#6D28D9"><span class="pill" style="--c:#6D28D9">RAID 5 · parité</span><p style="margin-top:8px">Données + <b>parité</b> réparties sur tous les disques.</p><ul class="tight"><li>🛡️ Supporte la panne d'1 disque</li><li>Capacité = (n − 1) disques</li><li>Min. 3 disques</li></ul></div>
+  <div class="card top" style="--c:#DB2777"><span class="pill" style="--c:#DB2777">RAID 10 · 1 + 0</span><p style="margin-top:8px">Des miroirs, eux-mêmes agrégés.</p><ul class="tight"><li>⚡🛡️ Rapide et tolérant</li><li>📉 50 % de la capacité</li><li>Min. 4 disques</li></ul></div>
+</div>
+<h2>Calcule la capacité utile</h2>
+<div class="card">
+  <div class="row">
+    <label class="field">Niveau RAID<select id="rl"><option value="0">RAID 0</option><option value="1">RAID 1</option><option value="5" selected>RAID 5</option><option value="10">RAID 10</option></select></label>
+    <label class="field">Nombre de disques<input id="rn" type="number" min="2" max="24" value="4"></label>
+    <label class="field">Taille d'un disque (To)<input id="rs" type="number" min="1" value="2"></label>
+  </div>
+  <div class="out" id="rOut"></div>
+</div>
+<div class="note red"><b>Le RAID n'est PAS une sauvegarde !</b> Un fichier supprimé ou chiffré par un ransomware l'est aussi sur tous les disques.</div>
+  </section>
+  <section class="panel" id="virtu" hidden>
+<h2>Virtualiser : plusieurs machines dans une</h2>
+<p>Un <b>hyperviseur</b> fait tourner plusieurs <b>machines virtuelles</b> (VM) sur un seul serveur physique.</p>
+<div class="vs">
+  <div class="card top"><h3>🏢 Hyperviseur type 1 (bare metal)</h3><p>Installé <b>directement sur le matériel</b>. Pour les serveurs en production.</p><p class="muted">VMware ESXi, Proxmox VE, Microsoft Hyper-V</p></div>
+  <div class="card top" style="--c:var(--t2)"><h3>💻 Hyperviseur type 2 (hébergé)</h3><p>Installé <b>comme un logiciel</b> sur Windows, macOS ou Linux. Pour tester, apprendre.</p><p class="muted">VirtualBox, VMware Workstation</p></div>
+</div>
+<h2>Pourquoi tout le monde virtualise</h2>
+<div class="grid">
+  <div class="card"><span class="ico">💶</span><h3>Économies</h3><p>Moins de serveurs, moins d'électricité.</p></div>
+  <div class="card"><span class="ico">📸</span><h3>Snapshots</h3><p>Une « photo » de la VM avant une mise à jour risquée, pour revenir en arrière.</p></div>
+  <div class="card"><span class="ico">🚀</span><h3>Rapidité</h3><p>Créer un serveur en quelques minutes.</p></div>
+  <div class="card"><span class="ico">🧪</span><h3>Isolation</h3><p>Un problème dans une VM n'affecte pas les autres.</p></div>
+</div>
+<div class="note blue"><b>Et les conteneurs (Docker) ?</b> Plus légers qu'une VM : ils partagent le noyau du système hôte et ne contiennent que l'application et ses dépendances.</div>
+<div class="note">Un <b>snapshot</b> n'est pas une sauvegarde non plus : il est stocké au même endroit que la VM.</div>
+  </section>
+  <section class="panel" id="quiz" hidden>
+<h2>Teste-toi</h2><p class="muted">9 questions. L'explication s'affiche après chaque réponse.</p><div class="quiz" id="quizBox"></div>
+  </section>
+  <footer>Cours de révision BTS SIO option SISR · administration des systèmes.</footer>
+</main>
+<script>
+(function(){
+var QUIZ=[{"q": "Quelle sauvegarde copie tout ce qui a changé depuis la dernière sauvegarde complète ?", "o": ["Incrémentielle", "Différentielle", "Complète"], "a": 1, "e": "Différentielle = depuis la dernière complète. Incrémentielle = depuis la dernière sauvegarde, quelle qu'elle soit."}, {"q": "Pour restaurer avec des incrémentielles, il faut :", "o": ["La dernière incrémentielle seulement", "La complète + toutes les incrémentielles", "La complète seulement"], "a": 1, "e": "Chaque incrémentielle ne contient qu'une partie des changements."}, {"q": "Dans la règle 3-2-1, le « 1 » signifie :", "o": ["1 sauvegarde par jour", "1 copie hors site", "1 seul disque"], "a": 1, "e": "Une copie ailleurs, pour survivre à un incendie ou un vol."}, {"q": "Le RAID 1 c'est :", "o": ["Le miroir", "L'agrégat sans tolérance", "La parité"], "a": 0, "e": "RAID 1 = les données sont dupliquées sur 2 disques."}, {"q": "RAID 5 avec 4 disques de 2 To : capacité utile ?", "o": ["8 To", "6 To", "4 To"], "a": 1, "e": "(4 − 1) × 2 To = 6 To. Un disque sert pour la parité."}, {"q": "Quel RAID n'offre aucune tolérance aux pannes ?", "o": ["RAID 0", "RAID 1", "RAID 5"], "a": 0, "e": "RAID 0 : un disque perdu = toutes les données perdues."}, {"q": "Le RAID remplace-t-il une sauvegarde ?", "o": ["Oui", "Non"], "a": 1, "e": "Non : une suppression ou un ransomware touche tous les disques en même temps."}, {"q": "Proxmox et VMware ESXi sont des hyperviseurs :", "o": ["De type 1", "De type 2"], "a": 0, "e": "Ils s'installent directement sur le matériel (bare metal)."}, {"q": "Un snapshot de VM sert à :", "o": ["Revenir à un état précédent de la VM", "Augmenter la RAM", "Chiffrer la VM"], "a": 0, "e": "Pratique avant une mise à jour risquée."}];
+
+var tabs=document.getElementById('tabs');
+tabs.addEventListener('click',function(e){var t=e.target.closest('.tab');if(!t)return;
+  [].forEach.call(tabs.children,function(x){x.setAttribute('aria-selected',x===t);});
+  [].forEach.call(document.querySelectorAll('.panel'),function(p){p.hidden=p.id!==t.dataset.tab;});});
+document.addEventListener('click',function(e){var f=e.target.closest('.flip');if(f)f.classList.toggle('open');});
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var QZ=document.getElementById('quizBox'), order, qi, score, done;
+function startQuiz(){order=shuffle(QUIZ.map(function(_,i){return i;}));qi=0;score=0;renderQ();}
+function renderQ(){
+  if(qi>=order.length){var pct=Math.round(score/order.length*100);
+    QZ.innerHTML='<div class="card result"><div class="big">'+(pct>=80?'🏆':pct>=50?'👍':'📚')+'</div><h2>'+score+' / '+order.length+'</h2><p>'+(pct>=80?'Excellent, cette notion est maîtrisée !':pct>=50?'Pas mal ! Relis les points ratés et recommence.':'Relis la leçon puis retente le quiz.')+'</p><div class="btns" style="justify-content:center"><button class="btn" id="qRestart">↻ Recommencer</button></div></div>';
+    document.getElementById('qRestart').onclick=startQuiz;return;}
+  var q=QUIZ[order[qi]];done=false;
+  var opts=shuffle(q.o.map(function(t,i){return {t:t,i:i};}));
+  QZ.innerHTML='<div class="card"><div class="qhead"><b>Question '+(qi+1)+' / '+order.length+'</b><span class="muted">Score : '+score+'</span></div><div class="progress"><i style="width:'+(qi/order.length*100)+'%"></i></div><div class="qtext">'+q.q+'</div><div class="opts">'+
+    opts.map(function(o){return '<button class="opt" data-i="'+o.i+'">'+o.t+'</button>';}).join('')+'</div><div id="qAfter"></div></div>';
+  QZ.querySelector('.opts').onclick=function(e){var b=e.target.closest('.opt');if(!b||done)return;done=true;
+    var ok=+b.dataset.i===q.a;if(ok)score++;
+    [].forEach.call(this.children,function(c){if(+c.dataset.i===q.a)c.classList.add('ok');else if(c===b)c.classList.add('ko');});
+    document.getElementById('qAfter').innerHTML='<div class="expl">'+(ok?'✅ <b>Bonne réponse !</b> ':'❌ <b>Raté.</b> ')+q.e+'</div><div class="btns"><button class="btn" id="qNext">'+(qi+1<order.length?'Question suivante →':'Voir mon score')+'</button></div>';
+    document.getElementById('qNext').onclick=function(){qi++;renderQ();};};
+}
+startQuiz();
+
+
+function raid(){var l=+document.getElementById('rl').value,n=Math.max(1,+document.getElementById('rn').value||0),s=Math.max(0,+document.getElementById('rs').value||0),o=document.getElementById('rOut'),min={0:2,1:2,5:3,10:4}[l],cap,tol;
+  if(n<min){o.innerHTML='<b>⚠️</b><span>Il faut au moins '+min+' disques</span>';return;}
+  if(l===10&&n%2){o.innerHTML='<b>⚠️</b><span>RAID 10 : nombre de disques pair</span>';return;}
+  if(l===0){cap=n*s;tol='Aucun disque 💥';}else if(l===1){cap=s;tol=(n-1)+' disque(s)';}else if(l===5){cap=(n-1)*s;tol='1 disque';}else{cap=n/2*s;tol='1 disque par miroir';}
+  o.innerHTML='<b>Capacité brute</b><span>'+(n*s)+' To</span><b>Capacité utile</b><span>'+cap+' To ('+Math.round(cap/(n*s)*100)+' %)</span><b>Panne supportée</b><span>'+tol+'</span>';}
+['rl','rn','rs'].forEach(function(id){document.getElementById(id).oninput=raid;});raid();
+
+})();
+</script>
+</body>
+</html>
