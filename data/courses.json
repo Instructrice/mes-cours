@@ -4,7 +4,7 @@
       "id": "mw8e1s3w99a3",
       "title": "Les Systèmes & Surveillance",
       "category": "ADMIN SYS",
-      "description": "",
+      "description": "Cours sur les fonctionnalités des systèmes et réseaux pour assurer leur sécurité.",
       "cover_url": "https://i.pinimg.com/1200x/3e/4d/d1/3e4dd14c73f0b33b4cfb0d2f5c6806e6.jpg",
       "published": true,
       "lessons": [
@@ -16,7 +16,7 @@
           "format": "html"
         }
       ],
-      "updated_at": "2026-11-08T22:14:25.042Z",
+      "updated_at": "2026-11-08T22:30:20.157Z",
       "slug": "les-systemes-surveillance"
     },
     {
