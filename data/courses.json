@@ -112,7 +112,7 @@
       "id": "mw3kjnpmjfh7",
       "title": "Mathématiques",
       "category": "Maths",
-      "description": "",
+      "description": "Cours de maths durant l'année pour pouvoir réviser avant les épreuves sur les différents thèmes vus en classe.",
       "cover_url": "https://sherpas.com/content/uploads/2026/07/maths-fiches.jpg",
       "published": true,
       "lessons": [
@@ -124,7 +124,7 @@
           "format": "html"
         }
       ],
-      "updated_at": "2026-11-08T22:19:25.336Z",
+      "updated_at": "2026-11-08T22:29:24.910Z",
       "slug": "mathematiques"
     },
     {
