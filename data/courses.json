@@ -2,7 +2,7 @@
   "courses": [
     {
       "id": "mw8e1s3w99a3",
-      "title": "Les Systèmes",
+      "title": "Les Systèmes & Surveillance",
       "category": "ADMIN SYS",
       "description": "",
       "cover_url": "https://i.pinimg.com/1200x/3e/4d/d1/3e4dd14c73f0b33b4cfb0d2f5c6806e6.jpg",
@@ -16,8 +16,8 @@
           "format": "html"
         }
       ],
-      "updated_at": "2026-11-08T22:13:47.374Z",
-      "slug": "les-systemes"
+      "updated_at": "2026-11-08T22:14:25.042Z",
+      "slug": "les-systemes-surveillance"
     },
     {
       "id": "mw41ifiy52yk",
