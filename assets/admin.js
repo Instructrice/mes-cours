@@ -30,6 +30,12 @@ function guessRepo() {
   return { owner: m[1], repo };
 }
 
+// Sur GitHub Pages, l'admin ne peut viser QUE le dépôt qui héberge ce site.
+const SITE = guessRepo();
+const ON_PAGES = !!SITE.owner;
+const sameRepo = cfg => !ON_PAGES ||
+  (cfg.owner.toLowerCase() === SITE.owner.toLowerCase() && cfg.repo.toLowerCase() === SITE.repo.toLowerCase());
+
 /** Ancienne configuration (jeton EN CLAIR) : reprise une seule fois, puis effacée. */
 function legacyConfig() {
   const old = store.get(KEYS.legacy);
@@ -75,15 +81,28 @@ const Lockout = {
 
 // Coffres disponibles : celui du navigateur et celui publié dans le dépôt.
 // Chacun est authentifié (AES-GCM) : un coffre modifié par un tiers ne s'ouvre simplement pas.
-async function vaultCandidates() {
-  const raw = [store.get(KEYS.vault)];
+// Le coffre du dépôt fait foi : il est lu directement sur GitHub (à jour immédiatement),
+// à défaut sur le site (GitHub Pages peut avoir quelques minutes de retard).
+async function fetchRepoVault() {
+  if (ON_PAGES) {
+    try {
+      const res = await fetch(`https://api.github.com/repos/${encodeURIComponent(SITE.owner)}/${encodeURIComponent(SITE.repo)}/contents/${VAULT_PATH}?t=${Date.now()}`,
+        { headers: { Accept: 'application/vnd.github.raw+json' }, cache: 'no-store', referrerPolicy: 'no-referrer' });
+      if (res.ok) return await res.json();
+    } catch { /* limite de l'API publique atteinte, hors ligne… */ }
+  }
   try {
     const res = await fetch(`${VAULT_PATH}?t=${Date.now()}`, { cache: 'no-store' });
-    if (res.ok) raw.push(await res.json());
+    if (res.ok) return await res.json();
   } catch { /* pas de coffre publié */ }
+  return null;
+}
+
+async function vaultCandidates() {
+  const raw = [await fetchRepoVault(), store.get(KEYS.vault)];
   const out = [];
   for (const v of raw) {
-    try { const p = parseVault(v); if (!out.some(x => x.ct === p.ct)) out.push(p); } catch { /* ignoré */ }
+    try { const p = parseVault(v); if (sameRepo(p) && !out.some(x => x.ct === p.ct)) out.push(p); } catch { /* ignoré */ }
   }
   return out;
 }
@@ -119,13 +138,6 @@ const gh = cfg => ({
     if (!res.ok) throw new Error(await ghError(res));
     return (await res.json()).content.sha;
   },
-  async deleteFile(path, sha, message) {
-    const res = await fetch(`${this.base}/contents/${path}`, {
-      method: 'DELETE', headers: { ...this.headers, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, branch: cfg.branch, sha }),
-    });
-    if (!res.ok && res.status !== 404) throw new Error(await ghError(res));
-  },
   async read() {
     const f = await this.readFile(DATA_PATH);
     if (!f) return { data: { courses: [] }, sha: null };
@@ -136,11 +148,10 @@ const gh = cfg => ({
   write(data, sha, message) {
     return this.writeFile(DATA_PATH, JSON.stringify(validateData(data), null, 2) + '\n', sha, message);
   },
-  /** Publie (ou retire) le coffre chiffré dans le dépôt. */
-  async saveVault(vault, inRepo) {
+  /** Publie le coffre chiffré dans le dépôt. Échoue si le jeton n'a pas le droit d'écrire : c'est voulu. */
+  async saveVault(vault) {
     const cur = await this.readFile(VAULT_PATH);
-    if (inRepo) await this.writeFile(VAULT_PATH, JSON.stringify(vault, null, 2) + '\n', cur?.sha, 'Admin : coffre chiffré mis à jour');
-    else if (cur) await this.deleteFile(VAULT_PATH, cur.sha, 'Admin : coffre chiffré retiré du dépôt');
+    await this.writeFile(VAULT_PATH, JSON.stringify(vault, null, 2) + '\n', cur?.sha, 'Admin : coffre chiffré mis à jour');
   },
 });
 
@@ -351,9 +362,8 @@ const passwordFields = (label = 'Mot de passe admin') => `
   <label>Confirmer le mot de passe
     <input name="password2" type="password" required minlength="${MIN_PASSWORD_LENGTH}" maxlength="256" autocomplete="new-password"></label>`;
 
-const repoCheckbox = checked => `<label class="checkbox"><input type="checkbox" name="in_repo" ${checked ? 'checked' : ''}>
-  Enregistrer le coffre chiffré dans le dépôt <small class="muted">— permet de se connecter depuis n'importe quel appareil
-  avec le seul mot de passe. Le jeton y est chiffré (AES-256) : sans le mot de passe il est illisible.</small></label>`;
+const vaultNote = `<p class="muted"><small>Le coffre chiffré est enregistré dans le dépôt : vous pourrez vous connecter
+  depuis n'importe quel appareil avec le seul mot de passe. Sans le mot de passe, le jeton y est illisible (AES-256).</small></p>`;
 
 function loginView() {
   return `<form class="panel narrow" data-form="login" autocomplete="off">
@@ -376,18 +386,20 @@ function setupView(hasVault) {
     <h1>${hasVault ? 'Réinitialiser l\'accès admin' : 'Protéger l\'admin par mot de passe'}</h1>
     ${legacy?.token ? `<div class="flash warn">Votre jeton GitHub était enregistré <strong>en clair</strong> dans ce navigateur.
       Choisissez un mot de passe : il sera chiffré, puis la copie en clair sera effacée.</div>` : ''}
+    ${hasVault ? `<div class="flash warn">Un mot de passe admin existe déjà. Pour le remplacer, il faut un jeton GitHub
+      autorisé à <strong>écrire</strong> dans ce dépôt : seul le propriétaire du dépôt peut donc le faire.</div>` : ''}
     <p class="muted">Le jeton GitHub est chiffré avec votre mot de passe. Sans ce mot de passe,
       personne ne peut modifier les cours, même en lisant le code du dépôt.</p>
     <div class="two-cols">
-      <label>Propriétaire (compte GitHub)<input name="owner" value="${esc(g.owner)}" required maxlength="100" pattern="[A-Za-z0-9_.\\-]+"></label>
-      <label>Dépôt<input name="repo" value="${esc(g.repo)}" required maxlength="100" pattern="[A-Za-z0-9_.\\-]+"></label>
+      <label>Propriétaire (compte GitHub)<input name="owner" value="${esc(ON_PAGES ? SITE.owner : g.owner)}" required maxlength="100" pattern="[A-Za-z0-9_.\\-]+" ${ON_PAGES ? 'readonly' : ''}></label>
+      <label>Dépôt<input name="repo" value="${esc(ON_PAGES ? SITE.repo : g.repo)}" required maxlength="100" pattern="[A-Za-z0-9_.\\-]+" ${ON_PAGES ? 'readonly' : ''}></label>
     </div>
     <label>Branche<input name="branch" value="${esc(g.branch)}" required maxlength="200"></label>
     <label>Jeton d'accès GitHub (fine-grained token)
       <input name="token" type="password" value="${esc(legacy?.token || '')}" required autocomplete="off" placeholder="github_pat_…"></label>
     ${TOKEN_HELP}
     ${passwordFields()}
-    ${repoCheckbox(true)}
+    ${vaultNote}
     <div class="row"><button class="btn">Chiffrer et enregistrer</button></div>
     <p data-form-msg role="alert"></p>
   </form>`;
@@ -404,7 +416,7 @@ function settings() {
       <input name="token" type="password" autocomplete="off" placeholder="github_pat_…"></label>
     ${TOKEN_HELP}
     ${passwordFields('Nouveau mot de passe')}
-    ${repoCheckbox(true)}
+    ${vaultNote}
     <div class="row"><button class="btn">Mettre à jour</button></div>
     <p data-form-msg role="alert"></p>
   </form>`;
@@ -500,6 +512,7 @@ const busy = (form, on, label) => {
 };
 
 async function startSession(cfg) {
+  if (!sameRepo(cfg)) { session = null; return render(); }
   session = cfg;
   store.del(KEYS.legacy);                 // plus aucune trace du jeton en clair
   Lockout.reset();
@@ -541,6 +554,7 @@ async function handleAuthForm(form, kind, v) {
     let cfg;
     if (kind === 'setup') {
       cfg = { owner: v.owner.trim(), repo: v.repo.trim(), branch: v.branch.trim() || 'main', token: v.token.trim() };
+      if (ON_PAGES) Object.assign(cfg, { owner: SITE.owner, repo: SITE.repo }); // impossible de viser un autre dépôt
     } else {
       // On redemande le mot de passe actuel avant tout changement.
       busy(form, true, 'Vérification…');
@@ -557,7 +571,9 @@ async function handleAuthForm(form, kind, v) {
       const api = gh(cfg);
       await api.readFile(DATA_PATH);         // vérifie que le jeton fonctionne sur ce dépôt
       const vault = await createVault(cfg, newPassword);
-      await api.saveVault(vault, v.in_repo === 'on');
+      // Écrire le coffre dans le dépôt prouve que le jeton a le droit d'écriture :
+      // un jeton d'un autre compte, ou en lecture seule, est refusé par GitHub ici.
+      await api.saveVault(vault);
       store.set(KEYS.vault, vault);
       busy(form, false);
       if (kind === 'settings') { session = cfg; render(); return formMsg(app.querySelector('form'), '✅ Accès mis à jour.', true); }
