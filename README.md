@@ -44,9 +44,12 @@ C'est tout : ensuite l'admin ne demande plus que le mot de passe. Créez vos cou
 **Accès admin uniquement par mot de passe**
 - Le jeton GitHub (la seule clé qui permet d'écrire dans `data/courses.json`) est **chiffré** avec votre mot de passe :
   PBKDF2-SHA256 (600 000 itérations) → AES-256-GCM. Il n'est **jamais** stocké en clair, ni dans le dépôt, ni dans le navigateur.
-- Le coffre chiffré peut être publié dans `data/admin-vault.json` : vous vous connectez alors depuis n'importe quel appareil
+- Le coffre chiffré est enregistré dans `data/admin-vault.json` : vous vous connectez depuis n'importe quel appareil
   avec le seul mot de passe. Quelqu'un qui lit ou copie le dépôt ne voit qu'un bloc chiffré inutilisable sans le mot de passe.
   Toute modification du coffre (chiffré, dépôt, branche) le rend invalide.
+- **Personne d'autre ne peut créer ou remplacer le mot de passe** : l'écran de création/réinitialisation est visible par tous,
+  mais il n'aboutit que si GitHub accepte d'écrire le coffre dans **ce** dépôt, donc avec un jeton du propriétaire.
+  Le dépôt visé est figé sur celui du site : impossible de pointer l'admin vers un autre dépôt.
 - Après déverrouillage, le jeton reste **uniquement en mémoire** : bouton « 🔒 Verrouiller », verrouillage automatique
   après 20 minutes d'inactivité ou à la fermeture de l'onglet.
 - Délai croissant après 3 mots de passe faux (5 s, 10 s, 20 s… jusqu'à 5 min). La vraie protection contre la force brute
