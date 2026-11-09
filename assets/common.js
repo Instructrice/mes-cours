@@ -123,9 +123,18 @@ export function htmlLessonDoc(content) {
   return HTML_HELPER + src;
 }
 
+// Le contenu n'est plus injecté en srcdoc (qui hériterait de la politique de sécurité
+// de la page) : l'iframe charge lesson-frame.html, sandboxée sans allow-same-origin,
+// et reçoit son HTML par postMessage. Ses scripts tournent dans une origine opaque :
+// ils ne peuvent lire ni le stockage du site, ni la session admin.
+const frameContents = new Map();
+let frameSeq = 0;
 export function htmlLessonFrame(content, title = '') {
+  const key = `f${++frameSeq}`;
+  frameContents.set(key, htmlLessonDoc(content));
+  if (frameContents.size > 50) frameContents.delete(frameContents.keys().next().value);
   return `<iframe class="html-lesson" title="${esc(title)}" sandbox="${HTML_SANDBOX}"
-    srcdoc="${esc(htmlLessonDoc(content))}"></iframe>`;
+    src="lesson-frame.html" data-frame-key="${key}" referrerpolicy="no-referrer"></iframe>`;
 }
 
 /** Contenu d'une leçon selon son format (markdown par défaut). */
@@ -138,6 +147,15 @@ export function lessonBodyHtml(lesson) {
 
 // Ajuste la hauteur des iframes HTML à leur contenu
 window.addEventListener('message', e => {
+  if (e.data && e.data.lessonFrameReady === true) {
+    for (const f of document.querySelectorAll('iframe.html-lesson')) {
+      if (f.contentWindow !== e.source) continue;
+      const html = frameContents.get(f.dataset.frameKey);
+      // Origine opaque (sandbox) : seule la cible '*' est possible ; on vise la fenêtre exacte de l'iframe.
+      if (html != null) e.source.postMessage({ lessonHtml: html }, '*');
+    }
+    return;
+  }
   const h = e.data && e.data.htmlLessonHeight;
   if (typeof h !== 'number') return;
   for (const f of document.querySelectorAll('iframe.html-lesson')) {
