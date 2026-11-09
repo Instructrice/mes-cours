@@ -32,18 +32,40 @@ ajoutez vos cours depuis un **espace admin**, puis suivez-les leçon par leçon 
 2. **Créer un jeton pour l'admin** : ouvrez <https://github.com/settings/personal-access-tokens/new>
    - *Repository access* : « Only select repositories » → ce dépôt
    - *Permissions → Repository permissions → Contents* : **Read and write**
-   - Générez et copiez le jeton (`github_pat_…`)
-3. Ouvrez `…/admin.html`, allez dans **Réglages**, collez le jeton puis « Enregistrer et tester ».
+   - Mettez une date d'expiration, générez et copiez le jeton (`github_pat_…`)
+3. Ouvrez `…/admin.html`, collez le jeton et **choisissez un mot de passe admin**
+   (12 caractères min., 3 types de caractères, ou une phrase de 20 caractères et plus).
 
-C'est tout : créez vos cours, cliquez sur **Publier sur GitHub**, le site se met à jour en 1 à 2 minutes.
+C'est tout : ensuite l'admin ne demande plus que le mot de passe. Créez vos cours, cliquez sur
+**Publier sur GitHub**, le site se met à jour en 1 à 2 minutes.
 
-## 🔒 Sécurité, à savoir
+## 🔒 Sécurité
 
-- Le jeton est stocké **uniquement dans votre navigateur**. Sans lui, la page admin ne peut rien modifier :
-  n'importe qui peut l'ouvrir mais personne ne peut publier.
-- Utilisez l'admin seulement sur vos appareils personnels et donnez au jeton l'accès à **ce seul dépôt**.
-- Un dépôt public (nécessaire pour GitHub Pages gratuit) rend `data/courses.json` lisible par tous,
-  **y compris les cours en brouillon**. Ne mettez rien de confidentiel.
+**Accès admin uniquement par mot de passe**
+- Le jeton GitHub (la seule clé qui permet d'écrire dans `data/courses.json`) est **chiffré** avec votre mot de passe :
+  PBKDF2-SHA256 (600 000 itérations) → AES-256-GCM. Il n'est **jamais** stocké en clair, ni dans le dépôt, ni dans le navigateur.
+- Le coffre chiffré peut être publié dans `data/admin-vault.json` : vous vous connectez alors depuis n'importe quel appareil
+  avec le seul mot de passe. Quelqu'un qui lit ou copie le dépôt ne voit qu'un bloc chiffré inutilisable sans le mot de passe.
+  Toute modification du coffre (chiffré, dépôt, branche) le rend invalide.
+- Après déverrouillage, le jeton reste **uniquement en mémoire** : bouton « 🔒 Verrouiller », verrouillage automatique
+  après 20 minutes d'inactivité ou à la fermeture de l'onglet.
+- Délai croissant après 3 mots de passe faux (5 s, 10 s, 20 s… jusqu'à 5 min). La vraie protection contre la force brute
+  reste la longueur du mot de passe : **choisissez-en un long et unique**.
+- Mot de passe oublié : « Mot de passe oublié ? » sur l'écran de connexion, recollez un jeton GitHub et choisissez un nouveau mot de passe.
+  En cas de doute, révoquez le jeton sur GitHub : le coffre devient alors inutilisable.
+
+**Protection contre les injections**
+- Toutes les données (lues depuis GitHub, brouillon du navigateur, formulaires) passent par une validation stricte
+  (`assets/schema.js`) : champs connus uniquement, types et tailles contrôlés, identifiants sans caractère spécial,
+  liens obligatoirement en `https://` (`javascript:`, `data:`… refusés). Une donnée invalide n'est jamais publiée.
+- Politique de sécurité du contenu (CSP) stricte sur le site et l'admin : seuls les scripts du site s'exécutent,
+  l'admin ne parle qu'à `api.github.com`. L'admin refuse aussi d'être affiché dans le cadre d'un autre site.
+- Le Markdown est nettoyé par DOMPurify ; les leçons HTML s'exécutent dans `lesson-frame.html`, un cadre isolé
+  (sandbox, origine opaque) qui ne peut lire ni le stockage du site, ni la session admin.
+- `npm test` vérifie aussi qu'aucun jeton GitHub en clair n'est présent dans le dépôt.
+
+**À savoir** : le dépôt est public (GitHub Pages gratuit), donc `data/courses.json` est lisible par tous,
+**y compris les cours en brouillon**. Le mot de passe protège la **modification**, pas la lecture.
 
 ## 🧩 Leçons en HTML
 
@@ -51,7 +73,7 @@ Choisissez le format **HTML** dans le formulaire de leçon, puis collez votre co
 
 - Un **fragment** (`<h2>…</h2><p>…</p>`) ou une **page complète** (`<!doctype html>…`, avec `<style>` et `<script>`) sont acceptés.
 - La leçon s'affiche dans un cadre isolé (iframe *sandbox*) qui s'adapte automatiquement à la hauteur du contenu.
-  Vos scripts fonctionnent normalement, mais ils ne peuvent pas accéder au reste du site (ni au jeton de l'admin).
+  Vos scripts fonctionnent normalement, mais ils ne peuvent pas accéder au reste du site (ni à la session admin).
 - Les ressources externes (images, polices, bibliothèques via CDN) doivent être en `https://…`.
   Pour une image de votre dépôt, utilisez son adresse complète : `https://<compte>.github.io/<depot>/…`.
 - Le format Markdown accepte aussi du HTML simple (sans scripts).
@@ -65,7 +87,7 @@ ou l'identifiant seul. Ajoutez `?t=90` ou `&t=1m30s` pour démarrer à un moment
 
 ```bash
 npm start      # sert le site sur http://localhost:3000
-npm test       # vérifie les liens YouTube et data/courses.json
+npm test       # liens YouTube, data/courses.json, chiffrement et protections anti-injection
 ```
 
 Vous pouvez aussi modifier `data/courses.json` à la main et le pousser : c'est le même fichier que l'admin.
@@ -76,12 +98,16 @@ Vous pouvez aussi modifier `data/courses.json` à la main et le pousser : c'est 
 index.html           Site d'apprentissage
 admin.html           Espace admin
 assets/app.js        Pages : accueil, cours, leçon
-assets/admin.js      Admin + enregistrement via l'API GitHub
+assets/admin.js      Admin (connexion par mot de passe) + enregistrement via l'API GitHub
+assets/vault.js      Coffre chiffré du jeton GitHub (PBKDF2 + AES-GCM)
+assets/schema.js     Validation stricte des données (anti-injection)
+assets/lesson-frame.js + lesson-frame.html   Cadre isolé des leçons HTML
 assets/common.js     Fonctions partagées (Markdown, progression, thème…)
 assets/youtube.js    Analyse des liens YouTube
 assets/style.css     Design
 assets/vendor/       marked (Markdown) et DOMPurify (sécurité)
 data/courses.json    Vos cours
+data/admin-vault.json  Coffre chiffré (créé par l'admin, optionnel)
 ```
 
 ## Licence

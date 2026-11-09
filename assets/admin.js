@@ -1,12 +1,27 @@
-import { esc, md, loadData, normalize, initTheme, youtubeId, thumbnailUrl, embedUrl, htmlLessonFrame, DATA_PATH } from './common.js';
+import { esc, md, initTheme, youtubeId, thumbnailUrl, embedUrl, htmlLessonFrame, DATA_PATH } from './common.js';
+import { createVault, openVault, parseVault, checkPassword, VAULT_PATH, MIN_PASSWORD_LENGTH } from './vault.js';
+import { validateData, validateCourse, validateLesson, LIMITS } from './schema.js';
+
+// Anti-clickjacking : l'admin refuse de s'afficher dans un cadre d'un autre site.
+if (window.top !== window.self) {
+  document.documentElement.innerHTML = '';
+  throw new Error('Admin intégré dans un cadre : affichage bloqué.');
+}
 
 initTheme();
 const app = document.getElementById('app');
 const savebar = document.getElementById('savebar');
 
 // =====================================================================
-// Configuration GitHub (stockée uniquement dans ce navigateur)
+// Stockage local (jamais de secret en clair)
 // =====================================================================
+const KEYS = { vault: 'admin-vault', draft: 'admin-draft', lockout: 'admin-lockout', legacy: 'gh-config' };
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} },
+};
+
 function guessRepo() {
   const m = location.hostname.match(/^([^.]+)\.github\.io$/i);
   if (!m) return { owner: '', repo: '' };
@@ -14,56 +29,129 @@ function guessRepo() {
   const repo = first && !first.endsWith('.html') ? first : `${m[1]}.github.io`;
   return { owner: m[1], repo };
 }
-const Config = {
-  get() {
-    let saved = {};
-    try { saved = JSON.parse(localStorage.getItem('gh-config') || '{}'); } catch {}
-    return { ...guessRepo(), branch: 'main', token: '', ...Object.fromEntries(Object.entries(saved).filter(([, v]) => v)) };
+
+/** Ancienne configuration (jeton EN CLAIR) : reprise une seule fois, puis effacée. */
+function legacyConfig() {
+  const old = store.get(KEYS.legacy);
+  if (!old || typeof old !== 'object') return null;
+  const pick = k => (typeof old[k] === 'string' ? old[k] : '');
+  return { owner: pick('owner'), repo: pick('repo'), branch: pick('branch'), token: pick('token') };
+}
+
+// =====================================================================
+// Session : le jeton déchiffré vit UNIQUEMENT en mémoire, dans cette variable.
+// Il disparaît en verrouillant, en fermant l'onglet ou après 20 min d'inactivité.
+// =====================================================================
+let session = null;
+let locking = false;
+const IDLE_MS = 20 * 60 * 1000;
+let idleTimer;
+function armIdle() { clearTimeout(idleTimer); if (session) idleTimer = setTimeout(lock, IDLE_MS); }
+['pointerdown', 'keydown', 'scroll', 'input'].forEach(ev => addEventListener(ev, armIdle, { passive: true, capture: true }));
+function lock() {
+  if (state.dirty) Draft.save();
+  session = null; locking = true;
+  location.hash = '#/';
+  location.reload();
+}
+function showAuthNav() {
+  document.querySelectorAll('[data-auth-only]').forEach(el => { el.hidden = !session; });
+}
+document.querySelector('[data-lock]')?.addEventListener('click', lock);
+
+// Anti-force brute : délai croissant après 3 échecs (5 s, 10 s, 20 s… jusqu'à 5 min).
+// La vraie protection reste le coût du déchiffrement (PBKDF2) et la longueur du mot de passe.
+const Lockout = {
+  get() { const s = store.get(KEYS.lockout); return { fails: Number.isInteger(s?.fails) ? s.fails : 0, until: Number(s?.until) || 0 }; },
+  remaining() { return Math.max(0, this.get().until - Date.now()); },
+  fail() {
+    const fails = this.get().fails + 1;
+    const wait = fails >= 3 ? Math.min(5 * 2 ** (fails - 3), 300) * 1000 : 0;
+    store.set(KEYS.lockout, { fails, until: Date.now() + wait });
+    return wait;
   },
-  save(cfg) { try { localStorage.setItem('gh-config', JSON.stringify(cfg)); } catch {} },
-  ready() { const c = this.get(); return !!(c.owner && c.repo && c.token); },
+  reset() { store.del(KEYS.lockout); },
 };
 
-// Encodage base64 compatible UTF-8 (accents, emojis)
+// Coffres disponibles : celui du navigateur et celui publié dans le dépôt.
+// Chacun est authentifié (AES-GCM) : un coffre modifié par un tiers ne s'ouvre simplement pas.
+async function vaultCandidates() {
+  const raw = [store.get(KEYS.vault)];
+  try {
+    const res = await fetch(`${VAULT_PATH}?t=${Date.now()}`, { cache: 'no-store' });
+    if (res.ok) raw.push(await res.json());
+  } catch { /* pas de coffre publié */ }
+  const out = [];
+  for (const v of raw) {
+    try { const p = parseVault(v); if (!out.some(x => x.ct === p.ct)) out.push(p); } catch { /* ignoré */ }
+  }
+  return out;
+}
+
+// =====================================================================
+// API GitHub (avec la configuration déchiffrée)
+// =====================================================================
 const toB64 = str => { const b = new TextEncoder().encode(str); let s = ''; b.forEach(x => { s += String.fromCharCode(x); }); return btoa(s); };
 const fromB64 = b64 => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\s/g, '')), c => c.charCodeAt(0)));
 
-const GitHub = {
-  url(cfg) { return `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${DATA_PATH}`; },
-  headers(cfg) { return { Accept: 'application/vnd.github+json', Authorization: `Bearer ${cfg.token}`, 'X-GitHub-Api-Version': '2022-11-28' }; },
-  async read() {
-    const cfg = Config.get();
-    const res = await fetch(`${this.url(cfg)}?ref=${encodeURIComponent(cfg.branch)}&t=${Date.now()}`, { headers: this.headers(cfg), cache: 'no-store' });
-    if (res.status === 404) return { data: { courses: [] }, sha: null };
-    if (!res.ok) throw new Error(await this.error(res));
+const gh = cfg => ({
+  base: `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}`,
+  headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${cfg.token}`, 'X-GitHub-Api-Version': '2022-11-28' },
+  async readFile(path) {
+    const res = await fetch(`${this.base}/contents/${path}?ref=${encodeURIComponent(cfg.branch)}&t=${Date.now()}`,
+      { headers: this.headers, cache: 'no-store', referrerPolicy: 'no-referrer' });
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(await ghError(res));
     const json = await res.json();
     let b64 = json.content;
     if (!b64 || json.encoding === 'none') { // fichier > 1 Mo : passer par l'API "blobs"
-      const blob = await fetch(`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/git/blobs/${json.sha}`,
-        { headers: this.headers(cfg), cache: 'no-store' });
-      if (!blob.ok) throw new Error(await this.error(blob));
+      const blob = await fetch(`${this.base}/git/blobs/${encodeURIComponent(json.sha)}`, { headers: this.headers, cache: 'no-store' });
+      if (!blob.ok) throw new Error(await ghError(blob));
       b64 = (await blob.json()).content;
     }
-    return { data: normalize(JSON.parse(fromB64(b64))), sha: json.sha };
+    return { text: fromB64(b64), sha: json.sha };
   },
-  async write(data, sha, message) {
-    const cfg = Config.get();
-    const res = await fetch(this.url(cfg), {
-      method: 'PUT', headers: { ...this.headers(cfg), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, branch: cfg.branch, content: toB64(JSON.stringify(data, null, 2) + '\n'), ...(sha ? { sha } : {}) }),
+  async writeFile(path, text, sha, message) {
+    const res = await fetch(`${this.base}/contents/${path}`, {
+      method: 'PUT', headers: { ...this.headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, branch: cfg.branch, content: toB64(text), ...(sha ? { sha } : {}) }),
     });
-    if (!res.ok) throw new Error(await this.error(res));
+    if (!res.ok) throw new Error(await ghError(res));
     return (await res.json()).content.sha;
   },
-  async error(res) {
-    let msg = ''; try { msg = (await res.json()).message; } catch {}
-    if (res.status === 401) return 'Jeton GitHub invalide ou expiré (Réglages).';
-    if (res.status === 403) return `Accès refusé : le jeton doit avoir la permission « Contents : Read and write » sur ce dépôt. ${msg}`;
-    if (res.status === 404) return 'Dépôt ou branche introuvable : vérifiez les Réglages.';
-    if (res.status === 409) return 'Le fichier a changé sur GitHub entre-temps. Rechargez les données puis réessayez.';
-    return `Erreur GitHub ${res.status} : ${msg}`;
+  async deleteFile(path, sha, message) {
+    const res = await fetch(`${this.base}/contents/${path}`, {
+      method: 'DELETE', headers: { ...this.headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, branch: cfg.branch, sha }),
+    });
+    if (!res.ok && res.status !== 404) throw new Error(await ghError(res));
   },
-};
+  async read() {
+    const f = await this.readFile(DATA_PATH);
+    if (!f) return { data: { courses: [] }, sha: null };
+    let parsed;
+    try { parsed = JSON.parse(f.text); } catch { throw new Error(`${DATA_PATH} n'est pas un JSON valide.`); }
+    return { data: validateData(parsed), sha: f.sha };
+  },
+  write(data, sha, message) {
+    return this.writeFile(DATA_PATH, JSON.stringify(validateData(data), null, 2) + '\n', sha, message);
+  },
+  /** Publie (ou retire) le coffre chiffré dans le dépôt. */
+  async saveVault(vault, inRepo) {
+    const cur = await this.readFile(VAULT_PATH);
+    if (inRepo) await this.writeFile(VAULT_PATH, JSON.stringify(vault, null, 2) + '\n', cur?.sha, 'Admin : coffre chiffré mis à jour');
+    else if (cur) await this.deleteFile(VAULT_PATH, cur.sha, 'Admin : coffre chiffré retiré du dépôt');
+  },
+});
+
+async function ghError(res) {
+  let msg = ''; try { msg = (await res.json()).message; } catch {}
+  if (res.status === 401) return 'Jeton GitHub invalide ou expiré.';
+  if (res.status === 403) return `Accès refusé : le jeton doit avoir la permission « Contents : Read and write » sur ce dépôt. ${msg}`;
+  if (res.status === 404) return 'Dépôt ou branche introuvable.';
+  if (res.status === 409) return 'Le fichier a changé sur GitHub entre-temps. Rechargez les données puis réessayez.';
+  return `Erreur GitHub ${res.status} : ${msg}`;
+}
 
 // =====================================================================
 // État : données + brouillon local non publié
@@ -71,28 +159,29 @@ const GitHub = {
 const state = { data: { courses: [] }, sha: null, dirty: false, saving: false, message: null };
 
 const Draft = {
-  save() { try { localStorage.setItem('admin-draft', JSON.stringify({ data: state.data, sha: state.sha })); } catch {} },
-  load() { try { return JSON.parse(localStorage.getItem('admin-draft') || 'null'); } catch { return null; } },
-  clear() { try { localStorage.removeItem('admin-draft'); } catch {} },
+  save() { store.set(KEYS.draft, { data: state.data, sha: state.sha }); },
+  /** Le brouillon vient du navigateur (partagé avec les autres pages du domaine) : il est revalidé. */
+  load() {
+    const d = store.get(KEYS.draft);
+    if (!d) return null;
+    try { return { data: validateData(d.data), sha: typeof d.sha === 'string' && /^[0-9a-f]{40}$/.test(d.sha) ? d.sha : null }; }
+    catch (err) { this.clear(); state.message = { ok: false, text: `Brouillon local ignoré (données invalides) : ${err.message}` }; return null; }
+  },
+  clear() { store.del(KEYS.draft); },
 };
 
 function changed() { state.dirty = true; Draft.save(); renderSavebar(); }
 
 async function loadFromSource() {
-  if (Config.ready()) {
-    const { data, sha } = await GitHub.read();
-    state.data = data; state.sha = sha;
-  } else {
-    state.data = await loadData().catch(() => ({ courses: [] }));
-  }
-  state.dirty = false;
+  const { data, sha } = await gh(session).read();
+  state.data = data; state.sha = sha; state.dirty = false;
 }
 
 async function publish() {
-  if (!Config.ready()) { location.hash = '#/reglages'; return; }
+  if (!session) return;
   state.saving = true; state.message = null; renderSavebar();
   try {
-    state.sha = await GitHub.write(state.data, state.sha, 'Mise à jour des cours depuis l\'admin');
+    state.sha = await gh(session).write(state.data, state.sha, 'Mise à jour des cours depuis l\'admin');
     state.dirty = false; Draft.clear();
     state.message = { ok: true, text: '✅ Publié ! Le site sera à jour dans 1 à 2 minutes.' };
   } catch (e) {
@@ -116,6 +205,7 @@ function renderSavebar() {
 }
 
 savebar.addEventListener('click', async e => {
+  if (!session) return;
   const action = e.target.closest('[data-action]')?.dataset.action;
   if (action === 'publish') publish();
   if (action === 'dismiss') { state.message = null; renderSavebar(); }
@@ -125,7 +215,7 @@ savebar.addEventListener('click', async e => {
     renderSavebar(); render();
   }
 });
-window.addEventListener('beforeunload', e => { if (state.dirty) e.preventDefault(); });
+window.addEventListener('beforeunload', e => { if (state.dirty && !locking) e.preventDefault(); });
 
 // =====================================================================
 // Utilitaires
@@ -148,15 +238,9 @@ const notFound = () => `<div class="empty"><p>Élément introuvable.</p><p><a cl
 // =====================================================================
 // Vues
 // =====================================================================
-function setupNotice() {
-  if (Config.ready()) return '';
-  return `<div class="flash warn">Pour enregistrer vos cours sur GitHub, configurez d'abord votre
-    <a href="#/reglages">jeton d'accès GitHub</a>. En attendant, vos modifications restent dans ce navigateur.</div>`;
-}
-
 function dashboard() {
   const courses = state.data.courses;
-  return `${setupNotice()}
+  return `
   <div class="page-head"><h1>Mes cours</h1><a class="btn" href="#/cours/nouveau">+ Nouveau cours</a></div>
   ${!courses.length ? `<div class="empty"><p>Vous n'avez encore aucun cours.</p>
      <p><a class="btn" href="#/cours/nouveau">Créer un cours</a></p></div>` : `
@@ -252,44 +336,93 @@ function lessonForm(c, l) {
   </form>`;
 }
 
-function settings() {
-  const c = Config.get();
-  return `<a href="#/" class="back">← Tous les cours</a>
-  <form class="panel" data-form="settings">
-    <h1>Réglages GitHub</h1>
-    <p class="muted">L'admin enregistre vos cours dans le fichier <code>${DATA_PATH}</code> de votre dépôt.
-      Ces réglages restent <strong>uniquement dans ce navigateur</strong>.</p>
+const TOKEN_HELP = `<details><summary>Comment créer le jeton GitHub (2 minutes)</summary>
+  <ol class="help">
+    <li>Ouvrez <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">github.com/settings/personal-access-tokens/new</a></li>
+    <li>Nom : « Admin mes cours », avec une date d'expiration</li>
+    <li><strong>Repository access</strong> : « Only select repositories » → ce dépôt uniquement</li>
+    <li><strong>Permissions → Repository permissions → Contents</strong> : « Read and write »</li>
+    <li>Générez le jeton, copiez-le et collez-le ici</li>
+  </ol></details>`;
+
+const passwordFields = (label = 'Mot de passe admin') => `
+  <label>${label} <small class="muted">(${MIN_PASSWORD_LENGTH} caractères min., 3 types de caractères ou une longue phrase)</small>
+    <input name="password" type="password" required minlength="${MIN_PASSWORD_LENGTH}" maxlength="256" autocomplete="new-password"></label>
+  <label>Confirmer le mot de passe
+    <input name="password2" type="password" required minlength="${MIN_PASSWORD_LENGTH}" maxlength="256" autocomplete="new-password"></label>`;
+
+const repoCheckbox = checked => `<label class="checkbox"><input type="checkbox" name="in_repo" ${checked ? 'checked' : ''}>
+  Enregistrer le coffre chiffré dans le dépôt <small class="muted">— permet de se connecter depuis n'importe quel appareil
+  avec le seul mot de passe. Le jeton y est chiffré (AES-256) : sans le mot de passe il est illisible.</small></label>`;
+
+function loginView() {
+  return `<form class="panel narrow" data-form="login" autocomplete="off">
+    <h1>🔒 Espace admin</h1>
+    <p class="muted">Entrez le mot de passe pour déverrouiller l'admin.</p>
+    <input type="text" name="username" autocomplete="username" value="admin" hidden>
+    <label>Mot de passe<input name="password" type="password" required maxlength="256" autocomplete="current-password" autofocus></label>
+    <div class="row"><button class="btn">Déverrouiller</button></div>
+    <p data-form-msg role="alert"></p>
+    <p class="muted"><small><a href="#/configurer">Mot de passe oublié ou nouvel appareil sans coffre ?</a>
+      Il faudra recoller un jeton GitHub.</small></p>
+  </form>`;
+}
+
+function setupView(hasVault) {
+  const legacy = legacyConfig();
+  const g = { ...guessRepo(), branch: 'main', ...(legacy ? Object.fromEntries(Object.entries(legacy).filter(([, v]) => v)) : {}) };
+  return `${hasVault ? '<a href="#/" class="back">← Retour à la connexion</a>' : ''}
+  <form class="panel" data-form="setup" autocomplete="off">
+    <h1>${hasVault ? 'Réinitialiser l\'accès admin' : 'Protéger l\'admin par mot de passe'}</h1>
+    ${legacy?.token ? `<div class="flash warn">Votre jeton GitHub était enregistré <strong>en clair</strong> dans ce navigateur.
+      Choisissez un mot de passe : il sera chiffré, puis la copie en clair sera effacée.</div>` : ''}
+    <p class="muted">Le jeton GitHub est chiffré avec votre mot de passe. Sans ce mot de passe,
+      personne ne peut modifier les cours, même en lisant le code du dépôt.</p>
     <div class="two-cols">
-      <label>Propriétaire (compte GitHub)<input name="owner" value="${esc(c.owner)}" required></label>
-      <label>Dépôt<input name="repo" value="${esc(c.repo)}" required></label>
+      <label>Propriétaire (compte GitHub)<input name="owner" value="${esc(g.owner)}" required maxlength="100" pattern="[A-Za-z0-9_.\\-]+"></label>
+      <label>Dépôt<input name="repo" value="${esc(g.repo)}" required maxlength="100" pattern="[A-Za-z0-9_.\\-]+"></label>
     </div>
-    <label>Branche<input name="branch" value="${esc(c.branch)}" required></label>
-    <label>Jeton d'accès personnel (fine-grained token)
-      <input name="token" type="password" value="${esc(c.token)}" autocomplete="off" placeholder="github_pat_…"></label>
-    <details open><summary>Comment créer le jeton (2 minutes)</summary>
-      <ol class="help">
-        <li>Ouvrez <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a></li>
-        <li>Nom : « Admin mes cours », expiration au choix</li>
-        <li><strong>Repository access</strong> : « Only select repositories » → votre dépôt</li>
-        <li><strong>Permissions → Repository permissions → Contents</strong> : « Read and write »</li>
-        <li>Générez le jeton, copiez-le et collez-le ici</li>
-      </ol>
-      <p class="muted">⚠️ Ne partagez jamais ce jeton. N'utilisez cet admin que sur vos appareils personnels.</p>
-    </details>
-    <div class="row">
-      <button class="btn">Enregistrer et tester</button>
-      ${c.token ? '<button class="btn ghost" type="button" data-forget>Oublier le jeton</button>' : ''}
-    </div>
-    <p data-test-result></p>
+    <label>Branche<input name="branch" value="${esc(g.branch)}" required maxlength="200"></label>
+    <label>Jeton d'accès GitHub (fine-grained token)
+      <input name="token" type="password" value="${esc(legacy?.token || '')}" required autocomplete="off" placeholder="github_pat_…"></label>
+    ${TOKEN_HELP}
+    ${passwordFields()}
+    ${repoCheckbox(true)}
+    <div class="row"><button class="btn">Chiffrer et enregistrer</button></div>
+    <p data-form-msg role="alert"></p>
+  </form>`;
+}
+
+function settings() {
+  return `<a href="#/" class="back">← Tous les cours</a>
+  <form class="panel" data-form="settings" autocomplete="off">
+    <h1>Sécurité de l'admin</h1>
+    <p class="muted">Connecté à <strong>${esc(session.owner)}/${esc(session.repo)}</strong> (branche <code>${esc(session.branch)}</code>).
+      Le jeton est chiffré ; il n'est déchiffré qu'en mémoire, pendant la session.</p>
+    <label>Mot de passe actuel<input name="current" type="password" required maxlength="256" autocomplete="current-password"></label>
+    <label>Nouveau jeton GitHub <small class="muted">(laisser vide pour garder l'actuel)</small>
+      <input name="token" type="password" autocomplete="off" placeholder="github_pat_…"></label>
+    ${TOKEN_HELP}
+    ${passwordFields('Nouveau mot de passe')}
+    ${repoCheckbox(true)}
+    <div class="row"><button class="btn">Mettre à jour</button></div>
+    <p data-form-msg role="alert"></p>
   </form>`;
 }
 
 // =====================================================================
 // Routeur
 // =====================================================================
+let hasVault = false;
 function render() {
-  const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
+  showAuthNav();
+  const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(p => { try { return decodeURIComponent(p); } catch { return ''; } });
   let html;
+  // Rien n'est affiché ni modifiable sans session déverrouillée.
+  if (!session) {
+    app.innerHTML = hasVault && parts[0] !== 'configurer' ? loginView() : setupView(hasVault);
+    return;
+  }
   if (!parts.length) html = dashboard();
   else if (parts[0] === 'reglages') html = settings();
   else if (parts[0] === 'cours' && parts[1] === 'nouveau') html = newCourse();
@@ -337,6 +470,7 @@ function initPreviews() {
     form.querySelector('[data-import-html]').addEventListener('change', async e => {
       const file = e.target.files[0];
       if (!file) return;
+      if (file.size > LIMITS.content) { e.target.value = ''; alert(`Fichier trop volumineux (${Math.round(LIMITS.content / 1e6)} Mo max.).`); return; }
       const text = await file.text();
       input.value = text;
       const title = form.querySelector('input[name=title]');
@@ -352,52 +486,140 @@ function initPreviews() {
 // =====================================================================
 // Actions
 // =====================================================================
+const formMsg = (form, text, ok = false) => {
+  const out = form.querySelector('[data-form-msg]') || form.appendChild(Object.assign(document.createElement('p'), { role: 'alert' }));
+  out.dataset.formMsg = '';
+  out.className = ok ? 'ok-text' : 'error-text';
+  out.textContent = text;
+};
+const busy = (form, on, label) => {
+  const btn = form.querySelector('button:not([type=button])');
+  if (!btn) return;
+  if (on) { btn.dataset.label = btn.textContent; btn.textContent = label; } else if (btn.dataset.label) btn.textContent = btn.dataset.label;
+  btn.disabled = on;
+};
+
+async function startSession(cfg) {
+  session = cfg;
+  store.del(KEYS.legacy);                 // plus aucune trace du jeton en clair
+  Lockout.reset();
+  armIdle();
+  const draft = Draft.load();
+  if (draft) { state.data = draft.data; state.sha = draft.sha; state.dirty = true; }
+  else {
+    try { await loadFromSource(); }
+    catch (err) { state.message = { ok: false, text: err.message }; state.data = { courses: [] }; }
+  }
+  if (!location.hash.startsWith('#/') || location.hash.startsWith('#/configurer')) location.hash = '#/';
+  renderSavebar(); render();
+}
+
+async function handleAuthForm(form, kind, v) {
+  if (kind === 'login') {
+    const wait = Lockout.remaining();
+    if (wait) return formMsg(form, `Trop de tentatives. Réessayez dans ${Math.ceil(wait / 1000)} s.`);
+    busy(form, true, 'Déchiffrement…');
+    const password = v.password;
+    form.reset();
+    let cfg = null;
+    for (const vault of await vaultCandidates()) {
+      try { cfg = await openVault(vault, password); break; } catch { /* essai suivant */ }
+    }
+    busy(form, false);
+    if (!cfg) {
+      const delay = Lockout.fail();
+      return formMsg(form, `Mot de passe incorrect.${delay ? ` Nouvel essai possible dans ${delay / 1000} s.` : ''}`);
+    }
+    return startSession(cfg);
+  }
+
+  if (kind === 'setup' || kind === 'settings') {
+    const newPassword = v.password;
+    if (newPassword !== v.password2) return formMsg(form, 'Les deux mots de passe ne correspondent pas.');
+    const weak = checkPassword(newPassword);
+    if (weak) return formMsg(form, weak);
+    let cfg;
+    if (kind === 'setup') {
+      cfg = { owner: v.owner.trim(), repo: v.repo.trim(), branch: v.branch.trim() || 'main', token: v.token.trim() };
+    } else {
+      // On redemande le mot de passe actuel avant tout changement.
+      busy(form, true, 'Vérification…');
+      let ok = false;
+      for (const vault of await vaultCandidates()) {
+        try { await openVault(vault, v.current); ok = true; break; } catch { /* essai suivant */ }
+      }
+      busy(form, false);
+      if (!ok) { Lockout.fail(); return formMsg(form, 'Mot de passe actuel incorrect.'); }
+      cfg = { ...session, token: v.token.trim() || session.token };
+    }
+    busy(form, true, 'Chiffrement…');
+    try {
+      const api = gh(cfg);
+      await api.readFile(DATA_PATH);         // vérifie que le jeton fonctionne sur ce dépôt
+      const vault = await createVault(cfg, newPassword);
+      await api.saveVault(vault, v.in_repo === 'on');
+      store.set(KEYS.vault, vault);
+      busy(form, false);
+      if (kind === 'settings') { session = cfg; render(); return formMsg(app.querySelector('form'), '✅ Accès mis à jour.', true); }
+      hasVault = true;
+      return startSession(cfg);
+    } catch (err) {
+      busy(form, false);
+      return formMsg(form, `❌ ${err.message}`);
+    }
+  }
+}
+
+/** Valide une saisie avant de la mettre dans les données (refuse liens javascript:, champs trop longs…). */
+function guard(form, fn) {
+  try { return fn(); } catch (err) { formMsg(form, `❌ ${err.message}`); return null; }
+}
+
 app.addEventListener('submit', async e => {
   e.preventDefault();
   const form = e.target, kind = form.dataset.form, v = formData(form);
+  if (['login', 'setup', 'settings'].includes(kind)) return handleAuthForm(form, kind, v);
+  if (!session) return render();
   const courseInput = () => ({
     title: v.title.trim(), category: v.category.trim(), description: v.description.trim(),
     cover_url: v.cover_url.trim(), published: v.published === 'on',
   });
 
   if (kind === 'course-new') {
-    const c = { id: uid(), ...courseInput(), lessons: [], updated_at: new Date().toISOString() };
+    const c = guard(form, () => validateCourse({ id: uid(), ...courseInput(), lessons: [], updated_at: new Date().toISOString() }));
+    if (!c) return;
     c.slug = uniqueSlug(c.title, c.id);
     state.data.courses.unshift(c); changed(); go(`#/cours/${c.id}`);
   }
   if (kind === 'course-edit') {
     const c = findCourse(form.dataset.id);
-    Object.assign(c, courseInput(), { updated_at: new Date().toISOString() });
+    if (!c) return render();
+    const clean = guard(form, () => validateCourse({ ...c, ...courseInput(), updated_at: new Date().toISOString() }));
+    if (!clean) return;
+    Object.assign(c, clean);
     c.slug = uniqueSlug(c.title, c.id);
     changed(); render();
   }
   if (kind === 'lesson') {
     const c = findCourse(form.dataset.course);
-    const input = { title: v.title.trim(), youtube_url: v.youtube_url.trim(), content: v.content, format: v.format === 'html' ? 'html' : 'markdown' };
-    if (form.dataset.id) Object.assign(c.lessons.find(l => l.id === form.dataset.id), input);
-    else c.lessons.push({ id: uid(), ...input });
+    if (!c) return render();
+    const existing = form.dataset.id ? c.lessons.find(l => l.id === form.dataset.id) : null;
+    if (form.dataset.id && !existing) return render();
+    const input = guard(form, () => validateLesson({ id: existing?.id || uid(), title: v.title, youtube_url: v.youtube_url,
+      content: v.content, format: v.format === 'html' ? 'html' : 'markdown' }));
+    if (!input) return;
+    if (existing) Object.assign(existing, input);
+    else c.lessons.push(input);
     c.updated_at = new Date().toISOString();
     changed();
     if (e.submitter?.name === 'again') { render(); app.querySelector('input[name=title]').focus(); }
     else go(`#/cours/${c.id}`);
   }
-  if (kind === 'settings') {
-    const cfg = { owner: v.owner.trim(), repo: v.repo.trim(), branch: v.branch.trim() || 'main', token: v.token.trim() };
-    Config.save(cfg);
-    const out = form.querySelector('[data-test-result]');
-    out.textContent = 'Test de connexion…';
-    try {
-      const remote = await GitHub.read();
-      state.sha = remote.sha;
-      if (!state.dirty) state.data = remote.data;
-      out.innerHTML = `<span class="ok-text">✅ Connecté à ${esc(cfg.owner)}/${esc(cfg.repo)} — ${remote.data.courses.length} cours trouvé(s).</span>`;
-    } catch (err) { out.innerHTML = `<span class="error-text">❌ ${esc(err.message)}</span>`; }
-  }
 });
 
 app.addEventListener('click', e => {
   const t = e.target.closest('button');
-  if (!t) return;
+  if (!t || !session) return;
   const c = findCourse(app.querySelector('[data-form=course-edit]')?.dataset.id);
   if (t.dataset.move && c) {
     const i = c.lessons.findIndex(l => l.id === t.dataset.lesson), j = i + Number(t.dataset.move);
@@ -412,24 +634,13 @@ app.addEventListener('click', e => {
     state.data.courses = state.data.courses.filter(x => x.id !== t.dataset.deleteCourse);
     changed(); go('#/');
   }
-  if (t.hasAttribute('data-forget')) { Config.save({ ...Config.get(), token: '' }); render(); }
 });
 
 window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
 
 // =====================================================================
-// Démarrage
+// Démarrage : on cherche un coffre ; sans mot de passe, rien n'est chargé.
 // =====================================================================
-try {
-  const draft = Draft.load();
-  if (draft) {
-    state.data = normalize(draft.data); state.sha = draft.sha; state.dirty = true;
-  } else {
-    await loadFromSource();
-  }
-} catch (err) {
-  state.message = { ok: false, text: err.message };
-  state.data = await loadData().catch(() => ({ courses: [] }));
-}
-renderSavebar();
+hasVault = (await vaultCandidates()).length > 0;
+if (hasVault && legacyConfig()?.token) store.del(KEYS.legacy);
 render();
