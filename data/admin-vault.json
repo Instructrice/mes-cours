@@ -1,0 +1,12 @@
+{
+  "v": 1,
+  "kdf": "PBKDF2-SHA256",
+  "cipher": "AES-256-GCM",
+  "iterations": 600000,
+  "owner": "instructrice",
+  "repo": "mes-cours",
+  "branch": "main",
+  "salt": "+qqwI7KwusOGwEkQ8y4e0w==",
+  "iv": "f0NgIiEkLTYa1rka",
+  "ct": "/Ev91xVwtRGoPrc7P3XZVsb8DKTnvixjjzUAO78TXzRE+XoOfo+IMd8VW8Pfc5cQQu/nbonPY7cqW595Ave8eJs3kO9u5HzI/akv+Y40EgRC3IHxkcgx9XYy7dKCmhVtLWbL73nqfVGVFbxhQ1xxdqBltjs3rQQNuQ=="
+}
