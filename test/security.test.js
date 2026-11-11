@@ -2,10 +2,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createVault, openVault, parseVault, checkPassword, VaultError, VAULT_PATH } from '../assets/vault.js';
 import { validateData, validateCourse, validateLesson, DataError } from '../assets/schema.js';
 
-const root = new URL('..', import.meta.url).pathname;
+const root = fileURLToPath(new URL('..', import.meta.url));
 const CFG = { owner: 'Instructrice', repo: 'mes-cours', branch: 'main', token: 'github_pat_' + 'A1b2C3d4'.repeat(10) };
 const PASSWORD = 'Correct-Cheval-Pile-42';
 

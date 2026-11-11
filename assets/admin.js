@@ -192,7 +192,7 @@ async function publish() {
   if (!session) return;
   state.saving = true; state.message = null; renderSavebar();
   try {
-    state.sha = await gh(session).write(state.data, state.sha, 'Mise à jour des cours depuis l\'admin');
+    state.sha = await gh(session).write(state.data, state.sha, 'Mise à jour des cours depuis l\'administration');
     state.dirty = false; Draft.clear();
     state.message = { ok: true, text: '✅ Publié ! Le site sera à jour dans 1 à 2 minutes.' };
   } catch (e) {
@@ -356,7 +356,7 @@ const TOKEN_HELP = `<details><summary>Comment créer le jeton GitHub (2 minutes)
     <li>Générez le jeton, copiez-le et collez-le ici</li>
   </ol></details>`;
 
-const passwordFields = (label = 'Mot de passe admin') => `
+const passwordFields = (label = 'Mot de passe d\'administration') => `
   <label>${label} <small class="muted">(${MIN_PASSWORD_LENGTH} caractères min., 3 types de caractères ou une longue phrase)</small>
     <input name="password" type="password" required minlength="${MIN_PASSWORD_LENGTH}" maxlength="256" autocomplete="new-password"></label>
   <label>Confirmer le mot de passe
@@ -367,8 +367,8 @@ const vaultNote = `<p class="muted"><small>Le coffre chiffré est enregistré da
 
 function loginView() {
   return `<form class="panel narrow" data-form="login" autocomplete="off">
-    <h1>🔒 Espace admin</h1>
-    <p class="muted">Entrez le mot de passe pour déverrouiller l'admin.</p>
+    <p class="eyebrow">Accès réservé</p><h1>Espace administration</h1>
+    <p class="muted">Entrez le mot de passe pour déverrouiller l'administration.</p>
     <input type="text" name="username" autocomplete="username" value="admin" hidden>
     <label>Mot de passe<input name="password" type="password" required maxlength="256" autocomplete="current-password" autofocus></label>
     <div class="row"><button class="btn">Déverrouiller</button></div>
@@ -383,10 +383,10 @@ function setupView(hasVault) {
   const g = { ...guessRepo(), branch: 'main', ...(legacy ? Object.fromEntries(Object.entries(legacy).filter(([, v]) => v)) : {}) };
   return `${hasVault ? '<a href="#/" class="back">← Retour à la connexion</a>' : ''}
   <form class="panel" data-form="setup" autocomplete="off">
-    <h1>${hasVault ? 'Réinitialiser l\'accès admin' : 'Protéger l\'admin par mot de passe'}</h1>
+    <h1>${hasVault ? 'Réinitialiser l\'accès à l\'administration' : 'Protéger l\'administration par mot de passe'}</h1>
     ${legacy?.token ? `<div class="flash warn">Votre jeton GitHub était enregistré <strong>en clair</strong> dans ce navigateur.
       Choisissez un mot de passe : il sera chiffré, puis la copie en clair sera effacée.</div>` : ''}
-    ${hasVault ? `<div class="flash warn">Un mot de passe admin existe déjà. Pour le remplacer, il faut un jeton GitHub
+    ${hasVault ? `<div class="flash warn">Un mot de passe d'administration existe déjà. Pour le remplacer, il faut un jeton GitHub
       autorisé à <strong>écrire</strong> dans ce dépôt : seul le propriétaire du dépôt peut donc le faire.</div>` : ''}
     <p class="muted">Le jeton GitHub est chiffré avec votre mot de passe. Sans ce mot de passe,
       personne ne peut modifier les cours, même en lisant le code du dépôt.</p>
@@ -408,7 +408,7 @@ function setupView(hasVault) {
 function settings() {
   return `<a href="#/" class="back">← Tous les cours</a>
   <form class="panel" data-form="settings" autocomplete="off">
-    <h1>Sécurité de l'admin</h1>
+    <h1>Sécurité de l'administration</h1>
     <p class="muted">Connecté à <strong>${esc(session.owner)}/${esc(session.repo)}</strong> (branche <code>${esc(session.branch)}</code>).
       Le jeton est chiffré ; il n'est déchiffré qu'en mémoire, pendant la session.</p>
     <label>Mot de passe actuel<input name="current" type="password" required maxlength="256" autocomplete="current-password"></label>
