@@ -1,4 +1,4 @@
-# 📚 Mes cours
+# Mes cours
 
 Plateforme personnelle d'apprentissage **hébergée gratuitement sur GitHub Pages** :
 ajoutez vos cours depuis un **espace admin**, puis suivez-les leçon par leçon avec **vidéos YouTube**, notes en **Markdown** et **suivi de progression**.
@@ -6,7 +6,7 @@ ajoutez vos cours depuis un **espace admin**, puis suivez-les leçon par leçon 
 - Site : `https://<votre-compte>.github.io/<nom-du-depot>/`
 - Admin : `https://<votre-compte>.github.io/<nom-du-depot>/admin.html`
 
-## ✨ Fonctionnalités
+## Fonctionnalités
 
 **Pour apprendre**
 - Catalogue des cours avec recherche et filtre par catégorie
@@ -24,7 +24,7 @@ ajoutez vos cours depuis un **espace admin**, puis suivez-les leçon par leçon 
 - Bouton **Publier sur GitHub** : enregistre tout dans `data/courses.json` du dépôt
 - Brouillon conservé automatiquement dans le navigateur tant que vous n'avez pas publié
 
-## 🚀 Mise en ligne (une seule fois)
+## Mise en ligne (une seule fois)
 
 1. **Activer GitHub Pages** : dans le dépôt, *Settings → Pages → Build and deployment*,
    Source « Deploy from a branch », branche `main`, dossier `/ (root)`, puis *Save*.
@@ -39,7 +39,7 @@ ajoutez vos cours depuis un **espace admin**, puis suivez-les leçon par leçon 
 C'est tout : ensuite l'admin ne demande plus que le mot de passe. Créez vos cours, cliquez sur
 **Publier sur GitHub**, le site se met à jour en 1 à 2 minutes.
 
-## 🔒 Sécurité
+## Sécurité
 
 **Accès admin uniquement par mot de passe**
 - Le jeton GitHub (la seule clé qui permet d'écrire dans `data/courses.json`) est **chiffré** avec votre mot de passe :
@@ -50,7 +50,7 @@ C'est tout : ensuite l'admin ne demande plus que le mot de passe. Créez vos cou
 - **Personne d'autre ne peut créer ou remplacer le mot de passe** : l'écran de création/réinitialisation est visible par tous,
   mais il n'aboutit que si GitHub accepte d'écrire le coffre dans **ce** dépôt, donc avec un jeton du propriétaire.
   Le dépôt visé est figé sur celui du site : impossible de pointer l'admin vers un autre dépôt.
-- Après déverrouillage, le jeton reste **uniquement en mémoire** : bouton « 🔒 Verrouiller », verrouillage automatique
+- Après déverrouillage, le jeton reste **uniquement en mémoire** : bouton « Verrouiller », verrouillage automatique
   après 20 minutes d'inactivité ou à la fermeture de l'onglet.
 - Délai croissant après 3 mots de passe faux (5 s, 10 s, 20 s… jusqu'à 5 min). La vraie protection contre la force brute
   reste la longueur du mot de passe : **choisissez-en un long et unique**.
@@ -70,7 +70,7 @@ C'est tout : ensuite l'admin ne demande plus que le mot de passe. Créez vos cou
 **À savoir** : le dépôt est public (GitHub Pages gratuit), donc `data/courses.json` est lisible par tous,
 **y compris les cours en brouillon**. Le mot de passe protège la **modification**, pas la lecture.
 
-## 🧩 Leçons en HTML
+## Leçons en HTML
 
 Choisissez le format **HTML** dans le formulaire de leçon, puis collez votre code ou importez un fichier `.html`.
 
@@ -81,12 +81,12 @@ Choisissez le format **HTML** dans le formulaire de leçon, puis collez votre co
   Pour une image de votre dépôt, utilisez son adresse complète : `https://<compte>.github.io/<depot>/…`.
 - Le format Markdown accepte aussi du HTML simple (sans scripts).
 
-## 🎬 Liens YouTube acceptés
+## Liens YouTube acceptés
 
 `youtube.com/watch?v=…`, `youtu.be/…`, `youtube.com/shorts/…`, `youtube.com/live/…`, `youtube.com/embed/…`
 ou l'identifiant seul. Ajoutez `?t=90` ou `&t=1m30s` pour démarrer à un moment précis.
 
-## 💻 En local
+## En local
 
 ```bash
 npm start      # sert le site sur http://localhost:3000
@@ -95,7 +95,7 @@ npm test       # liens YouTube, data/courses.json, chiffrement et protections an
 
 Vous pouvez aussi modifier `data/courses.json` à la main et le pousser : c'est le même fichier que l'admin.
 
-## 🗂️ Structure
+## Structure
 
 ```
 index.html           Site d'apprentissage
