@@ -77,8 +77,8 @@ function home(params) {
 
   return `
   <section class="hero">
-    <h1>Apprendre,<br>à votre rythme</h1>
-    <p class="lead">Des cours clairs, des vidéos et des fiches pour progresser sereinement. Votre avancement est enregistré au fil des leçons.</p>
+    <h1>Que voulez-vous apprendre ?</h1>
+    <p class="lead">Choisissez un cours et avancez leçon par leçon.</p>
     <form class="search" id="search" role="search">
       ${SEARCH}
       <input type="search" name="q" value="${esc(params.get('q') || '')}" placeholder="Rechercher un cours ou un sujet" aria-label="Rechercher un cours">
@@ -87,13 +87,18 @@ function home(params) {
     </form>
   </section>
   ${resume}
-  ${categories.length > 1 ? `<nav class="subjects ${cat ? 'filtering' : ''}" aria-label="Matières">
+  <div class="home-layout ${categories.length > 1 ? '' : 'no-subjects'}">
+  ${categories.length > 1 ? `<nav class="subjects" aria-label="Matières">
+    <p class="subjects-title">Matières</p>
+    <a class="subject ${cat ? '' : 'on'}" href="${esc(chipHref(''))}" ${cat ? '' : 'aria-current="true"'}>
+      <span class="dot" aria-hidden="true"></span><strong>Toutes</strong><span>${published.length}</span></a>
     ${categories.map(c => {
       const count = published.filter(x => x.category === c).length;
       return `<a class="subject cat ${c === cat ? 'on' : ''}" ${catStyle(c)} href="${esc(chipHref(c === cat ? '' : c))}"
-        ${c === cat ? 'aria-current="true"' : ''}><strong>${esc(c)}</strong><span>${count} cours</span></a>`;
+        ${c === cat ? 'aria-current="true"' : ''}><span class="dot" aria-hidden="true"></span><strong>${esc(c)}</strong><span>${count}</span></a>`;
     }).join('')}
   </nav>` : ''}
+  <div class="home-main">
   <div class="section-head">
     <h2>${cat ? esc(cat) : 'Tous les cours'}</h2>
     ${cat ? `<a href="${chipHref('')}">Voir toutes les matières</a>` : ''}
@@ -118,7 +123,8 @@ function home(params) {
           </div>
         </div></a>`;
     }).join('')}
-  </div>`;
+  </div>
+  </div></div>`;
 }
 
 // ---------- Page cours ----------
@@ -162,10 +168,21 @@ function coursePage(course) {
 }
 
 // ---------- Page leçon ----------
-const sidebarHtml = (course, lessonId) => `
+// Sur téléphone, la liste des leçons est repliée en haut de page ; sur ordinateur, elle reste ouverte.
+const wideScreen = matchMedia('(min-width: 861px)');
+const sidebarHtml = (course, lessonId) => {
+  const n = course.lessons.length, pos = course.lessons.findIndex(l => l.id === lessonId) + 1;
+  return `
+  <summary><span>Leçon ${pos} sur ${n}</span><span class="summary-hint">Voir les leçons</span></summary>
   <a href="#/cours/${esc(course.slug)}" class="back">${esc(course.title)}</a>
   ${progressHtml(course, true)}
   ${lessonListHtml(course, lessonId, true)}`;
+};
+wideScreen.addEventListener('change', e => { const s = app.querySelector('.sidebar'); if (s) s.open = e.matches; });
+
+const doneLabel = (on, short = false) => on
+  ? (short ? '✓ Terminée' : '✓ Leçon terminée')
+  : (short ? 'J\'ai fini' : 'Marquer comme terminée');
 
 function lessonPage(course, lessonId) {
   const index = course.lessons.findIndex(l => l.id === lessonId);
@@ -177,15 +194,14 @@ function lessonPage(course, lessonId) {
   document.title = `${lesson.title} · ${course.title}`;
   return `
   <div class="lesson-layout cat" ${catStyle(course.category)}>
-    <aside class="sidebar">${sidebarHtml(course, lesson.id)}</aside>
+    <details class="sidebar" ${wideScreen.matches ? 'open' : ''}>${sidebarHtml(course, lesson.id)}</details>
     <article class="lesson">
       ${course.category ? `<p class="eyebrow">${esc(course.category)}</p>` : ''}
       <h1>${esc(lesson.title)}</h1>
       ${videoHtml(lesson.youtube_url, lesson.title)}
       ${lessonBodyHtml(lesson)}
       <div class="lesson-actions">
-        <button class="btn ghost ${isDone ? 'success' : ''}" type="button" data-toggle-done>
-          ${isDone ? '✓ Leçon terminée' : 'Marquer comme terminée'}</button>
+        <button class="btn ghost ${isDone ? 'success' : ''}" type="button" data-toggle-done>${doneLabel(isDone)}</button>
       </div>
       <nav class="pager" aria-label="Navigation entre les leçons">
         ${prev ? `<a data-prev href="${link(prev)}"><small>← Leçon précédente</small><strong>${esc(prev.title)}</strong></a>` : ''}
@@ -193,6 +209,11 @@ function lessonPage(course, lessonId) {
                : `<a class="next" data-next href="#/cours/${esc(course.slug)}"><small>Dernière leçon</small><strong>Terminer le cours</strong></a>`}
       </nav>
     </article>
+    <nav class="lesson-bar" aria-label="Navigation rapide">
+      ${prev ? `<a class="bar-prev" href="${link(prev)}">‹ Précédente</a>` : '<span class="bar-prev"></span>'}
+      <button class="bar-done ${isDone ? 'on' : ''}" type="button" data-toggle-done>${doneLabel(isDone, true)}</button>
+      <a class="bar-next" data-next href="${next ? link(next) : `#/cours/${esc(course.slug)}`}">${next ? 'Suivante ›' : 'Fin du cours ›'}</a>
+    </nav>
   </div>`;
 }
 
@@ -226,9 +247,12 @@ app.addEventListener('click', e => {
   if (!course) return;
   if (e.target.closest('[data-toggle-done]')) {
     const on = Progress.toggle(course.id, lessonId);
-    const btn = e.target.closest('[data-toggle-done]');
-    btn.textContent = on ? '✓ Leçon terminée' : 'Marquer comme terminée';
-    btn.classList.toggle('success', on);
+    // Met à jour les deux boutons (dans la leçon et dans la barre du bas)
+    for (const btn of app.querySelectorAll('[data-toggle-done]')) {
+      const short = btn.classList.contains('bar-done');
+      btn.textContent = doneLabel(on, short);
+      btn.classList.toggle(short ? 'on' : 'success', on);
+    }
     // Met à jour la barre latérale sans toucher à la vidéo
     app.querySelector('.sidebar').innerHTML = sidebarHtml(course, lessonId);
   }
