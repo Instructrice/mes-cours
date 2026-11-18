@@ -194,7 +194,7 @@ async function publish() {
   try {
     state.sha = await gh(session).write(state.data, state.sha, 'Mise à jour des cours depuis l\'administration');
     state.dirty = false; Draft.clear();
-    state.message = { ok: true, text: '✅ Publié ! Le site sera à jour dans 1 à 2 minutes.' };
+    state.message = { ok: true, text: 'Publié ! Le site sera à jour dans 1 à 2 minutes.' };
   } catch (e) {
     state.message = { ok: false, text: e.message };
   }
@@ -303,7 +303,7 @@ function editCourse(c) {
       <ol class="admin-lessons">${c.lessons.map((l, i) => {
         const thumb = thumbnailUrl(l.youtube_url);
         return `<li>
-          ${thumb ? `<img src="${esc(thumb)}" alt="" loading="lazy">` : '<span class="no-thumb">📝</span>'}
+          ${thumb ? `<img src="${esc(thumb)}" alt="" loading="lazy">` : '<span class="no-thumb" aria-hidden="true"></span>'}
           <a href="#/cours/${esc(c.id)}/lecon/${esc(l.id)}" class="grow">${i + 1}. ${esc(l.title)}</a>
           <button class="icon" data-move="-1" data-lesson="${esc(l.id)}" title="Monter" ${i === 0 ? 'disabled' : ''}>↑</button>
           <button class="icon" data-move="1" data-lesson="${esc(l.id)}" title="Descendre" ${i === n - 1 ? 'disabled' : ''}>↓</button>
@@ -335,7 +335,7 @@ function lessonForm(c, l) {
     <label><span data-content-label></span>
       <textarea name="content" rows="18" class="mono" data-content-input spellcheck="false">${esc(l.content)}</textarea></label>
     <div class="row import-row" data-html-only>
-      <label class="btn ghost file-btn">📂 Importer un fichier .html
+      <label class="btn ghost file-btn">Importer un fichier .html
         <input type="file" accept=".html,.htm,text/html" data-import-html hidden></label>
       <small class="muted">Le contenu du fichier remplace celui de la zone de texte.</small>
     </div>
@@ -576,19 +576,19 @@ async function handleAuthForm(form, kind, v) {
       await api.saveVault(vault);
       store.set(KEYS.vault, vault);
       busy(form, false);
-      if (kind === 'settings') { session = cfg; render(); return formMsg(app.querySelector('form'), '✅ Accès mis à jour.', true); }
+      if (kind === 'settings') { session = cfg; render(); return formMsg(app.querySelector('form'), 'Accès mis à jour.', true); }
       hasVault = true;
       return startSession(cfg);
     } catch (err) {
       busy(form, false);
-      return formMsg(form, `❌ ${err.message}`);
+      return formMsg(form, err.message);
     }
   }
 }
 
 /** Valide une saisie avant de la mettre dans les données (refuse liens javascript:, champs trop longs…). */
 function guard(form, fn) {
-  try { return fn(); } catch (err) { formMsg(form, `❌ ${err.message}`); return null; }
+  try { return fn(); } catch (err) { formMsg(form, err.message); return null; }
 }
 
 app.addEventListener('submit', async e => {
