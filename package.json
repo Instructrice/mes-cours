@@ -8,5 +8,5 @@
     "start": "npx --yes serve@14.2.4 .",
     "test": "node --test"
   },
-  "license": "MIT"
+  "license": "UNLICENSED"
 }
