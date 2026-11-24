@@ -115,4 +115,6 @@ data/admin-vault.json  Coffre chiffré (créé par l'admin, optionnel)
 
 ## Licence
 
-MIT
+© 2026 Instructrice. **Tous droits réservés.** Le dépôt est public uniquement pour l'hébergement sur GitHub Pages :
+aucune copie, modification ou réutilisation n'est autorisée sans accord écrit. Voir [LICENSE](LICENSE).
+Les bibliothèques de `assets/vendor/` restent sous leurs propres licences (MIT pour marked, Apache 2.0 / MPL 2.0 pour DOMPurify).
