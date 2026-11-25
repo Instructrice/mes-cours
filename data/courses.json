@@ -4,7 +4,7 @@
       "id": "mww03p6jv33p",
       "title": "Gestion de Projet",
       "category": "Gestion",
-      "description": "",
+      "description": "Ensemble de cours portant sur la gestion de projet.",
       "cover_url": "https://eclaireur.ca/wp-content/uploads/2018/06/gestion-de-projet-t-i-2.jpg",
       "published": true,
       "lessons": [
@@ -16,7 +16,7 @@
           "format": "html"
         }
       ],
-      "updated_at": "2026-11-25T10:50:46.211Z",
+      "updated_at": "2026-11-25T10:53:31.778Z",
       "slug": "gestion-de-projet"
     },
     {
